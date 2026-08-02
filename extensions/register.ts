@@ -3,7 +3,8 @@
 // lowercase hex sha256, and exit/status codes are JSON integers — never floats.
 // This module registers the Drenyra Pi extension; it holds no money logic.
 
-import { dirname } from "node:path";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
@@ -56,8 +57,31 @@ export interface PiCommandContext {
   cwd: string;
 }
 
-/** The installed package root: <package>/extensions/register.ts → <package>. */
-const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
+/**
+ * The installed package root, found by walking up from this module's own
+ * location to the first package.json named "drenyra-pi".
+ *
+ * Source layout: <package>/extensions/register.ts → package root is 2 levels up.
+ * Compiled layout: <package>/dist/extensions/register.js → 3 levels up.
+ * Walking up is correct in both, so the shipped extension resolves the package
+ * root inside the packed artifact (doctor/status are always package-local).
+ */
+function findPackageRoot(fromDir: string): string {
+  let dir = fromDir;
+  for (let depth = 0; depth < 8; depth += 1) {
+    try {
+      const raw = readFileSync(join(dir, "package.json"), "utf8");
+      const manifest = JSON.parse(raw) as { name?: unknown };
+      if (manifest.name === "drenyra-pi") return dir;
+    } catch {
+      // not this directory — keep walking up
+    }
+    dir = dirname(dir);
+  }
+  throw new Error("drenyra-pi: package root not found above this module");
+}
+
+const PACKAGE_ROOT = findPackageRoot(dirname(fileURLToPath(import.meta.url)));
 
 export interface DrenyraPiExtensionDescriptor {
   name: string;

@@ -3,20 +3,56 @@
   "version": "0.0.1-prealpha.1",
   "description": "Pi-native Accounting Operations Harness — consumes a pinned, verified, package-local Drenyra AI runtime. Zero runtime dependencies.",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "files": [
-    "runtime",
-    "extensions",
+    "dist",
+    "assets",
     "contracts",
-    "index.ts"
+    "prompts",
+    "skills",
+    "agents",
+    "chains",
+    "themes",
+    "README.md",
+    "LICENSE"
   ],
   "pi": {
     "extensions": [
-      "./extensions"
+      "./dist/extensions"
+    ],
+    "prompts": [
+      "./prompts"
+    ],
+    "skills": [
+      "./skills"
+    ],
+    "themes": [
+      "./themes"
     ]
   },
+  "exports": {
+    ".": "./dist/index.js",
+    "./runtime": "./dist/runtime/index.js",
+    "./extensions": "./dist/extensions/register.js"
+  },
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "postinstall": "node -e \"const{existsSync}=require('node:fs');const{spawnSync}=require('node:child_process');existsSync('dist/scripts/install-drenyra-ai.js')?process.exit(spawnSync(process.execPath,['dist/scripts/install-drenyra-ai.js'],{stdio:'inherit'}).status??1):undefined\"",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:package": "node scripts/build.mjs && bun run test && node scripts/verify-package-files.mjs",
+    "prepack": "bun run verify:package",
+    "prepublishOnly": "bun run typecheck && bun run verify:package && node scripts/verify-packed-install.mjs"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
   },
   "dependencies": {},
   "devDependencies": {
