@@ -48,6 +48,20 @@ This contract defines how Drenyra Pi consumes the Drenyra AI runtime. It follows
 - Tampering: a replaced binary producing unreceipted or forged results.
 - Unreviewed upgrades: a runtime change landing without a migration note.
 
+## Reference implementation
+
+The first verifiable vertical of the pinned-runtime core lives in this package:
+
+| Contract rule | Implementation |
+| --- | --- |
+| Pinned exact version | `runtime/pin.ts` — `RuntimePin`, `createPin` (validates exact semver, hex checksum, state) and `DEFAULT_PIN` (package `drenyra-ai`, version `0.0.1-prealpha.1`, state `pending-release` until the first release fills the checksum) |
+| Package-local install / never PATH | `runtime/resolve.ts` — `resolvePackageLocal` consults only `<packageRoot>/runtime/<package>` then `<packageRoot>/node_modules/<package>`; never PATH, `which`, or env |
+| Checksum verification | `runtime/checksum.ts` — `sha256File` (lowercase hex sha256, streamed via `node:crypto`); `runtime/doctor.ts` checksums the resolved runtime's entry artifact |
+| Doctor fail-closed | `runtime/doctor.ts` — verdicts `verified`, `missing`, `pending-release`, `version-mismatch`, `checksum-mismatch`; a `pending-release` pin is never `verified` |
+| Status / startup panel | `runtime/status.ts` — human + machine status reusing `doctor`; `extensions/register.ts` registers `/drenyra:status` and `/drenyra:doctor` |
+
+Conformance tests: `__tests__/doctor.test.ts` (fail-closed matrix with fixture runtimes in the temp dir), `__tests__/resolve.test.ts` (package-locality incl. PATH immunity), `__tests__/pin.test.ts`, `__tests__/status.test.ts`.
+
 ## Conformance
 
 Tests cover: pin resolution, checksum mismatch → fail closed, version mismatch → fail closed, package-locality (runtime not found on `PATH` still works), and explicit upgrade flow.

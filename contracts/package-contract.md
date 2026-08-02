@@ -46,6 +46,16 @@ Every `/drenyra:*` command:
 - The pinned Drenyra AI version is part of the package manifest and changes with the pin — see [runtime-dependency](runtime-dependency.md).
 - Command output shape is versioned; consumers (chains, scripts) declare the version they parse.
 
+## Reference implementation
+
+The first verifiable vertical of this contract ships in `runtime/` and `extensions/`:
+
+- `runtime/pin.ts` — the pinned Drenyra AI runtime (`DEFAULT_PIN`, currently `pending-release`), validated by `createPin`.
+- `runtime/doctor.ts` — fail-closed verification (checksum + version, package-local); `runtime/status.ts` renders human + machine status for the startup panel.
+- `extensions/register.ts` — Pi extension registration descriptor (`drenyraPiExtension`) and factory, registering `/drenyra:status` and `/drenyra:doctor`.
+
+Install + doctor behavior (contract item 3) is exercised by `__tests__/doctor.test.ts` and `__tests__/status.test.ts`; fail-closed behavior (contract item 4) is the fail-closed matrix in `__tests__/doctor.test.ts`.
+
 ## Conformance
 
 Tests cover: clean install, doctor verification, permission defaults, command scope validation, receipt enforcement, and fail-closed behavior on an unverifiable runtime.
