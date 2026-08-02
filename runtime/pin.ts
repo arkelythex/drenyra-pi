@@ -91,16 +91,20 @@ export function createPin(overrides: Partial<RuntimePin> = {}): RuntimePin {
   return pin;
 }
 
-/**
- * The pinned Drenyra AI runtime for this package.
- *
- * drenyra-ai has NOT released a real artifact yet, so this pin is in
- * "pending-release" state: the verification machinery is fully implemented and
- * tested with fixtures, but doctor() refuses to report "verified" until the
- * first release happens.
- *
- * At the first drenyra-ai release, fill in the published sha256 here and flip
- * state to "released". That change is itself a release of Drenyra Pi (see
- * contracts/runtime-dependency.md, "Upgrade is explicit").
- */
-export const DEFAULT_PIN: RuntimePin = createPin();
+    /**
+     * The pinned Drenyra AI runtime for this package.
+     *
+     * Released at v0.0.1-prealpha.1 (github:arkelythex/drenyra-ai#v0.0.1-prealpha.1,
+     * 2026-08-02). checksumSha256 is the SHA-256 of the release's entry artifact
+     * dist/cmd/cli.js (the artifact doctor() checksums for a package-local
+     * install); the release tarball hash lives in the GitHub Release SHA256SUMS.
+     *
+     * Upgrading the pin is itself a release of Drenyra Pi (see
+     * contracts/runtime-dependency.md, "Upgrade is explicit").
+     */
+    export const DEFAULT_PIN: RuntimePin = createPin({
+      version: RUNTIME_VERSION,
+      checksumSha256:
+        "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
+      state: "released",
+    });

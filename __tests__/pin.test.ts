@@ -14,9 +14,8 @@ import {
 } from "../runtime/pin.js";
 
 describe("createPin", () => {
-  it("builds the DEFAULT_PIN shape when called without overrides", () => {
+  it("defaults to a pending-release pin", () => {
     const pin = createPin();
-    expect(pin).toEqual(DEFAULT_PIN);
     expect(pin.package).toBe(RUNTIME_PACKAGE);
     expect(pin.version).toBe(RUNTIME_VERSION);
     expect(pin.checksumSha256).toBe(PENDING_CHECKSUM);
@@ -70,10 +69,12 @@ describe("createPin", () => {
   });
 });
 
-describe("DEFAULT_PIN", () => {
-  it("is pending-release with the pending placeholder until the first release", () => {
-    expect(DEFAULT_PIN.state).toBe("pending-release");
-    expect(DEFAULT_PIN.checksumSha256).toBe(PENDING_CHECKSUM);
-    expect(DEFAULT_PIN.version).toBe("0.0.1-prealpha.1");
-  });
-});
+    describe("DEFAULT_PIN", () => {
+      it("is released at v0.0.1-prealpha.1 with the real entry-artifact checksum", () => {
+        expect(DEFAULT_PIN.state).toBe("released");
+        expect(DEFAULT_PIN.checksumSha256).toBe(
+          "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
+        );
+        expect(DEFAULT_PIN.version).toBe("0.0.1-prealpha.1");
+      });
+    });
