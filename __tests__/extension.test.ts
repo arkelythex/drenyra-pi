@@ -44,7 +44,13 @@ describe("drenyraPiExtension descriptor", () => {
     expect(drenyraPiExtension.name).toBe("drenyra-pi");
     expect(drenyraPiExtension.provides).toContain("status");
     expect(drenyraPiExtension.provides).toContain("doctor");
-    expect(drenyraPiExtension.commands).toEqual(["/drenyra:status", "/drenyra:doctor"]);
+    expect(drenyraPiExtension.commands).toEqual([
+      "/drenyra:status",
+      "/drenyra:doctor",
+      "/drenyra:company",
+      "/drenyra:period",
+      "/drenyra:context",
+    ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
     expect(drenyraPiExtension.runtime.version).toBe("0.2.0");
     expect(drenyraPiExtension.runtime.state).toBe("released");
@@ -55,7 +61,13 @@ describe("registerDrenyraPiExtension", () => {
   it("registers /drenyra:status and /drenyra:doctor with descriptions", () => {
     const { pi, registered } = makeMockPi();
     registerDrenyraPiExtension(pi);
-    expect(registered.map((c) => c.name)).toEqual(["drenyra:status", "drenyra:doctor"]);
+    expect(registered.map((c) => c.name)).toEqual([
+      "drenyra:status",
+      "drenyra:doctor",
+      "drenyra:company",
+      "drenyra:period",
+      "drenyra:context",
+    ]);
     expect(registered[0].description.length).toBeGreaterThan(0);
     expect(registered[1].description.length).toBeGreaterThan(0);
   });

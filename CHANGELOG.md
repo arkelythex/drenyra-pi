@@ -28,6 +28,11 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
     and verifies with doctor; the packed-install test proves the full chain
     (pack → install → postinstall → runtime verified). Extension registration
     tested against a structural Pi API (39 tests total).
+  - **Company + period context vertical:** `runtime/context.ts` (RUC via SUNAT
+    Módulo 11 checksum — ported from Drenyra; verified against known-valid RUCs —
+    plus YYYYMM period validation) with an atomic JSON scope store; extension
+    commands `/drenyra:company`, `/drenyra:period`, `/drenyra:context` wired and
+    tested (51 tests total).
   - **Pin released:** `DEFAULT_PIN` points at `drenyra-ai@0.2.0` (git tag `v0.2.0`, entry-artifact checksum `e4e81914…`; all six contracts frozen — mission-protocol, candidate, receipt, gate, ledger, recovery). `doctor` fail-closed verification is live against the released artifact.
   - `verify:package` + `verify-packed-install` (pack → install → extension factory loads under Node) + prepack/prepublishOnly gates + CI package job.
   - Placeholder asset dirs (assets/, prompts/, skills/, agents/, chains/, themes/) per the README layout.

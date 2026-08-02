@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ScopeContextStore } from "../runtime/context.js";
 import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
 import { status } from "../runtime/status.js";
@@ -107,8 +108,14 @@ export interface DrenyraPiExtensionDescriptor {
 export const drenyraPiExtension = {
   name: "drenyra-pi",
   version: DRENYRA_PI_VERSION,
-  provides: ["status", "doctor"] as const,
-  commands: ["/drenyra:status", "/drenyra:doctor"] as const,
+  provides: ["status", "doctor", "context"] as const,
+  commands: [
+    "/drenyra:status",
+    "/drenyra:doctor",
+    "/drenyra:company",
+    "/drenyra:period",
+    "/drenyra:context",
+  ] as const,
   runtime: {
     package: DEFAULT_PIN.package,
     version: DEFAULT_PIN.version,
@@ -128,13 +135,53 @@ async function doctorHandler(_args: string, _ctx: PiCommandContext): Promise<voi
   console.log(JSON.stringify(report, null, 2));
 }
 
+/** Context store for the company/period commands (user-level, atomic writes). */
+const contextStore = new ScopeContextStore();
+
+async function companyHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+  const ruc = args.trim();
+  if (ruc.length === 0) {
+    console.log("drenyra:company: usage: /drenyra:company <ruc> (11 digits, checksummed)");
+    return;
+  }
+  try {
+    const company = contextStore.setCompany(ruc);
+    console.log(`drenyra:company: RUC ${company.ruc} set and persisted.`);
+  } catch (error) {
+    console.log(`drenyra:company: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+async function periodHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+  const period = args.trim();
+  if (period.length === 0) {
+    console.log("drenyra:period: usage: /drenyra:period <YYYYMM>");
+    return;
+  }
+  try {
+    const fiscal = contextStore.setPeriod(period);
+    console.log(`drenyra:period: period ${fiscal.period} set and persisted.`);
+  } catch (error) {
+    console.log(`drenyra:period: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+async function contextHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+  const scope = contextStore.load();
+  const company = scope.company?.ruc ?? "NOT SET";
+  const period = scope.period?.period ?? "NOT SET";
+  console.log(`drenyra:context: company RUC ${company} | fiscal period ${period}`);
+  console.log(JSON.stringify(scope, null, 2));
+}
+
 /**
  * Register the drenyra-pi extension against a Pi ExtensionAPI.
  *
  * `/drenyra:status` and `/drenyra:doctor` run the same fail-closed runtime
- * verification core (runtime/doctor.ts) and print human + machine output.
- * Full Pi UI rendering (ctx.ui panels, RUC/period scope validation) belongs to
- * the commands vertical — see contracts/package-contract.md "Command contract".
+ * verification core (runtime/doctor.ts); `/drenyra:company`, `/drenyra:period`
+ * and `/drenyra:context` manage the RUC/period scope (runtime/context.ts).
+ * Full Pi UI rendering (ctx.ui panels) belongs to a later vertical —
+ * see contracts/package-contract.md "Command contract".
  */
 export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
   pi.registerCommand("drenyra:status", {
@@ -146,6 +193,20 @@ export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
     description:
       "Run the fail-closed runtime doctor against the pinned Drenyra AI runtime.",
     handler: doctorHandler,
+  });
+  pi.registerCommand("drenyra:company", {
+    description:
+      "Set the company context (RUC, checksummed) for the session — scope for every command.",
+    handler: companyHandler,
+  });
+  pi.registerCommand("drenyra:period", {
+    description:
+      "Set the fiscal period context (YYYYMM) for the session — scope for every command.",
+    handler: periodHandler,
+  });
+  pi.registerCommand("drenyra:context", {
+    description: "Show the current company (RUC) and fiscal period context.",
+    handler: contextHandler,
   });
 }
 
