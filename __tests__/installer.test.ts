@@ -33,6 +33,9 @@ describe("decideInstall", () => {
     if (decision.kind === "released") {
       expect(decision.packageName).toBe("drenyra-ai");
       expect(decision.version).toBe("0.2.0");
+      expect(decision.installUrl).toBe(
+        "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz",
+      );
     }
   });
 });

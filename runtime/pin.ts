@@ -21,6 +21,20 @@ export const RUNTIME_VERSION = "0.2.0";
  */
 export const PENDING_CHECKSUM = "pending";
 
+/**
+ * GitHub Release tarball for the pinned version — the install source until
+ * drenyra-ai publishes to the npm registry (see RELEASING.md provenance).
+ * Released pins install from this URL; pending-release pins have no artifact.
+ */
+export function installUrlFor(pin: RuntimePin): string {
+  if (pin.state !== "released") {
+    throw new Error(
+      `installUrlFor: pin for ${pin.package}@${pin.version} is "${pin.state}", not released`,
+    );
+  }
+  return `https://github.com/arkelythex/${pin.package}/releases/download/v${pin.version}/${pin.package}-${pin.version}.tgz`;
+}
+
 export type PinState = "released" | "pending-release";
 
 export interface RuntimePin {

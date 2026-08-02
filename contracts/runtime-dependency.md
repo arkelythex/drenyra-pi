@@ -16,19 +16,27 @@ This contract defines how Drenyra Pi consumes the Drenyra AI runtime. It follows
        └── drenyra-ai@<exact.version>
    ```
 
-3. **Never `PATH`.** Ambient `drenyra-ai` binaries are not trusted. All commands, chains, and subagents resolve the pinned runtime explicitly.
+3. **Install source.** Until drenyra-ai publishes to the npm registry, the
+   installer (`runtime/installer.ts` + postinstall) installs the exact pinned
+   version from its **GitHub Release tarball URL**
+   (`https://github.com/arkelythex/drenyra-ai/releases/download/v<version>/drenyra-ai-<version>.tgz`,
+   via `installUrlFor`). The tarball is the same artifact verified by
+   `verify-packed-install`; when drenyra-ai reaches the registry this becomes a
+   plain `drenyra-ai@<version>` install — the pin contract is unchanged.
 
-4. **Verification on install and doctor.**
+4. **Never `PATH`.** Ambient `drenyra-ai` binaries are not trusted. All commands, chains, and subagents resolve the pinned runtime explicitly.
+
+5. **Verification on install and doctor.**
    - Checksum of the packaged runtime matches the published artifact.
    - Version matches the pin exactly.
    - If verification fails → harness refuses fiscal operations (fail closed).
 
-5. **Upgrade is explicit.** Changing the pin is a release of Drenyra Pi itself, with:
+6. **Upgrade is explicit.** Changing the pin is a release of Drenyra Pi itself, with:
    - a changelog entry,
    - a migration note describing contract impact,
    - re-run of `doctor` and conformance tests.
 
-6. **Single source of truth.** The pinned runtime's contracts (`mission-protocol`, `candidate`, `receipt`, `gate` from `arkelythex/drenyra-ai/contracts`) are authoritative. Drenyra Pi never forks or redefines them.
+7. **Single source of truth.** The pinned runtime's contracts (`mission-protocol`, `candidate`, `receipt`, `gate` from `arkelythex/drenyra-ai/contracts`) are authoritative. Drenyra Pi never forks or redefines them.
 
 ## Verification procedure (reference)
 

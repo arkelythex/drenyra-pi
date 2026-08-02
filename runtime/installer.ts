@@ -6,11 +6,11 @@
 
 import { execFile } from "node:child_process";
 import { doctor, type DoctorReport } from "./doctor.js";
-import { DEFAULT_PIN, type RuntimePin } from "./pin.js";
+import { DEFAULT_PIN, installUrlFor, type RuntimePin } from "./pin.js";
 
 export type InstallDecision =
   | { kind: "pending-release"; notice: string }
-  | { kind: "released"; packageName: string; version: string };
+  | { kind: "released"; packageName: string; version: string; installUrl: string };
 
 /**
  * Decide what the postinstall must do for a given pin.
@@ -31,7 +31,12 @@ export function decideInstall(pin: RuntimePin): InstallDecision {
         "failing closed until then.",
     };
   }
-  return { kind: "released", packageName: pin.package, version: pin.version };
+  return {
+    kind: "released",
+    packageName: pin.package,
+    version: pin.version,
+    installUrl: installUrlFor(pin),
+  };
 }
 
 export interface InstallerResult {
@@ -42,21 +47,22 @@ export interface InstallerResult {
 }
 
 export interface InstallerDeps {
-  /** npm install of the pinned runtime into <packageRoot>/node_modules. */
-  install?: (packageRoot: string, packageName: string, version: string) => Promise<void>;
+  /** Install the pinned runtime into <packageRoot>/node_modules. */
+  install?: (packageRoot: string, installUrl: string) => Promise<void>;
   /** Fail-closed verification of the installed runtime. */
   verify?: (packageRoot: string, pin: RuntimePin) => Promise<DoctorReport>;
 }
 
-function runNpmInstall(
-  packageRoot: string,
-  packageName: string,
-  version: string,
-): Promise<void> {
+/**
+ * Install the pinned runtime from its release tarball URL (the install source
+ * until drenyra-ai publishes to the npm registry). Package-local only —
+ * drenyra-pi never trusts an ambient binary.
+ */
+function runNpmInstall(packageRoot: string, installUrl: string): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(
       "npm",
-      ["install", "--no-save", "--no-package-lock", `${packageName}@${version}`],
+      ["install", "--no-save", "--no-package-lock", installUrl],
       { cwd: packageRoot },
       (error, _stdout, stderr) => {
         if (error !== null) {
@@ -99,7 +105,7 @@ export async function runInstaller(options: {
   const verify = deps.verify ?? defaultVerify;
 
   try {
-    await install(packageRoot, decision.packageName, decision.version);
+    await install(packageRoot, decision.installUrl);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     return {
