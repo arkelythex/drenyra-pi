@@ -75,6 +75,6 @@ describe("createPin", () => {
         expect(DEFAULT_PIN.checksumSha256).toBe(
           "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
         );
-        expect(DEFAULT_PIN.version).toBe("0.1.0");
+        expect(DEFAULT_PIN.version).toBe("0.2.0");
       });
     });

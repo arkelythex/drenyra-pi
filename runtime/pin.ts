@@ -13,7 +13,7 @@
  */
 
 export const RUNTIME_PACKAGE = "drenyra-ai";
-export const RUNTIME_VERSION = "0.1.0";
+export const RUNTIME_VERSION = "0.2.0";
 
 /**
  * Checksum placeholder while the pinned runtime has not been published yet.
@@ -94,7 +94,7 @@ export function createPin(overrides: Partial<RuntimePin> = {}): RuntimePin {
     /**
      * The pinned Drenyra AI runtime for this package.
      *
-     * Released at v0.1.0 (github:arkelythex/drenyra-ai#v0.1.0,
+     * Released at v0.2.0 (github:arkelythex/drenyra-ai#v0.2.0,
      * 2026-08-02). checksumSha256 is the SHA-256 of the release's entry artifact
      * dist/cmd/cli.js (the artifact doctor() checksums for a package-local
      * install); the release tarball hash lives in the GitHub Release SHA256SUMS.

@@ -16,7 +16,7 @@ import {
   type FakeRuntime,
 } from "./helpers/fixture-runtime.js";
 
-const EXACT_VERSION = "0.1.0";
+const EXACT_VERSION = "0.2.0";
 
 describe("doctor — fail-closed matrix", () => {
   let fixture: FakeRuntime | undefined;
@@ -90,7 +90,7 @@ describe("doctor — fail-closed matrix", () => {
   });
 
   it("version-mismatch: resolved runtime reports a different version → fail closed", async () => {
-    fixture = await createFakeRuntime({ version: "0.2.0" });
+    fixture = await createFakeRuntime({ version: "0.3.0" });
     const pin = createPin({
       state: "released",
       checksumSha256: fixture.artifactChecksum,
@@ -98,13 +98,13 @@ describe("doctor — fail-closed matrix", () => {
     const report = await doctor({ pin, packageRoot: fixture.root });
 
     expect(report.verdict).toBe("version-mismatch");
-    expect(report.version).toBe("0.2.0");
+    expect(report.version).toBe("0.3.0");
     expect(report.versionMatches).toBe(false);
     expect(report.issues.some((issue) => issue.includes("version mismatch"))).toBe(true);
   });
 
   it("fail-closed ordering: version mismatch wins when both version and checksum mismatch", async () => {
-    fixture = await createFakeRuntime({ version: "0.2.0" });
+    fixture = await createFakeRuntime({ version: "0.3.0" });
     const pin = createPin({
       state: "released",
       checksumSha256: "0".repeat(64),

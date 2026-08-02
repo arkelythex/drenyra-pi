@@ -22,7 +22,7 @@ describe("decideInstall", () => {
     expect(decision.kind).toBe("pending-release");
     if (decision.kind === "pending-release") {
       expect(decision.notice).toContain("pending-release");
-      expect(decision.notice).toContain("drenyra-ai@0.1.0");
+      expect(decision.notice).toContain("drenyra-ai@0.2.0");
     }
   });
 
@@ -32,7 +32,7 @@ describe("decideInstall", () => {
     expect(decision.kind).toBe("released");
     if (decision.kind === "released") {
       expect(decision.packageName).toBe("drenyra-ai");
-      expect(decision.version).toBe("0.1.0");
+      expect(decision.version).toBe("0.2.0");
     }
   });
 });
