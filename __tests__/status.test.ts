@@ -16,7 +16,7 @@ import {
   type FakeRuntime,
 } from "./helpers/fixture-runtime.js";
 
-const EXACT_VERSION = "0.0.1-prealpha.1";
+const EXACT_VERSION = "0.1.0";
 
 describe("status", () => {
   let fixture: FakeRuntime | undefined;

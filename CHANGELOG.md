@@ -22,7 +22,7 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 - **Release hardening:**
   - Build to `dist/` (tsc, NodeNext, declarations), `engines >= 22`, complete `files` manifest, `pi` manifest pointing at `dist/extensions`, optional Pi peer dependency, subpath `exports`.
   - Private Drenyra AI installer (`runtime/installer.ts` + postinstall wrapper).
-  - **Pin released:** `DEFAULT_PIN` now points at `drenyra-ai@0.0.1-prealpha.1` (git tag `v0.0.1-prealpha.1`, entry-artifact checksum `e4e81914…`) — `doctor` fail-closed verification is live against the released artifact.
+  - **Pin released:** `DEFAULT_PIN` points at `drenyra-ai@0.1.0` (git tag `v0.1.0`, entry-artifact checksum `e4e81914…`; first frozen-contract release — mission-protocol, candidate, receipt, gate). `doctor` fail-closed verification is live against the released artifact.
   - `verify:package` + `verify-packed-install` (pack → install → extension factory loads under Node) + prepack/prepublishOnly gates + CI package job.
   - Placeholder asset dirs (assets/, prompts/, skills/, agents/, chains/, themes/) per the README layout.
 

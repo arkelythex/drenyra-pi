@@ -39,7 +39,7 @@ export async function createFakeRuntime(
   const runtimeDir = join(root, installUnder, "drenyra-ai");
   mkdirSync(runtimeDir, { recursive: true });
 
-  const version = options.version ?? "0.0.1-prealpha.1";
+  const version = options.version ?? "0.1.0";
   const manifest: Record<string, unknown> = {
     name: "drenyra-ai",
     version,
