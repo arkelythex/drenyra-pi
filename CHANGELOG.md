@@ -15,9 +15,18 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 - Draft contract index (`contracts/`):
   - `package-contract` — install surface and provided capabilities.
   - `runtime-dependency` — pinned, verified, package-local Drenyra AI runtime strategy.
+- **PR 1 — Pinned runtime verification core:**
+  - `runtime/` — pin, package-local resolution (never PATH), checksum, fail-closed doctor, status.
+  - Pi extension registration (`extensions/register.ts`) against the gentle-pi model.
+  - CLI-exposed doctor/status machinery; fail-closed matrix tests (30 tests).
+- **Release hardening:**
+  - Build to `dist/` (tsc, NodeNext, declarations), `engines >= 22`, complete `files` manifest, `pi` manifest pointing at `dist/extensions`, optional Pi peer dependency, subpath `exports`.
+  - Private Drenyra AI installer (`runtime/installer.ts` + postinstall wrapper; pending-release no-op until the first real drenyra-ai release).
+  - `verify:package` + `verify-packed-install` (pack → install → extension factory loads under Node) + prepack/prepublishOnly gates + CI package job.
+  - Placeholder asset dirs (assets/, prompts/, skills/, agents/, chains/, themes/) per the README layout.
 
 ### Notes
 
-- **Contracts only — no implementation yet.** No install, commands, panels, agents, skills, or chains exist in this release.
+- The DEFAULT_PIN is in `pending-release` state until drenyra-ai publishes its first real artifact; the released-install path is fixture-tested.
 - Pre-alpha: nothing is production-ready; contracts are not frozen.
 - Version policy: `0.0.1-prealpha.x` until the first frozen contract, then `0.1.0`.
