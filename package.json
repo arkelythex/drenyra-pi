@@ -1,7 +1,7 @@
 {
   "name": "drenyra-pi",
   "version": "0.0.1-prealpha.1",
-  "description": "Pi-native Accounting Operations Harness — consumes a pinned, verified, package-local Drenyra AI runtime. Zero runtime dependencies.",
+  "description": "Pi-native Accounting Operations Harness \u2014 consumes a pinned, verified, package-local Drenyra AI runtime. Zero runtime dependencies.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -58,6 +58,7 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "drenyra-ai": "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz"
   }
 }

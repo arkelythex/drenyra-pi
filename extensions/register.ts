@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { MonthlyCloseChain } from "../chains/monthly-close.js";
 import { ScopeContextStore } from "../runtime/context.js";
 import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
@@ -115,7 +116,8 @@ export const drenyraPiExtension = {
     "/drenyra:company",
     "/drenyra:period",
     "/drenyra:context",
-  ] as const,
+    "/drenyra:close",
+      ] as const,
   runtime: {
     package: DEFAULT_PIN.package,
     version: DEFAULT_PIN.version,
@@ -174,6 +176,26 @@ async function contextHandler(_args: string, _ctx: PiCommandContext): Promise<vo
   console.log(JSON.stringify(scope, null, 2));
 }
 
+async function closeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+  const approverId = args.trim();
+  if (approverId.length === 0) {
+    console.log("drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)");
+    return;
+  }
+  try {
+    const scope = contextStore.load();
+    const chain = new MonthlyCloseChain(scope);
+    const result = await chain.run({ approverId });
+    console.log(
+      `drenyra:close: mission ${result.mission.id} COMPLETED (v${result.mission.version}) ` +
+        `— receipt ${result.receipt.receiptHash.slice(0, 12)}… signed by ${result.receipt.signerKeyId}`,
+    );
+    console.log(JSON.stringify({ mission: result.mission, receipt: result.receipt }, null, 2));
+  } catch (error) {
+    console.log(`drenyra:close: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 /**
  * Register the drenyra-pi extension against a Pi ExtensionAPI.
  *
@@ -207,6 +229,11 @@ export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
   pi.registerCommand("drenyra:context", {
     description: "Show the current company (RUC) and fiscal period context.",
     handler: contextHandler,
+  });
+  pi.registerCommand("drenyra:close", {
+    description:
+      "Run the monthly-close RDA chain for the current scope with explicit R2 approval.",
+    handler: closeHandler,
   });
 }
 

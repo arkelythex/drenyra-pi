@@ -33,6 +33,12 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
     plus YYYYMM period validation) with an atomic JSON scope store; extension
     commands `/drenyra:company`, `/drenyra:period`, `/drenyra:context` wired and
     tested (51 tests total).
+  - **Monthly-close RDA chain:** `chains/monthly-close.ts` runs a
+    monthly-close mission through the pinned Drenyra AI runtime (in-memory
+    stores, protocol-legal transitions), enforces the **R2 approval gate**
+    (explicit single approver — never automatic), and produces a **signed
+    receipt** as the immutable close proof. `/drenyra:close <approverId>`
+    command wired; fail-closed without scope or approver (54 tests total).
   - **Pin released:** `DEFAULT_PIN` points at `drenyra-ai@0.2.0` (git tag `v0.2.0`, entry-artifact checksum `e4e81914…`; all six contracts frozen — mission-protocol, candidate, receipt, gate, ledger, recovery). `doctor` fail-closed verification is live against the released artifact.
   - `verify:package` + `verify-packed-install` (pack → install → extension factory loads under Node) + prepack/prepublishOnly gates + CI package job.
   - Placeholder asset dirs (assets/, prompts/, skills/, agents/, chains/, themes/) per the README layout.

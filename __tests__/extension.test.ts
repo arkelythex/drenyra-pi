@@ -50,6 +50,7 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:company",
       "/drenyra:period",
       "/drenyra:context",
+      "/drenyra:close",
     ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
     expect(drenyraPiExtension.runtime.version).toBe("0.2.0");
@@ -67,6 +68,7 @@ describe("registerDrenyraPiExtension", () => {
       "drenyra:company",
       "drenyra:period",
       "drenyra:context",
+      "drenyra:close",
     ]);
     expect(registered[0].description.length).toBeGreaterThan(0);
     expect(registered[1].description.length).toBeGreaterThan(0);
@@ -86,8 +88,8 @@ describe("registerDrenyraPiExtension", () => {
     } finally {
       console.log = originalLog;
     }
-    // The repo root has no package-local drenyra-ai → doctor reports "missing"
-    // (fail closed, never a crash) — this is the pre-install state.
-    expect(output).toContain("missing");
+    // drenyra-ai is installed as a devDependency (the postinstall artifact in
+    // a real consumer), so the doctor reports "verified" against the repo root.
+    expect(output).toContain("verified");
   });
 });
