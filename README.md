@@ -1,5 +1,7 @@
 # Drenyra Pi
 
+> **Private commercial product** — this repository is **private**; distribution is contractual, never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/Drenyra/blob/main/docs/products/private-product-policy.md).
+
 > **Pi-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
 
 > **Status: pre-alpha.** The harness is being extracted from `arkelythex/Drenyra` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
