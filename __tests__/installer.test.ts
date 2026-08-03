@@ -6,7 +6,7 @@
 // real drenyra-ai release.
 
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createPin } from "../runtime/pin.js";
@@ -109,6 +109,60 @@ describe("runInstaller", () => {
       expect(result.exitCode).toBe(1);
       expect(result.message).toContain("checksum-mismatch");
       expect(result.message).toContain("Checksum mismatch");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("released with a vendored tarball: installs from the vendored path", async () => {
+    const root = makeRoot();
+    try {
+      const pin = createPin({ state: "released", checksumSha256: "e".repeat(64) });
+      mkdirSync(join(root, "vendored"), { recursive: true });
+      writeFileSync(join(root, "vendored", "drenyra-ai-0.2.0.tgz"), "fake-tgz");
+      let receivedSource: string | undefined;
+      const deps: InstallerDeps = {
+        install: async (_root, source) => {
+          receivedSource = source;
+        },
+        verify: async () => ({
+          pinState: "released",
+          versionMatches: true,
+          checksumMatches: true,
+          verdict: "verified",
+          issues: [],
+        }),
+      };
+      const result = await runInstaller({ pin, packageRoot: root, deps });
+      expect(result.exitCode).toBe(0);
+      expect(receivedSource).toBe(join(root, "vendored", "drenyra-ai-0.2.0.tgz"));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("released without a vendored tarball: installs from the release URL", async () => {
+    const root = makeRoot();
+    try {
+      const pin = createPin({ state: "released", checksumSha256: "f".repeat(64) });
+      let receivedSource: string | undefined;
+      const deps: InstallerDeps = {
+        install: async (_root, source) => {
+          receivedSource = source;
+        },
+        verify: async () => ({
+          pinState: "released",
+          versionMatches: true,
+          checksumMatches: true,
+          verdict: "verified",
+          issues: [],
+        }),
+      };
+      const result = await runInstaller({ pin, packageRoot: root, deps });
+      expect(result.exitCode).toBe(0);
+      expect(receivedSource).toBe(
+        "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz",
+      );
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

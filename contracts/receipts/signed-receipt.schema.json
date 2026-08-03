@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/receipts/signed-receipt.schema.json",
+  "title": "SignedReceipt",
+  "description": "Complete signed mission receipt bundle — mirrors the pinned drenyra-ai@0.2.0 SignedReceipt shape field-for-field (REQ-CONTRACTS-004; design §3.3). receiptType and algorithm are bundle metadata and never enter the canonical content bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "receiptType",
+    "algorithm",
+    "content",
+    "receiptHash",
+    "signerKeyId",
+    "signerPublicKey",
+    "signature",
+    "issuedAt"
+  ],
+  "properties": {
+    "protocolVersion": { "type": "string", "const": "1.0" },
+    "receiptType": {
+      "type": "string",
+      "enum": ["APPROVAL", "EXECUTION", "COMPLETION", "EXTERNAL_SUBMISSION"]
+    },
+    "algorithm": { "type": "string", "const": "Ed25519" },
+    "content": { "$ref": "receipt-content.schema.json" },
+    "receiptHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "lowercase hex sha-256 over the canonical serialization of content only"
+    },
+    "signerKeyId": { "type": "string", "minLength": 1 },
+    "signerPublicKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+      "description": "base64 Ed25519 public key; decoded length is enforced by harnesses"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+      "description": "base64 raw Ed25519 signature (64 bytes); decoded length is enforced by harnesses"
+    },
+    "issuedAt": { "type": "string", "format": "date-time" }
+  }
+}

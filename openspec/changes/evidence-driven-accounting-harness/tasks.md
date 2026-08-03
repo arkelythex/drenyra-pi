@@ -94,7 +94,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - `bun run typecheck` passes with the new includes (no new errors).
   - `bun run build` succeeds and `node scripts/verify-package-files.mjs` still passes (existing checks unchanged).
   - After T-S1-005 lands, `dist/lib/canonicalization.js` and `dist/lib/canonicalization.d.ts` are emitted by the build (proves the root wiring ships lib modules — design §14).
-- [ ] T-S1-001 — build roots wiring. <!-- sdd-owner: implementation -->
+- [x] T-S1-001 — build roots wiring. <!-- sdd-owner: implementation -->
 
 #### T-S1-002 — Mission + evidence JSON-schema contract families with conformance tests
 
@@ -105,7 +105,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Evidence graph document with nodes, edges, payload hashes validates (REQ-CONTRACTS-002; SC-CONTRACTS-002).
   - Tampered/malformed payloads are rejected with a descriptive error (SC-CONTRACTS-005).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S1-002 — mission + evidence contract families. <!-- sdd-owner: implementation -->
+- [x] T-S1-002 — mission + evidence contract families. <!-- sdd-owner: implementation -->
 
 #### T-S1-003 — Authority + receipts + trusted-key JSON-schema contract families with conformance tests
 
@@ -117,7 +117,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Tampered receipt content fails validation (SC-CONTRACTS-005).
   - Registry entries validate against `SigningKeyInfo` before trust (REQ-CONTRACTS-005).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S1-003 — authority + receipts + trusted-key contract families. <!-- sdd-owner: implementation -->
+- [x] T-S1-003 — authority + receipts + trusted-key contract families. <!-- sdd-owner: implementation -->
 
 #### T-S1-004 — Extend `runtime/context.ts` with the 10-element canonical scope model (backward compatible)
 
@@ -129,7 +129,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Legacy context loads canonically and reports incomplete (REQ-SCOPE-007; SC-SCOPE-006).
   - Missing/invalid element blocks mission creation path (REQ-SCOPE-009).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S1-004 — canonical scope model in `runtime/context.ts`. <!-- sdd-owner: implementation -->
+- [x] T-S1-004 — canonical scope model in `runtime/context.ts`. <!-- sdd-owner: implementation -->
 
 #### T-S1-005 — `lib/canonicalization.ts`: canonical encoding, scope hash, payload canonicalization
 
@@ -141,7 +141,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - `bindScope` output includes the scope hash for binding into authorization/receipts (REQ-SCOPE-008).
   - Scope-change invalidation precondition: any element change → different `scopeHash` (SC-SCOPE-005 basis, exercised fully in PR #2/#4).
   - `bun test`, `bun run typecheck`, `bun run build` green; `dist/lib/canonicalization.js` ships (T-S1-001 wiring).
-- [ ] T-S1-005 — canonicalization library. <!-- sdd-owner: implementation -->
+- [x] T-S1-005 — canonicalization library. <!-- sdd-owner: implementation -->
 
 ---
 

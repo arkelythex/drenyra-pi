@@ -10,6 +10,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["runtime", "extensions", "index.ts"],
+  "include": ["lib", "chains", "runtime", "extensions", "index.ts"],
   "exclude": ["node_modules", "dist", "coverage", "**/__tests__/**", "vitest.config.ts"]
 }

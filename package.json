@@ -14,6 +14,7 @@
     "skills",
     "agents",
     "chains",
+    "vendored",
     "themes",
     "README.md",
     "LICENSE"
@@ -59,6 +60,8 @@
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8",
-    "drenyra-ai": "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz"
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "drenyra-ai": "file:./vendored/drenyra-ai-0.2.0.tgz"
   }
 }
