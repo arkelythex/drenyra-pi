@@ -158,7 +158,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Monthly close requires at least R2 (REQ-AUTH-005).
   - ASK/ANALYZE never mutate; PREPARE produces candidates only (REQ-AUTH-009).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S2-001 — authority modes + materiality. <!-- sdd-owner: implementation -->
+- [x] T-S2-001 — authority modes + materiality. <!-- sdd-owner: implementation -->
 
 #### T-S2-002 — `lib/authority-gates.ts`: fixed-order `runAuthorityPipeline`
 
@@ -169,7 +169,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Execute blocked when approval/evidence/trusted-key receipt verification missing (SC-AUTH-004).
   - Missing trusted keys block at the receipt stage (REQ-AUTH-008; design §6.2).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S2-002 — authority gate pipeline. <!-- sdd-owner: implementation -->
+- [x] T-S2-002 — authority gate pipeline. <!-- sdd-owner: implementation -->
 
 #### T-S2-003 — `lib/authority-store.ts`: append-only authorization records
 
@@ -180,7 +180,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Scope change invalidates prior authorization; new bound decision required (REQ-SCOPE-006; SC-SCOPE-005).
   - Path-traversal identifiers are rejected (design §15).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S2-003 — authority store. <!-- sdd-owner: implementation -->
+- [x] T-S2-003 — authority store. <!-- sdd-owner: implementation -->
 
 #### T-S2-004 — `lib/accounting-status.ts`: read-only status projection + EDA step derivation
 
@@ -191,7 +191,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Next phase derived from persisted state via engine predicates, never chat (REQ-MISS-003).
   - All 15 installed engine states handled; unknown states never map to runnable.
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S2-004 — accounting status projection. <!-- sdd-owner: implementation -->
+- [x] T-S2-004 — accounting status projection. <!-- sdd-owner: implementation -->
 
 #### T-S2-005 — Correct spec count references (14 → 15 engine states) in `specs/README.md`
 
@@ -200,7 +200,7 @@ PR #1  S1  contracts + scope model + canonicalization
 - **Acceptance criteria:**
   - README references 15 states consistently; no doc contradicts the installed enum (design §1 risk note).
   - `bun test` still green.
-- [ ] T-S2-005 — spec count correction. <!-- sdd-owner: implementation -->
+- [x] T-S2-005 — spec count correction. <!-- sdd-owner: implementation -->
 
 ---
 
