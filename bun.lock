@@ -6,7 +6,9 @@
       "name": "drenyra-pi",
       "devDependencies": {
         "@types/node": "^22.10.2",
-        "drenyra-ai": "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz",
+        "ajv": "^8.17.1",
+        "ajv-formats": "^3.0.1",
+        "drenyra-ai": "file:./vendored/drenyra-ai-0.2.0.tgz",
         "typescript": "^5.7.2",
         "vitest": "^2.1.8",
       },
@@ -153,7 +155,7 @@
 
     "deep-eql": ["deep-eql@5.0.2", "", {}, "sha512-h5k/5U50IJJFpzfL6nO9jaaumfjO/f2NjK/oYB2Djzm4p9L+3T9qWpZqZ2hAbLPuuYq9wrU08WQyBTL5GbPk5Q=="],
 
-    "drenyra-ai": ["drenyra-ai@https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz", { "dependencies": { "ajv": "^8.17.1", "ajv-formats": "^3.0.1" }, "bin": { "drenyra-ai": "./dist/cmd/cli.js" } }, "sha512-AZ/crwRCA5bst2AWQcbAys+AEETLhjL7Su2iCAP3Vu2e5QpqaRdUN3RbOk66ugAlQg+uRDp4wnNh9A4W8MjgGw=="],
+    "drenyra-ai": ["drenyra-ai@./vendored/drenyra-ai-0.2.0.tgz", { "dependencies": { "ajv": "^8.17.1", "ajv-formats": "^3.0.1" }, "bin": { "drenyra-ai": "./dist/cmd/cli.js" } }, "sha512-AZ/crwRCA5bst2AWQcbAys+AEETLhjL7Su2iCAP3Vu2e5QpqaRdUN3RbOk66ugAlQg+uRDp4wnNh9A4W8MjgGw=="],
 
     "es-module-lexer": ["es-module-lexer@1.7.0", "", {}, "sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA=="],
 

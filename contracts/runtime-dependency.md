@@ -16,9 +16,12 @@ This contract defines how Drenyra Pi consumes the Drenyra AI runtime. It follows
        └── drenyra-ai@<exact.version>
    ```
 
-3. **Install source.** Until drenyra-ai publishes to the npm registry, the
-   installer (`runtime/installer.ts` + postinstall) installs the exact pinned
-   version from its **GitHub Release tarball URL**
+3. **Install source.** The package ships a **vendored tarball** of the exact
+   pinned version at `vendored/drenyra-ai-<version>.tgz` (preferred source:
+   keeps installs offline and independent of the private release endpoint).
+   The installer (`runtime/installer.ts` + postinstall) installs from the
+   vendored artifact when present; otherwise it falls back to the
+   **GitHub Release tarball URL**
    (`https://github.com/arkelythex/drenyra-ai/releases/download/v<version>/drenyra-ai-<version>.tgz`,
    via `installUrlFor`). The tarball is the same artifact verified by
    `verify-packed-install`; when drenyra-ai reaches the registry this becomes a

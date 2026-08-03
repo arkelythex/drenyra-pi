@@ -5,12 +5,24 @@
 // result with the same fail-closed doctor used everywhere else.
 
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { doctor, type DoctorReport } from "./doctor.js";
 import { DEFAULT_PIN, installUrlFor, type RuntimePin } from "./pin.js";
 
 export type InstallDecision =
   | { kind: "pending-release"; notice: string }
   | { kind: "released"; packageName: string; version: string; installUrl: string };
+
+/**
+ * Relative path of the vendored tarball inside the package tree, when the
+ * package ships one. The vendored artifact is the PREFERRED install source
+ * (keeps installs offline and private-repo independent); the release URL
+ * remains the fallback for builds published without a vendored artifact.
+ */
+export function vendoredTarballFor(pin: RuntimePin): string {
+  return join("vendored", `${pin.package}-${pin.version}.tgz`);
+}
 
 /**
  * Decide what the postinstall must do for a given pin.
@@ -48,7 +60,7 @@ export interface InstallerResult {
 
 export interface InstallerDeps {
   /** Install the pinned runtime into <packageRoot>/node_modules. */
-  install?: (packageRoot: string, installUrl: string) => Promise<void>;
+  install?: (packageRoot: string, installSource: string) => Promise<void>;
   /** Fail-closed verification of the installed runtime. */
   verify?: (packageRoot: string, pin: RuntimePin) => Promise<DoctorReport>;
 }
@@ -104,8 +116,14 @@ export async function runInstaller(options: {
   const install = deps.install ?? runNpmInstall;
   const verify = deps.verify ?? defaultVerify;
 
+  const vendoredPath = join(packageRoot, vendoredTarballFor(pin));
+  const installSource =
+    decision.kind === "released" && existsSync(vendoredPath)
+      ? vendoredPath
+      : decision.installUrl;
+
   try {
-    await install(packageRoot, decision.installUrl);
+    await install(packageRoot, installSource);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     return {
