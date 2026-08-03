@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/mission/event.schema.json",
+  "title": "MissionEvent",
+  "description": "One mission event with its embedded snapshot — mirrors the pinned drenyra-ai@0.2.0 MissionEvent shape field-for-field. Sequence is a JSON integer, never a float.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "missionId", "sequence", "eventType", "snapshot", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "STATE_TRANSITION",
+        "PROGRESS_UPDATE",
+        "BLOCKER_ADDED",
+        "BLOCKER_RESOLVED",
+        "PROPOSAL_CREATED",
+        "APPROVAL_DECIDED",
+        "COMPLETED",
+        "FAILED",
+        "TIMEOUT",
+        "UNKNOWN",
+        "RECONCILED",
+        "KEEPALIVE"
+      ]
+    },
+    "snapshot": { "$ref": "snapshot.schema.json" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

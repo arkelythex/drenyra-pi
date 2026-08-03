@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/receipts/trusted-key-registry.schema.json",
+  "title": "TrustedKeyRegistryDocument",
+  "description": "Workspace-local trusted public-key registry (design §6.1). The map key MUST equal each entry's keyId; entries validate against SigningKeyInfo before a key is trusted for receipt verification (REQ-CONTRACTS-005). Private keys are never stored.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "keys"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "keys": {
+      "type": "object",
+      "additionalProperties": { "$ref": "signing-key-info.schema.json" }
+    }
+  }
+}

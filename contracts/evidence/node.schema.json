@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/evidence/node.schema.json",
+  "title": "EvidenceNode",
+  "description": "One immutable evidence graph node (design §7.1). The payload hash is lowercase hex sha-256 over the canonical payload; money in a payload is BigInt cents (JSON integer or decimal string), never a float.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordKind",
+    "id",
+    "missionId",
+    "nodeKind",
+    "payload",
+    "payloadHash",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "recordKind": { "const": "node" },
+    "id": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "nodeKind": {
+      "type": "string",
+      "enum": ["source", "transformation", "conclusion", "action"]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          { "type": "string" },
+          { "type": "boolean" },
+          { "type": "integer" },
+          { "type": "string", "pattern": "^-?[0-9]+$", "description": "BigInt cents as a decimal string" },
+          { "type": "null" },
+          { "type": "array" },
+          { "type": "object" }
+        ]
+      },
+      "description": "Payload content — monetary amounts are BigInt cents (JSON integers or decimal strings), never floats (REQ-CONTRACTS-008)"
+    },
+    "payloadHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "lowercase hex sha-256 over the canonical payload"
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

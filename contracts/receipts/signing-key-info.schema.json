@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/receipts/signing-key-info.schema.json",
+  "title": "SigningKeyInfo",
+  "description": "A trusted signing key and its lifecycle metadata — mirrors the pinned drenyra-ai@0.2.0 SigningKeyInfo shape field-for-field (REQ-CONTRACTS-005; design §6.1). Dates are canonical ISO-8601 instants; lifecycle order (issuedAt <= expiresAt/revokedAt) is enforced at trust time.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["keyId", "publicKey", "issuedAt"],
+  "properties": {
+    "keyId": { "type": "string", "minLength": 1 },
+    "publicKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+      "description": "base64-encoded Ed25519 public key; private keys are never stored in this registry"
+    },
+    "issuedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "revokedAt": { "type": "string", "format": "date-time" }
+  }
+}

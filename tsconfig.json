@@ -19,6 +19,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["runtime", "extensions", "__tests__", "index.ts", "vitest.config.ts"],
+  "include": ["lib", "chains", "runtime", "extensions", "__tests__", "index.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", "coverage"]
 }

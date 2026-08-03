@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/mission/snapshot.schema.json",
+  "title": "MissionSnapshot",
+  "description": "Complete mission snapshot — mirrors the pinned drenyra-ai@0.2.0 MissionSnapshot shape field-for-field (status, steps, blockers, proposal, rejection, receipt identity, event sequence). Version/sequence fields are JSON integers; evidence hashes are lowercase hex sha-256; money appears only as BigInt cents (JSON integers or decimal strings), never floats.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "companyId",
+    "fiscalPeriod",
+    "intent",
+    "status",
+    "version",
+    "progress",
+    "steps",
+    "currentStep",
+    "blockers",
+    "proposal",
+    "rejection",
+    "receiptId",
+    "receiptHash",
+    "lastEventSequence",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "companyId": {
+      "type": "string",
+      "pattern": "^[0-9]{11}$",
+      "description": "Peruvian RUC — full check-digit validation is enforced by the harness (REQ-SCOPE-002)"
+    },
+    "fiscalPeriod": {
+      "type": "string",
+      "pattern": "^[0-9]{4}(0[1-9]|1[0-2])$",
+      "description": "Canonical YYYYMM fiscal period with a real month 01-12 (REQ-SCOPE-003)"
+    },
+    "intent": {
+      "type": "string",
+      "enum": ["monthly-close", "correction", "reconciliation", "invoice-review", "compliance-check"]
+    },
+    "status": { "$ref": "status.schema.json" },
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "JSON integer — never a float"
+    },
+    "progress": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Lifecycle progress ratio (not a monetary value)"
+    },
+    "steps": {
+      "type": "array",
+      "items": { "$ref": "step.schema.json" }
+    },
+    "currentStep": { "type": "string", "minLength": 1 },
+    "blockers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/missionBlocker" }
+    },
+    "proposal": { "anyOf": [{ "$ref": "#/$defs/missionProposal" }, { "type": "null" }] },
+    "rejection": { "anyOf": [{ "$ref": "#/$defs/missionRejection" }, { "type": "null" }] },
+    "receiptId": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+    "receiptHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "lastEventSequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "JSON integer — never a float"
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "evidenceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 }
+      }
+    },
+    "missionBlocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reason", "severity", "occurredAt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["WARNING", "ERROR", "CRITICAL"] },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "resolvedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "missionProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "missionId",
+        "version",
+        "evidence",
+        "evidenceHash",
+        "summary",
+        "riskLevel",
+        "generatedAt"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "missionId": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 0 },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceItem" }
+        },
+        "evidenceHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "summary": { "type": "string", "minLength": 1 },
+        "riskLevel": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "missionRejection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason", "rejectedBy", "rejectedAt", "proposalVersion"],
+      "properties": {
+        "reason": { "type": "string", "minLength": 1 },
+        "rejectedBy": { "type": "string", "minLength": 1 },
+        "rejectedAt": { "type": "string", "format": "date-time" },
+        "proposalVersion": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/mission/status.schema.json",
+  "title": "AccountingMissionStatus",
+  "description": "Canonical accounting mission lifecycle states — mirrors the pinned drenyra-ai@0.2.0 AccountingMissionStatus enum field-for-field (15 members: the 11 original states plus RECOVERING, WAITING_FOR_EVIDENCE, BLOCKED_BY_GATE, RETRYING).",
+  "type": "string",
+  "enum": [
+    "DRAFT",
+    "QUEUED",
+    "RUNNING",
+    "BLOCKED",
+    "AWAITING_APPROVAL",
+    "APPROVED",
+    "REJECTED",
+    "REVISION_REQUESTED",
+    "COMPLETED",
+    "FAILED",
+    "UNKNOWN",
+    "RECOVERING",
+    "WAITING_FOR_EVIDENCE",
+    "BLOCKED_BY_GATE",
+    "RETRYING"
+  ]
+}
