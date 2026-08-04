@@ -80,6 +80,10 @@ const MISSION_INTENTS = [
   "reconciliation",
   "invoice-review",
   "compliance-check",
+  // Harness-only chain intents (design §11.4/§11.5): the verify and evidence
+  // chains persist their own missions through the shared pipeline.
+  "verify",
+  "evidence",
 ] as const;
 
 const STEP_STATUSES = ["PENDING", "IN_PROGRESS", "COMPLETED", "FAILED", "SKIPPED"] as const;

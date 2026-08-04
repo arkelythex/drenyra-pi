@@ -26,6 +26,7 @@ import {
 } from "../extensions/register.js";
 import { ScopeContextStore } from "../runtime/context.js";
 import { makeCanonicalScope } from "./helpers/authority-fixtures.js";
+import { sha256Canonical } from "../lib/canonicalization.js";
 
 interface RegisteredCommand {
   name: string;
@@ -301,41 +302,154 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     expect(drenyraPiExtension.provides).toHaveLength(13);
   });
 
-	it("registers evidence/verify with structured not_available denials (REQ-CMD-008)", async () => {
-		// /drenyra:reconcile is wired to the reconciliation chain in PR #7 (S5a);
-		// the evidence/verify chain bodies land in PR #8 (S5b).
-    const expectations: Record<string, string> = {
-      "drenyra:evidence": "PR #8",
-      "drenyra:verify": "PR #8",
-    };
-    for (const [name, expectedAfter] of Object.entries(expectations)) {
-      // Fresh store per command: the fail-closed check must see no scope.
+  it("wires /drenyra:verify and /drenyra:evidence to their chains (REQ-CMD-004/008)", async () => {
+    const VERIFY_MANIFEST = {
+      ledger: [
+        { account: "101", reference: "B001", debitCents: 10_000, creditCents: 0 },
+        { account: "401", reference: "B001", debitCents: 0, creditCents: 10_000 },
+      ],
+      bank: [{ reference: "B001", amountCents: 10_000 }],
+      bankAccount: "101",
+     };
+
+    // /drenyra:verify — fail closed without scope, then runs the verify chain.
+    {
+       const { pi, registered } = makeMockPi();
+       const store = makeTempStore();
+       registerDrenyraPiExtension(pi, { contextStore: store });
+      const command = registered.find((c) => c.name === "drenyra:verify");
+      expect(command).toBeDefined();
+      let output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
+       expect(output).toContain("missing");
+      cleanupTempStore(store);
+    }
+
+    // /drenyra:verify — under ANALYZE with a matching source digest, the chain
+    // runs and reports structured output (REQ-CMD-008).
+    {
+      const root = mkdtempSync(join(tmpdir(), "drenyra-verify-cmd-"));
+      try {
+        const { pi, registered } = makeMockPi();
+        const store = new ScopeContextStore(join(root, "context.json"));
+        registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+        store.setCanonicalScope(
+          makeCanonicalScope({
+            authorityLevel: "ANALYZE",
+            sourceSnapshot: sha256Canonical(VERIFY_MANIFEST),
+          }),
+        );
+        const command = registered.find((c) => c.name === "drenyra:verify");
+        expect(command).toBeDefined();
+        const output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
+        expect(output).toContain("drenyra:verify:");
+        const machine = parseMachineOutput(output) as {
+          command: string;
+          chain: string;
+          missionId: string;
+          intent: string;
+          phase: string | null;
+          status: string;
+        };
+        expect(machine.command).toBe("verify");
+        expect(machine.chain).toBe("verify");
+        expect(machine.missionId.length).toBeGreaterThan(0);
+        expect(machine.intent).toBe("verify");
+        expect(machine.phase).toBe("intake");
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+
+    // /drenyra:verify — a scope digest that cannot match the manifest produces a
+    // structured blocked verdict with the source-integrity issue (SC-CHAIN-003).
+    {
+      const root = mkdtempSync(join(tmpdir(), "drenyra-verify-cmd-"));
+      try {
+        const { pi, registered } = makeMockPi();
+        const store = new ScopeContextStore(join(root, "context.json"));
+        registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+        store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ANALYZE" }));
+        const command = registered.find((c) => c.name === "drenyra:verify");
+        expect(command).toBeDefined();
+        let output = "";
+        for (let index = 0; index < 8; index += 1) {
+          output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
+          if (output.includes("issues") || output.includes("blocked")) {
+            break;
+          }
+        }
+         const machine = parseMachineOutput(output) as {
+           command: string;
+           status: string;
+          verdict: string;
+          checks: Array<{ check: string; verdict: string }>;
+         };
+        expect(machine.command).toBe("verify");
+        expect(machine.status).toBe("blocked");
+        expect(machine.verdict).toBe("issues");
+        expect(
+          machine.checks.some(
+            (check) => check.check === "source-integrity" && check.verdict === "fail",
+          ),
+        ).toBe(true);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+
+    // /drenyra:evidence — fail closed without scope, then runs the evidence chain.
+    {
       const { pi, registered } = makeMockPi();
       const store = makeTempStore();
       registerDrenyraPiExtension(pi, { contextStore: store });
-      const command = registered.find((c) => c.name === name);
-      expect(command, name).toBeDefined();
-      // Fail closed without a complete scope (SC-CMD-002): nothing runs.
-      let output = await runHandler(command!.handler, "");
+      const command = registered.find((c) => c.name === "drenyra:evidence");
+      expect(command).toBeDefined();
+      const output = await runHandler(command!.handler, "{}");
       expect(output).toContain("missing");
-      // With a complete scope: structured not_available denial (REQ-CMD-008).
-      store.setCanonicalScope(makeCanonicalScope());
-      output = await runHandler(command!.handler, "");
-      const machine = parseMachineOutput(output) as {
-        command: string;
-        status: string;
-        reason: string;
-        expected_after: string;
-      };
-      expect(machine.command).toBe(name);
-      expect(machine.status).toBe("not_available");
-      expect(machine.reason.length).toBeGreaterThan(0);
-      expect(machine.expected_after).toContain(expectedAfter);
-      cleanupTempStore(store);
-    }
-  });
-});
+       cleanupTempStore(store);
+     }
 
+    // /drenyra:evidence — an add-node op appends the node with structured output.
+    {
+      const root = mkdtempSync(join(tmpdir(), "drenyra-evidence-cmd-"));
+      try {
+        const { pi, registered } = makeMockPi();
+        const store = new ScopeContextStore(join(root, "context.json"));
+        registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+        store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ANALYZE" }));
+        const command = registered.find((c) => c.name === "drenyra:evidence");
+        expect(command).toBeDefined();
+        const output = await runHandler(
+          command!.handler,
+          JSON.stringify({
+            op: "add-node",
+            node: {
+              id: "src-1",
+              nodeKind: "source",
+              payload: { kind: "ledger-entry", reference: "B001", amountCents: 100 },
+            },
+          }),
+        );
+            expect(output).toContain("drenyra:evidence:");
+            const machine = parseMachineOutput(output) as {
+              command: string;
+              chain: string;
+              missionId: string;
+              phase: string | null;
+              op: string;
+              nodeId: string | null;
+            };
+            expect(machine.command).toBe("evidence");
+            expect(machine.chain).toBe("evidence");
+            expect(machine.missionId.length).toBeGreaterThan(0);
+            expect(machine.op).toBe("add-node");
+            expect(machine.nodeId).toBe("src-1");
+          } finally {
+            rmSync(root, { recursive: true, force: true });
+          }
+        }
+  });
+  });
 describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () => {
 	const RECONCILE_MANIFEST = JSON.stringify({
 		bank: [

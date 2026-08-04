@@ -71,6 +71,7 @@ import {
 	createEdaSteps,
 	derivePreparedStep,
 	familyForPhase,
+	type EdaIntent,
 	type EdaPhase,
 	type PreparedStep,
 } from "./accounting-status.js";
@@ -147,13 +148,19 @@ export interface ChainStepOutcome<O> {
 }
 
 /** One chain definition (design §11.1). */
-export interface ChainDefinition<I, O> {
-	name: string;
-	intent: MissionIntent;
-	/** The minimum bound authority mode the whole chain requires. */
-	requiredMode: AuthorityMode;
-	runStep(context: ChainStepContext<I>): Promise<ChainStepOutcome<O>>;
-}
+    export interface ChainDefinition<I, O> {
+    	name: string;
+    	intent: EdaIntent;
+    	/** The minimum bound authority mode the whole chain requires. */
+    	requiredMode: AuthorityMode;
+    	/**
+    	 * Read-only chains (verify): the EXECUTE-family ceremony (materiality,
+    	 * approval, receipt) is not applicable — the mission completes as a state
+    	 * record, never an accounting mutation (REQ-AUTH-009).
+    	 */
+    	readOnly?: boolean;
+    	runStep(context: ChainStepContext<I>): Promise<ChainStepOutcome<O>>;
+    }
 
 /** Input for one bounded chain run. */
 export interface ChainRunInput<I> {
@@ -182,7 +189,7 @@ export interface ChainBlocked {
 /** The result of one bounded chain run (at most one EDA phase). */
 export interface ChainRunResult<O> {
 	chain: string;
-	intent: MissionIntent;
+	intent: EdaIntent;
 	/** The mission after this run; absent when scope/mode blocked before start. */
 	mission?: MissionSnapshot;
 	preparedStep: PreparedStep | null;
@@ -521,7 +528,7 @@ async function startChainMissionInternal<I, O>(
 	const started = await runtime.start({
 		companyId: binding.scope.company,
 		fiscalPeriod: binding.scope.fiscalPeriod,
-		intent: definition.intent,
+		intent: definition.intent as MissionIntent,
 		input: {
 			instruction: `Run ${definition.name} chain for ${binding.scope.fiscalPeriod}`,
 		},
@@ -552,7 +559,7 @@ export async function startChainMission<I, O>(
 		store: stores.store,
 		events: stores.events,
 		idempotency: stores.idempotency,
-		registry: buildChainRegistry(definition.intent, state),
+		registry: buildChainRegistry(definition.intent as MissionIntent, state),
 	});
 	const mission = await startChainMissionInternal(
 		runtime,
@@ -983,12 +990,12 @@ export async function runChainStep<I, O>(
 		store: stores.store,
 		events: stores.events,
 		idempotency: stores.idempotency,
-		registry: buildChainRegistry(definition.intent, state),
+		registry: buildChainRegistry(definition.intent as MissionIntent, state),
 	});
 	let mission: MissionSnapshot;
 	const loadedMission = await findActiveChainMission(
 		stores,
-		definition.intent,
+		definition.intent as MissionIntent,
 		binding,
 	);
 	const startedNow = loadedMission === undefined;
@@ -1019,7 +1026,35 @@ export async function runChainStep<I, O>(
 		};
 	}
 
-	if (prepared.disposition === "WAIT") {
+    	// SKIP is a deterministic no-op: no write, no gates — the step is marked
+    	// SKIPPED and the mission advances (read-only ceremony phases of the
+    	// verify/evidence chains never evaluate materiality/approval/receipt).
+    	if (prepared.disposition === "SKIP") {
+    		const skipped = await executePreparedStep({
+    			binding,
+    			stores,
+    			mission,
+    			prepared,
+    			targetHash: sha256Canonical({
+    				chain: definition.name,
+    				phase: prepared.phase,
+    				skip: true,
+    			}),
+    		});
+    		return {
+    			chain: definition.name,
+    			intent: definition.intent,
+    			mission: skipped.mission,
+    			preparedStep: derivePreparedStep(skipped.mission, binding.scopeHash),
+    			output: null,
+    			phase: skipped.phase,
+    			waitReason: skipped.waitReason,
+    			gates: [],
+    			replayed: skipped.replayed,
+    		};
+    	}
+
+    	if (prepared.disposition === "WAIT") {
 		// Evidence wait resume: explicit `resume` only; WAITING_FOR_EVIDENCE->RUNNING
 		// is an engine-validated transition, never an auto-advance (REQ-MISS-009).
 		if (
@@ -1137,15 +1172,15 @@ export async function runChainStep<I, O>(
 			intent: definition.intent,
 			mission,
 			preparedStep: prepared,
-			output: null,
-			phase: null,
-			waitReason: waitReasonFor(mission.status) ?? undefined,
-			gates: [],
-			replayed: false,
-		};
-	}
+    			output: null,
+    			phase: null,
+    			waitReason: waitReasonFor(mission.status) ?? undefined,
+    			gates: [],
+    			replayed: false,
+    		};
+    	}
 
-	// Stage 5: stale-scope invalidation for a running mission (before any write).
+    	// Stage 5: stale-scope invalidation for a running mission (before any write).
 	const family = familyForPhase(prepared.phase);
 	const authorization = await boundAuthorizationFor(
 		storesRoot,
@@ -1175,6 +1210,7 @@ export async function runChainStep<I, O>(
 		approvals,
 		approvalReceipt: input.approvalReceipt,
 		trustedKeys: input.trustedKeys ?? [],
+		readOnlyAction: definition.readOnly === true,
 	});
 	const firstBlocked = gateResults.find(
 		(gate) => gate.verdict === "blocked" || gate.verdict === "needs_input",
@@ -1219,34 +1255,6 @@ export async function runChainStep<I, O>(
 			preparedStep: prepared,
 			gates: gateResults,
 		});
-	}
-
-	// Stage 7: one phase operation — SKIP is a deterministic disposition.
-	if (prepared.disposition === "SKIP") {
-		const skipped = await executePreparedStep({
-			binding,
-			stores,
-			mission,
-			prepared,
-			targetHash: sha256Canonical({
-				chain: definition.name,
-				phase: prepared.phase,
-				skip: true,
-			}),
-			materiality: input.materiality,
-			approvals,
-		});
-		return {
-			chain: definition.name,
-			intent: definition.intent,
-			mission: skipped.mission,
-			preparedStep: derivePreparedStep(skipped.mission, binding.scopeHash),
-			output: null,
-			phase: skipped.phase,
-			waitReason: skipped.waitReason,
-			gates: gateResults,
-			replayed: skipped.replayed,
-		};
 	}
 
 	// RUN: the chain's bounded domain computation for this phase.

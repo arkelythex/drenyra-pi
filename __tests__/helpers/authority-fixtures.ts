@@ -25,6 +25,7 @@ import type { AuthorizationRecord } from "../../lib/authority-gates.js";
 
 /** A valid 11-digit RUC with a valid check digit (Módulo 11). */
 export const FIXTURE_RUC = "20123456786";
+export const FIXTURE_RUC_B = "20123456808";
 export const FIXTURE_PERIOD = "202507";
 export const FIXTURE_SNAPSHOT_DIGEST = "a".repeat(64);
 
