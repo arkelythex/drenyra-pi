@@ -300,7 +300,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Read-only bootstrap commands run under an explicit pre-scope policy (design §2.2).
   - Scope change invalidates command execution (REQ-SCOPE-006).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4A-001 — scope guard. <!-- sdd-owner: implementation -->
+- [x] T-S4A-001 — scope guard. <!-- sdd-owner: implementation -->
 
 #### T-S4A-002 — `extensions/mission-status.ts`: status/capabilities rendering + structured results
 
@@ -311,7 +311,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Capabilities view contains engine + harness capabilities (REQ-CMD-010).
   - Structured JSON + human summary output shape (REQ-CMD-008).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4A-002 — mission-status rendering. <!-- sdd-owner: implementation -->
+- [x] T-S4A-002 — mission-status rendering. <!-- sdd-owner: implementation -->
 
 #### T-S4A-003 — `extensions/startup-panel.ts`: activation banner
 
@@ -321,7 +321,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Banner renders runtime verdict + scope completeness (design §10.2).
   - Banner failure degrades without granting capability.
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4A-003 — startup panel. <!-- sdd-owner: implementation -->
+- [x] T-S4A-003 — startup panel. <!-- sdd-owner: implementation -->
 
 #### T-S4A-004 — Entrypoint packaging + read commands (`capabilities`, `scope`, `models`)
 
@@ -332,7 +332,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Handlers contain no accounting/fiscal logic (REQ-CMD-004).
   - `pi.extensions` = exact compiled entry file; verify-package-files passes (design §10.1, §14; SC-CMD-001 basis).
   - `bun test`, `bun run typecheck`, `bun run build`, `node scripts/verify-package-files.mjs` green.
-- [ ] T-S4A-004 — entrypoint + read commands. <!-- sdd-owner: implementation -->
+- [x] T-S4A-004 — entrypoint + read commands. <!-- sdd-owner: implementation -->
 
 ---
 

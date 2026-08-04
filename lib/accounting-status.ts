@@ -423,6 +423,10 @@ export interface AccountingStatusView {
   evidence: EvidenceStatusView;
   authority: AuthorityStatusView;
   nextAuthorizedAction?: NextAuthorizedAction;
+  /** Linked source references for the active scope (REQ-CMD-009). */
+  linkedSources?: readonly string[];
+  /** Pending reconciliation count for the active scope (REQ-CMD-009). */
+  pendingReconciliations?: number;
 }
 
 /** Inputs for `buildAccountingStatus`; every source is persisted state. */
@@ -433,6 +437,10 @@ export interface AccountingStatusInput {
   mission?: MissionSnapshot;
   /** Extra pending-approval count reported by callers that ran the gates. */
   pendingApprovals?: number;
+  /** Linked source references supplied from chain/session state (REQ-CMD-009). */
+  linkedSources?: readonly string[];
+  /** Pending reconciliation count supplied from persisted state (REQ-CMD-009). */
+  pendingReconciliations?: number;
 }
 
 /**
@@ -442,7 +450,7 @@ export interface AccountingStatusInput {
 export async function buildAccountingStatus(
   input: AccountingStatusInput,
 ): Promise<AccountingStatusView> {
-  const { runtime, scopeReport, binding, mission } = input;
+  const { runtime, scopeReport, binding, mission, linkedSources, pendingReconciliations } = input;
 
   let missionView: MissionStatusView | undefined;
   let nextAuthorizedAction: NextAuthorizedAction | undefined;
@@ -499,5 +507,9 @@ export async function buildAccountingStatus(
     },
     authority,
     nextAuthorizedAction,
+    ...(linkedSources === undefined ? {} : { linkedSources }),
+    ...(pendingReconciliations === undefined
+      ? {}
+      : { pendingReconciliations }),
   };
 }
