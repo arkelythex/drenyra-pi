@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/authority/scope-binding.schema.json",
+  "title": "CanonicalScope",
+  "description": "The 10-element canonical scope binding every mission and authorization is bound to (REQ-SCOPE-001; design §3.1). All ten fields are non-empty strings; company is a checksummed Peruvian RUC, fiscalPeriod is canonical YYYYMM with a real month, and sourceSnapshot is the lowercase hex sha-256 of the frozen source manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant",
+    "organization",
+    "company",
+    "fiscalPeriod",
+    "ledgerBook",
+    "operationType",
+    "sourceSnapshot",
+    "policyVersion",
+    "actor",
+    "authorityLevel"
+  ],
+  "properties": {
+    "tenant": { "type": "string", "minLength": 1 },
+    "organization": { "type": "string", "minLength": 1 },
+    "company": {
+      "type": "string",
+      "pattern": "^[0-9]{11}$",
+      "description": "Peruvian RUC — full check-digit validation enforced by the harness (REQ-SCOPE-002)"
+    },
+    "fiscalPeriod": {
+      "type": "string",
+      "pattern": "^[0-9]{4}(0[1-9]|1[0-2])$",
+      "description": "Canonical YYYYMM fiscal period with a real month 01-12 (REQ-SCOPE-003)"
+    },
+    "ledgerBook": { "type": "string", "minLength": 1 },
+    "operationType": { "type": "string", "minLength": 1 },
+    "sourceSnapshot": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "lowercase hex sha-256 of the frozen source manifest — never a path"
+    },
+    "policyVersion": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "minLength": 1 },
+    "authorityLevel": { "$ref": "authority-mode.schema.json" }
+  }
+}

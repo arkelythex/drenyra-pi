@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/evidence/edge.schema.json",
+  "title": "EvidenceEdge",
+  "description": "One directed lineage edge between evidence graph nodes (design §7.1). Endpoints must exist in the same mission; cycles are rejected by the graph store.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "recordKind", "id", "missionId", "from", "to", "relation", "createdAt"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "recordKind": { "const": "edge" },
+    "id": { "type": "string", "minLength": 1 },
+    "missionId": { "type": "string", "minLength": 1 },
+    "from": { "type": "string", "minLength": 1 },
+    "to": { "type": "string", "minLength": 1 },
+    "relation": {
+      "type": "string",
+      "enum": ["DERIVED_FROM", "SUPPORTS", "EXECUTES"]
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drenyra.dev/harness/contracts/authority/authority-mode.schema.json",
+  "title": "AuthorityMode",
+  "description": "The four canonical authority modes in strict order ASK < ANALYZE < PREPARE < EXECUTE (REQ-AUTH-001; REQ-CONTRACTS-003).",
+  "type": "string",
+  "enum": ["ASK", "ANALYZE", "PREPARE", "EXECUTE"]
+}
