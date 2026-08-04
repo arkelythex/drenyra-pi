@@ -3,7 +3,7 @@
 // lowercase hex sha256, and exit/status codes are JSON integers — never floats.
 // This module registers the Drenyra Pi extension; it holds no money logic.
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -16,7 +16,16 @@ import {
 import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
 import { status } from "../runtime/status.js";
+import type { MissionIntent, MissionSnapshot } from "drenyra-ai/missions";
 import { bindScope } from "../lib/canonicalization.js";
+import {
+  EDA_INTENTS,
+  EdaMissionCoordinator,
+  findActiveEdaMission,
+} from "../lib/mission-commands.js";
+import { ReceiptStore } from "../lib/receipt-store.js";
+import { TrustedKeyRegistry } from "../lib/trusted-key-registry.js";
+import { verifyHarnessReceipt } from "../lib/receipt-verification.js";
 import { ScopeGuard } from "./scope-guard.js";
 import {
   renderCapabilitiesView,
@@ -24,6 +33,14 @@ import {
   renderStatusView,
 } from "./mission-status.js";
 import { showStartupPanel, type StartupPanelDeps } from "./startup-panel.js";
+import {
+  renderContinueResult,
+  renderMissionStarted,
+  renderNotAvailableDenial,
+  renderReceiptVerification,
+  renderReceiptView,
+  renderResumeResult,
+} from "./mission-commands.js";
 
 /**
  * Drenyra Pi package version. Keep in sync with package.json — the pin's
@@ -129,6 +146,13 @@ export const drenyraPiExtension = {
     "capabilities",
     "scope",
     "models",
+    "mission",
+    "continue",
+    "resume",
+    "receipt",
+    "evidence",
+    "verify",
+    "reconcile",
   ] as const,
   commands: [
     "/drenyra:status",
@@ -140,6 +164,13 @@ export const drenyraPiExtension = {
     "/drenyra:scope",
     "/drenyra:models",
     "/drenyra:close",
+    "/drenyra:mission",
+    "/drenyra:continue",
+    "/drenyra:resume",
+    "/drenyra:receipt",
+    "/drenyra:evidence",
+    "/drenyra:verify",
+    "/drenyra:reconcile",
   ] as const,
   runtime: {
     package: DEFAULT_PIN.package,
@@ -151,6 +182,8 @@ export const drenyraPiExtension = {
 /** Optional per-registration dependencies (tests inject a temp context store). */
 export interface DrenyraPiExtensionDeps {
   contextStore?: ScopeContextStore;
+  /** Durable mission/receipt store root (tests inject a temp dir; default cwd). */
+  storesRoot?: string;
 }
 
 const SCOPE_USAGE =
@@ -172,18 +205,29 @@ export function registerDrenyraPiExtension(
   deps: DrenyraPiExtensionDeps = {},
 ): void {
   const contextStore = deps.contextStore ?? new ScopeContextStore();
+  const storesRoot = deps.storesRoot ?? process.cwd();
   const scopeGuard = new ScopeGuard(contextStore);
-
+    
   async function statusHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
     const outcome = scopeGuard.evaluate("drenyra:status");
     const runtime = await status({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
     const scope = contextStore.load();
+    // REQ-CMD-009: report the active mission + next authorized action when
+    // the durable mission layout exists for the bound scope (read-only).
+    let mission: MissionSnapshot | undefined;
+    if (
+      outcome.binding !== undefined &&
+      existsSync(join(storesRoot, ".local", "missions", "snapshots"))
+    ) {
+      mission = await findActiveEdaMission(outcome.binding, storesRoot);
+    }
     const output = await renderStatusView({
       company: scope.company?.ruc,
       period: scope.period?.period,
       runtime,
       scopeReport: outcome.report,
       binding: outcome.binding,
+      mission,
     });
     console.log(output.summary);
     console.log(JSON.stringify(output.machine, null, 2));
@@ -334,11 +378,243 @@ export function registerDrenyraPiExtension(
       console.log(`drenyra:close: ${outcome.error}`);
       return;
     }
-    console.log(
-      "drenyra:close: the monthly-close chain requires explicit materiality — " +
-        "the command body lands with the PR #5 scope-guard (S4a).",
-    );
-  }
+        console.log(
+          "drenyra:close: the monthly-close chain requires explicit materiality — " +
+            "the command body lands with the PR #5 scope-guard (S4a).",
+        );
+      }
+    
+      const MISSION_USAGE =
+        "drenyra:mission: usage — /drenyra:mission <intent> " +
+        "(monthly-close | correction | reconciliation | invoice-review | compliance-check)";
+    
+      async function missionHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+        const intent = args.trim();
+        const outcome = scopeGuard.evaluate("drenyra:mission");
+        if (!outcome.ok) {
+          console.log(`drenyra:mission: ${outcome.error}`);
+          return;
+        }
+        const binding = outcome.binding;
+        if (binding === undefined || !(EDA_INTENTS as readonly string[]).includes(intent)) {
+          console.log(MISSION_USAGE);
+          console.log(
+            JSON.stringify(
+              {
+                command: "mission",
+                error: `unknown intent "${intent}" — expected one of ${EDA_INTENTS.join(", ")}`,
+                intents: [...EDA_INTENTS],
+              },
+              null,
+              2,
+            ),
+          );
+          return;
+        }
+        try {
+          const coordinator = new EdaMissionCoordinator(binding, { storesRoot });
+          const mission = await coordinator.start({
+            intent: intent as MissionIntent,
+          });
+          const output = renderMissionStarted({
+            mission,
+            scopeHash: binding.scopeHash,
+            authorityMode: binding.scope.authorityLevel,
+          });
+          console.log(output.summary);
+          console.log(JSON.stringify(output.machine, null, 2));
+        } catch (error) {
+          console.log(`drenyra:mission: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    
+      async function continueHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+        const missionId = args.trim();
+        const outcome = scopeGuard.evaluate("drenyra:continue");
+        if (!outcome.ok) {
+          console.log(`drenyra:continue: ${outcome.error}`);
+          return;
+        }
+        const binding = outcome.binding;
+        if (binding === undefined) {
+          console.log("drenyra:continue: canonical scope present but invalid — re-bind via /drenyra:scope");
+          return;
+        }
+        const coordinator = new EdaMissionCoordinator(binding, { storesRoot });
+        try {
+          let targetId = missionId;
+          if (targetId.length === 0) {
+            const active = await coordinator.findActiveMission();
+            if (active === undefined) {
+              console.log(
+                "drenyra:continue: no active mission for the bound company + fiscal period — " +
+                  "start one with /drenyra:mission <intent> or pass a mission id",
+              );
+              console.log(
+                JSON.stringify(
+                  {
+                    command: "continue",
+                    missionId: null,
+                    status: "no_active_mission",
+                    error:
+                      "no active mission for the bound company + fiscal period — " +
+                      "start one with /drenyra:mission <intent> or pass a mission id",
+                  },
+                  null,
+                  2,
+                ),
+              );
+              return;
+            }
+            targetId = active.id;
+          }
+          const result = await coordinator.advance({ missionId: targetId });
+          const output = renderContinueResult({ result });
+          console.log(output.summary);
+          console.log(JSON.stringify(output.machine, null, 2));
+        } catch (error) {
+          console.log(`drenyra:continue: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    
+      async function resumeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+        const missionId = args.trim();
+        if (missionId.length === 0) {
+          console.log("drenyra:resume: usage — /drenyra:resume <mission-id>");
+          return;
+        }
+        const outcome = scopeGuard.evaluate("drenyra:resume");
+        if (!outcome.ok) {
+          console.log(`drenyra:resume: ${outcome.error}`);
+          return;
+        }
+        const binding = outcome.binding;
+        if (binding === undefined) {
+          console.log("drenyra:resume: canonical scope present but invalid — re-bind via /drenyra:scope");
+          return;
+        }
+        const coordinator = new EdaMissionCoordinator(binding, { storesRoot });
+        try {
+          const exists = await coordinator.stores.store.findById(missionId);
+          if (exists === undefined) {
+            console.log(`drenyra:resume: mission ${missionId} not found in the durable mission store`);
+            console.log(
+              JSON.stringify(
+                {
+                  command: "resume",
+                  missionId,
+                  outcome: "not-found",
+                  status: null,
+                  recovery: { recovered: [], preserved: [], unresolved: [] },
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+          const report = await coordinator.resumeAll();
+          const after = await coordinator.stores.store.findById(missionId);
+          const output = renderResumeResult({
+            missionId,
+            report,
+            status: after?.status ?? null,
+          });
+          console.log(output.summary);
+          console.log(JSON.stringify(output.machine, null, 2));
+        } catch (error) {
+          console.log(`drenyra:resume: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    
+      const RECEIPT_USAGE =
+        "drenyra:receipt: usage — /drenyra:receipt <id> | /drenyra:receipt verify <id>";
+    
+      async function receiptHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+        const tokens = args.trim().split(/\s+/).filter((token) => token.length > 0);
+        const outcome = scopeGuard.evaluate("drenyra:receipt");
+        if (!outcome.ok) {
+          console.log(`drenyra:receipt: ${outcome.error}`);
+          return;
+        }
+        const binding = outcome.binding;
+        if (binding === undefined) {
+          console.log("drenyra:receipt: canonical scope present but invalid — re-bind via /drenyra:scope");
+          return;
+        }
+        const store = new ReceiptStore(storesRoot);
+        if (tokens.length === 0) {
+          console.log(RECEIPT_USAGE);
+          return;
+        }
+        try {
+          if (tokens[0] === "verify") {
+            if (tokens.length !== 2) {
+              console.log(RECEIPT_USAGE);
+              return;
+            }
+            const id = tokens[1] ?? "";
+            const record = await store.load(id);
+            if (record === undefined) {
+              console.log(`drenyra:receipt verify ${id}: receipt not found in the local receipt store`);
+              console.log(
+                JSON.stringify(
+                  { command: "receipt:verify", receiptHash: id, valid: false, error: "receipt not found" },
+                  null,
+                  2,
+                ),
+              );
+              return;
+            }
+            const registry = new TrustedKeyRegistry(
+              join(storesRoot, ".local", "trusted-keys.json"),
+              storesRoot,
+            );
+            const verification = await verifyHarnessReceipt(
+              {
+                record,
+                expectedScope: binding,
+                expectedMissionId: record.receipt.content.missionId,
+                expectedPolicyVersion: record.binding.policyVersion,
+                expectedTargetHash: record.binding.targetHash,
+              },
+              registry,
+            );
+            const output = renderReceiptVerification({ record, verification });
+            console.log(output.summary);
+            console.log(JSON.stringify(output.machine, null, 2));
+            return;
+          }
+          if (tokens.length !== 1) {
+            console.log(RECEIPT_USAGE);
+            return;
+          }
+          const id = tokens[0] ?? "";
+          const record = await store.load(id);
+          if (record === undefined) {
+            console.log(`drenyra:receipt ${id}: receipt not found in the local receipt store`);
+            return;
+          }
+          const output = renderReceiptView(record);
+          console.log(output.summary);
+          console.log(JSON.stringify(output.machine, null, 2));
+        } catch (error) {
+          console.log(`drenyra:receipt: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    
+      function notAvailableHandler(command: string) {
+        return async (_args: string, _ctx: PiCommandContext): Promise<void> => {
+          const outcome = scopeGuard.evaluate(command);
+          if (!outcome.ok) {
+            console.log(`${command}: ${outcome.error}`);
+            return;
+          }
+          const output = renderNotAvailableDenial(command, outcome.binding?.scopeHash);
+          console.log(output.summary);
+          console.log(JSON.stringify(output.machine, null, 2));
+        };
+      }
 
   pi.registerCommand("drenyra:status", {
     description:
@@ -383,6 +659,45 @@ export function registerDrenyraPiExtension(
     description:
       "Run the monthly-close RDA chain for the current scope with explicit R2 approval.",
     handler: closeHandler,
+  });
+  pi.registerCommand("drenyra:mission", {
+    description:
+      "Start an EDA mission for the current scope + intent over the durable mission stores " +
+      "(full 13-step plan, bound authority mode).",
+    handler: missionHandler,
+  });
+  pi.registerCommand("drenyra:continue", {
+    description:
+      "Advance the active mission EXACTLY ONE EDA phase per invocation — the runtime decides " +
+      "the next step (RUN/SKIP/WAIT); WAIT states never auto-advance; no continue-all.",
+    handler: continueHandler,
+  });
+  pi.registerCommand("drenyra:resume", {
+    description:
+      "Recover interrupted missions after a restart via the engine recovery policy " +
+      "(UNKNOWN decided by evidence; human-wait and terminal missions untouched).",
+    handler: resumeHandler,
+  });
+  pi.registerCommand("drenyra:receipt", {
+    description:
+      "Show a stored receipt or verify one locally against the trusted-key registry " +
+      "(/drenyra:receipt <id> | /drenyra:receipt verify <id>).",
+    handler: receiptHandler,
+  });
+  pi.registerCommand("drenyra:evidence", {
+    description:
+      "Evidence graph operations for the active mission (registered; the chain lands in PR #8).",
+    handler: notAvailableHandler("drenyra:evidence"),
+  });
+  pi.registerCommand("drenyra:verify", {
+    description:
+      "Run the integrity verify chain (registered; the chain lands in PR #8).",
+    handler: notAvailableHandler("drenyra:verify"),
+  });
+  pi.registerCommand("drenyra:reconcile", {
+    description:
+      "Run the reconciliation chain (registered; the chain lands in PR #7).",
+    handler: notAvailableHandler("drenyra:reconcile"),
   });
 }
 

@@ -25,6 +25,7 @@ import {
   type PiExtensionApi,
 } from "../extensions/register.js";
 import { ScopeContextStore } from "../runtime/context.js";
+import { makeCanonicalScope } from "./helpers/authority-fixtures.js";
 
 interface RegisteredCommand {
   name: string;
@@ -83,6 +84,24 @@ async function runHandler(
   return output;
 }
 
+/** The 14 intended commands (REQ-CMD-001) plus the two legacy extras. */
+const INTENDED_COMMANDS = [
+  "status",
+  "doctor",
+  "capabilities",
+  "scope",
+  "period",
+  "mission",
+  "continue",
+  "reconcile",
+  "close",
+  "evidence",
+  "verify",
+  "receipt",
+  "resume",
+  "models",
+] as const;
+
 describe("drenyraPiExtension descriptor", () => {
   it("declares the runtime pin state and provided capabilities", () => {
     expect(drenyraPiExtension.name).toBe("drenyra-pi");
@@ -92,6 +111,13 @@ describe("drenyraPiExtension descriptor", () => {
     expect(drenyraPiExtension.provides).toContain("capabilities");
     expect(drenyraPiExtension.provides).toContain("scope");
     expect(drenyraPiExtension.provides).toContain("models");
+    expect(drenyraPiExtension.provides).toContain("mission");
+    expect(drenyraPiExtension.provides).toContain("continue");
+    expect(drenyraPiExtension.provides).toContain("resume");
+    expect(drenyraPiExtension.provides).toContain("receipt");
+    expect(drenyraPiExtension.provides).toContain("evidence");
+    expect(drenyraPiExtension.provides).toContain("verify");
+    expect(drenyraPiExtension.provides).toContain("reconcile");
     expect(drenyraPiExtension.commands).toEqual([
       "/drenyra:status",
       "/drenyra:doctor",
@@ -102,6 +128,13 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:scope",
       "/drenyra:models",
       "/drenyra:close",
+      "/drenyra:mission",
+      "/drenyra:continue",
+      "/drenyra:resume",
+      "/drenyra:receipt",
+      "/drenyra:evidence",
+      "/drenyra:verify",
+      "/drenyra:reconcile",
     ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
     expect(drenyraPiExtension.runtime.version).toBe("0.2.0");
@@ -123,6 +156,13 @@ describe("registerDrenyraPiExtension", () => {
       "drenyra:scope",
       "drenyra:models",
       "drenyra:close",
+      "drenyra:mission",
+      "drenyra:continue",
+      "drenyra:resume",
+      "drenyra:receipt",
+      "drenyra:evidence",
+      "drenyra:verify",
+      "drenyra:reconcile",
     ]);
     for (const command of registered) {
       expect(command.description.length).toBeGreaterThan(0);
@@ -233,5 +273,55 @@ describe("entrypoint packaging (T-S4A-004)", () => {
     expect(output).toContain("missing");
     expect(output).not.toContain("verified");
     cleanupTempStore(store);
+  });
+});
+
+describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () => {
+  it("registers the 14 intended commands plus company and context (16 total)", () => {
+    const { pi, registered } = makeMockPi();
+    registerDrenyraPiExtension(pi);
+    const names = registered.map((c) => c.name);
+    for (const name of INTENDED_COMMANDS) {
+      expect(names, name).toContain(`drenyra:${name}`);
+    }
+    expect(names).toContain("drenyra:company");
+    expect(names).toContain("drenyra:context");
+    expect(registered).toHaveLength(16);
+    // Descriptor mirrors the registered surface (SC-CMD-001 conformance).
+    expect(drenyraPiExtension.commands).toHaveLength(16);
+    expect(drenyraPiExtension.provides).toHaveLength(13);
+  });
+
+  it("registers evidence/verify/reconcile with structured not_available denials (REQ-CMD-008)", async () => {
+    const expectations: Record<string, string> = {
+      "drenyra:evidence": "PR #8",
+      "drenyra:verify": "PR #8",
+      "drenyra:reconcile": "PR #7",
+    };
+    for (const [name, expectedAfter] of Object.entries(expectations)) {
+      // Fresh store per command: the fail-closed check must see no scope.
+      const { pi, registered } = makeMockPi();
+      const store = makeTempStore();
+      registerDrenyraPiExtension(pi, { contextStore: store });
+      const command = registered.find((c) => c.name === name);
+      expect(command, name).toBeDefined();
+      // Fail closed without a complete scope (SC-CMD-002): nothing runs.
+      let output = await runHandler(command!.handler, "");
+      expect(output).toContain("missing");
+      // With a complete scope: structured not_available denial (REQ-CMD-008).
+      store.setCanonicalScope(makeCanonicalScope());
+      output = await runHandler(command!.handler, "");
+      const machine = parseMachineOutput(output) as {
+        command: string;
+        status: string;
+        reason: string;
+        expected_after: string;
+      };
+      expect(machine.command).toBe(name);
+      expect(machine.status).toBe("not_available");
+      expect(machine.reason.length).toBeGreaterThan(0);
+      expect(machine.expected_after).toContain(expectedAfter);
+      cleanupTempStore(store);
+    }
   });
 });

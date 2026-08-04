@@ -347,7 +347,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Continue advances exactly one prepared transition; no continue-all (REQ-CMD-005; SC-CMD-003; REQ-MISS-004).
   - Fail closed without complete scope (REQ-CMD-003; SC-CMD-002).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4B-001 — mission + continue handlers. <!-- sdd-owner: implementation -->
+- [x] T-S4B-001 — mission + continue handlers. <!-- sdd-owner: implementation -->
 
 #### T-S4B-002 — `resume` handler
 
@@ -356,7 +356,7 @@ PR #1  S1  contracts + scope model + canonicalization
 - **Acceptance criteria:**
   - UNKNOWN mission recovered via evidence-based decision; wait mission untouched (REQ-CMD-007; SC-CMD-006).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4B-002 — resume handler. <!-- sdd-owner: implementation -->
+- [x] T-S4B-002 — resume handler. <!-- sdd-owner: implementation -->
 
 #### T-S4B-003 — `receipt` handler with `verify <id>` subcommand
 
@@ -365,7 +365,7 @@ PR #1  S1  contracts + scope model + canonicalization
 - **Acceptance criteria:**
   - Local trusted-registry-backed verification with full rejection matrix (REQ-CMD-006; SC-CMD-004, 005).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4B-003 — receipt verify handler. <!-- sdd-owner: implementation -->
+- [x] T-S4B-003 — receipt verify handler. <!-- sdd-owner: implementation -->
 
 #### T-S4B-004 — `evidence`, `verify`, `reconcile` handlers (registration + structured pending denial)
 
@@ -375,7 +375,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - 14/14 intended commands + legacy extras registered; conformance passes (REQ-CMD-001, 002; SC-CMD-001).
   - All handlers thin and fail closed without scope (REQ-CMD-003, 004; SC-CMD-002).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S4B-004 — remaining command registrations. <!-- sdd-owner: implementation -->
+- [x] T-S4B-004 — remaining command registrations. <!-- sdd-owner: implementation -->
 
 ---
 
