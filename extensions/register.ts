@@ -6,8 +6,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MonthlyCloseChain } from "../chains/monthly-close.js";
-import { ScopeContextStore } from "../runtime/context.js";
+import { ScopeContextStore, loadCanonicalScope } from "../runtime/context.js";
 import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
 import { status } from "../runtime/status.js";
@@ -176,25 +175,30 @@ async function contextHandler(_args: string, _ctx: PiCommandContext): Promise<vo
   console.log(JSON.stringify(scope, null, 2));
 }
 
-async function closeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
-  const approverId = args.trim();
-  if (approverId.length === 0) {
-    console.log("drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)");
-    return;
-  }
-  try {
-    const scope = contextStore.load();
-    const chain = new MonthlyCloseChain(scope);
-    const result = await chain.run({ approverId });
-    console.log(
-      `drenyra:close: mission ${result.mission.id} COMPLETED (v${result.mission.version}) ` +
-        `— receipt ${result.receipt.receiptHash.slice(0, 12)}… signed by ${result.receipt.signerKeyId}`,
-    );
-    console.log(JSON.stringify({ mission: result.mission, receipt: result.receipt }, null, 2));
-  } catch (error) {
-    console.log(`drenyra:close: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
+    async function closeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+      const approverId = args.trim();
+      if (approverId.length === 0) {
+        console.log("drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)");
+        return;
+      }
+      try {
+        const scope = contextStore.load();
+        const report = loadCanonicalScope(scope);
+        if (!report.complete) {
+          console.log(
+            `drenyra:close: cannot run — canonical scope incomplete; missing: ${report.missing.join(", ")}. ` +
+              "Bind the full 10-element scope before closing (PR #5 scope-guard).",
+          );
+          return;
+        }
+        console.log(
+          "drenyra:close: the monthly-close chain requires a complete canonical scope and explicit " +
+            "materiality — the command wiring lands with the PR #5 scope-guard (S4a).",
+        );
+      } catch (error) {
+        console.log(`drenyra:close: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
 
 /**
  * Register the drenyra-pi extension against a Pi ExtensionAPI.

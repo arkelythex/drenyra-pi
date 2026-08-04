@@ -215,7 +215,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Atomic write + append-only guarantees hold (REQ-MISS-006).
   - Unknown schema version blocks rather than silently resetting (design §15).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S3A-001 — durable mission store adapters. <!-- sdd-owner: implementation -->
+- [x] T-S3A-001 — durable mission store adapters. <!-- sdd-owner: implementation -->
 
 #### T-S3A-002 — `lib/mission-store.ts`: fail-closed recovery + idempotent replay
 
@@ -226,7 +226,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Human-wait and terminal states preserved (REQ-MISS-007, 009).
   - Idempotent replay returns cached result; conflicts rejected (REQ-MISS-008; SC-MISS-004).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S3A-002 — recovery + idempotency. <!-- sdd-owner: implementation -->
+- [x] T-S3A-002 — recovery + idempotency. <!-- sdd-owner: implementation -->
 
 #### T-S3A-003 — Upgrade `chains/monthly-close.ts` to durable stores and the full EDA step plan
 
@@ -238,7 +238,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Real proposal evidence binding replaces the hardcoded hash (REQ-CHAIN-001).
   - All 54 baseline tests stay green (REQ-CHAIN-008).
   - `bun test`, `bun run typecheck`, `bun run build` green.
-- [ ] T-S3A-003 — monthly-close chain upgrade. <!-- sdd-owner: implementation -->
+- [x] T-S3A-003 — monthly-close chain upgrade. <!-- sdd-owner: implementation -->
 
 ---
 

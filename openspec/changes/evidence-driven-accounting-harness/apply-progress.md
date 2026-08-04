@@ -201,3 +201,100 @@ All 5 implementation-owned PR #2 rows verified `- [x]` in the persisted artifact
 - PR #3 S3a: T-S3A-001..003 (durable mission stores, recovery, monthly-close upgrade) — unchecked rows in `tasks.md`
 - PR #4 S3b: T-S3B-001..004 · PR #5 S4a: T-S4A-001..004 · PR #6 S4b: T-S4B-001..004 · PR #7 S5a: T-S5A-001..002 · PR #8 S5b: T-S5B-001..003 · PR #9 S6: T-S6-001..004
 - Parent gates T-GATE-001..004 deferred (parent-owned).
+
+
+---
+
+## PR #3 (S3a — Durable missions and monthly-close upgrade) · Branch: `eda/s3a-durable-missions` (off main@3b749fb, which contains S1 + S2)
+
+> Chain: 9-PR stacked-to-main. This batch = PR #3 only. NOT committed (orchestrator commits).
+
+### Structured status consumed
+
+```yaml
+schemaName: spec-driven
+changeName: evidence-driven-accounting-harness
+artifactStore: both            # openspec/ dir exists -> authoritative
+artifacts: { proposal: done, specs: done, design: done, tasks: done, applyProgress: partial (S1+S2+S3a), verifyReport: missing }
+applyState: ready              # -> completed for PR #3 implementation tasks
+dependencies: { apply: ready -> all_done (PR #3), verify: blocked (parent review owns) }
+actionContext:
+  mode: repo-local
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  allowedEditRoots: [workspace root]   # no warnings
+nextRecommended: PR #4 S3b (stacked-to-main)
+```
+
+### PR #3 task completion (persisted checkbox updates in `tasks.md`)
+
+| Task | Status | Checkbox |
+|------|--------|----------|
+| T-S3A-001 durable mission store adapters | ✅ done | `tasks.md:218` `[x]` |
+| T-S3A-002 recovery + idempotency | ✅ done | `tasks.md:229` `[x]` |
+| T-S3A-003 monthly-close chain upgrade | ✅ done | `tasks.md:241` `[x]` |
+
+All 3 implementation-owned PR #3 rows verified `- [x]` in the persisted artifact before this report. Parent-owned rows (T-GATE-001..004) untouched.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| T-S3A-001 | `__tests__/mission-store.test.ts` | Unit (real fs, temp dirs) | ✅ 180/180 | ✅ Written first; module-absent import failure (0 pass / 1 error) | ✅ 20/24 first run — 4 fixture bugs fixed (event snapshot id, idempotency filename hash, corrupt-file key hash, handler wait path) → 24/24 | ✅ 24 cases: full-field round-trip, filter/list, stale-temp crash safety, unknown schema, corrupt JSON, truncated event, cross-mission event, path traversal ×3, TTL expiry, key hashing, corrupt idempotency | ✅ None needed (module mirrors authority-store patterns) |
+| T-S3A-002 | `__tests__/mission-store.test.ts` (extended) | Unit (real engine runtime over durable stores) | ✅ 180/180 | ✅ Written in the same RED file (recovery tests reference `recoverDurableMissions` before it existed) | ✅ GREEN in the same pass (24/24) | ✅ 9 cases: preserve-consistent, human-wait preserved, terminal preserved, snapshot-ahead → UNKNOWN + unresolved, EXECUTING-without-result → UNKNOWN + record untouched, corrupt log throws, idempotent replay + conflict, recovery-record file | ✅ `DurableMissionStores` carries `root` (design §8.2 + harness extension for recovery diagnostics) |
+| T-S3A-003 | `chains/__tests__/monthly-close.test.ts` (rewritten deliberately) | Integration (chain over durable stores) | ✅ 204/204 | ✅ Written first; old API absent (1 error) | ✅ 5/10 first run — propose phase did not mark its step COMPLETED (cascade: run() budget, gate-block loop) + scope-error message from `bindScope`; fixed → 10/10 | ✅ 10 cases: real evidence hash + receipt binding, incomplete scope, no approver, missing materiality, durable survival + recovery, 13-step plan, one-phase-per-advance, evidence wait (advance + run), gate block | ✅ removed duplicated local `waitReasonFor` (engine export used); extracted `runApprovePhase` |
+
+### Test Summary
+
+- **Total tests written (PR #3)**: 31 (24 mission-store + 7 net-new monthly-close; monthly-close file went 3 → 10 with 3 kept/extended + 7 new)
+- **Suite total after PR #3**: 211 pass / 0 fail (180 baseline preserved — REQ-CHAIN-008), 853 expect() calls, 15 files
+- **Layers used**: Unit (24, real-fs temp-dir store tests), Integration (7, chain over durable stores)
+- **Engine-integration coverage**: real `MissionRuntime` over the durable adapters (start/apply/recoverIncomplete), real `ApprovalGate` with `deriveRequiredMateriality` (R2 floor), real `computeEvidenceHash` for the proposal/receipt binding, real `verifySignedReceipt`
+- **Pure functions created**: 20+ (`FileMissionStore`/`FileMissionEventStore`/`FileIdempotencyStore`/`DurableMissionStores`/`createDurableMissionStores`/`recoverDurableMissions` + envelope/validation helpers in `mission-store.ts`; `MonthlyCloseChain` (startMission/advance/run), `MonthlyCloseWaitError`, phase-step helpers in `monthly-close.ts`)
+
+### Files changed (PR #3)
+
+- `lib/mission-store.ts` (new) — file-backed `MissionStore`/`MissionEventStore`/`IdempotencyStore` adapters under `.local/missions/{snapshots,events,idempotency,recovery}/` (design §8.1/§8.2); versioned schema envelopes (`MISSION_STORE_SCHEMA_VERSION = 1`); atomic writes (unique temp + fsync + rename + dir fsync); append-only synced event logs; safe-identifier + path-traversal rejection; unknown-schema/corrupt data fail closed; `recoverDurableMissions` (design §8.3) + `RecoveryReport`/`RecoveryUnresolved`
+- `chains/monthly-close.ts` (upgraded) — durable stores replace in-memory; 13-step `createEdaSteps("monthly-close")` plan injected at start; `startMission`/`advance`/`run` with one bounded EDA phase per advance; `derivePreparedStep`-driven RUN/SKIP/WAIT; evidence wait (RUNNING→WAITING_FOR_EVIDENCE) and gate block (RUNNING→BLOCKED_BY_GATE) via engine-legal transitions; R2 `ApprovalGate` with `deriveRequiredMateriality` (explicit materiality input, no R0 default); real `computeEvidenceHash` proposal/receipt binding (hardcoded "pending" gone); phase-only PROGRESS_UPDATE progress steps (design §4.1); `MonthlyCloseWaitError` for fail-closed run()
+- `extensions/register.ts` (updated) — `/drenyra:close` now fails closed on incomplete canonical scope; full command wiring lands with the PR #5 scope-guard (registration + descriptor unchanged)
+- `__tests__/mission-store.test.ts` (new) — 24 tests
+- `chains/__tests__/monthly-close.test.ts` (rewritten deliberately) — 10 tests
+- `openspec/changes/evidence-driven-accounting-harness/tasks.md` — T-S3A-001..003 `[ ]` → `[x]`
+- `openspec/changes/evidence-driven-accounting-harness/apply-progress.md` — this merged section
+
+### Gates (all green)
+
+| Gate | Result |
+|------|--------|
+| `bun test` | ✅ 211 pass / 0 fail (180 baseline preserved — REQ-CHAIN-008) |
+| `bun run typecheck` | ✅ clean (tsc strict, noEmit) |
+| `bun run build` | ✅ emits `dist/lib/mission-store.js` + `dist/chains/monthly-close.js` (+ `.d.ts`) |
+| `node scripts/verify-package-files.mjs` | ✅ OK (unchanged script passes) |
+| `git add` | staged source/test/doc files (no node_modules, no dist) |
+
+### Deviations from design
+
+1. **Steady-state phases advance as phase-only PROGRESS_UPDATE progress steps.** The pinned engine has no same-status transition (RUNNING→RUNNING and APPROVED→APPROVED throw INVALID_TRANSITION — verified against the installed runtime), so the design §4.2 "RUNNING steady state" phases (ingest-with-evidence, normalize, classify, reconcile, investigate, propose, verify, execute, close) advance as phase-only updates (version bump + PROGRESS_UPDATE event, status unchanged), exactly as design §4.1 sanctions ("a phase-only update MUST NOT fabricate an engine state transition"). Lifecycle phases (intake, bind-scope, evidence wait, gate block, approve, archive) still go through `MissionRuntime.apply` with engine-validated transitions. The event log stays consistent for recovery because every phase-only update appends its PROGRESS_UPDATE event with the matching version.
+2. **`recoverDurableMissions` writes recovery diagnostics** at `.local/missions/recovery/<mission-id>.json` (design §8.1 layout) for unresolved missions; these are export/recovery diagnostics and are never read back as authority.
+3. **`DurableMissionStores` gains a `root` field** beyond the three engine ports (design §8.2 shows only the adapters); it carries the workspace root for recovery-record writes.
+4. **Per-phase idempotency keys are attached to engine-driven applies** (`mc:<mission>:<phase>:v<version>`); steady phase-only updates rely on optimistic version checks. Full chain-pipeline idempotency (mission+phase+version+scope+target key, `executePreparedStep`) lands in PR #7 (T-S5A-001) per the design's step-coordinator API.
+5. **Evidence is per-chain-instance** (source refs captured at `startMission`, evidence items derived into the durable proposal at the propose phase). The durable evidence graph (`EvidenceGraphStore`, PR #4) replaces this in the full flow; store-recreation tests read the durable mission (steps/proposal/status/events), not the in-memory refs.
+6. **Ephemeral receipt signing keys are retained** (existing `verifySignedReceipt` test contract); the explicit signing provider + trusted-key registry land in PR #4 (design §11.2 "Ephemeral per-run signing keys are removed").
+7. **`/drenyra:close` fails closed** on incomplete canonical scope instead of constructing the chain — the chain now requires the 10-element binding + explicit materiality, which only the PR #5 scope-guard supplies. Registration/descriptor unchanged (extension tests still green).
+8. **`MonthlyCloseChain` constructor takes a `ScopeBinding`** (design §11.2 "require complete ten-field scope") instead of the legacy `ScopeContext`; the chain test was extended deliberately (fixture `makeScopeBinding`, period 202507, sourceRefs + materiality input).
+
+### Guard workarounds (@drenyra/pi fiscal guard)
+
+- No blocked writes this slice (all money is BigInt literals; digests described as sha-256; no "checksum"/"SUNAT"/"mod-11" tokens needed). `tasks.md` checkbox edits applied via `perl -0pi` (plain text substitution, no guard conflict).
+
+### Workload / PR boundary (report for orchestrator)
+
+- Measured authored changes for PR #3: `git diff --stat` at commit time is authoritative; estimates: `lib/mission-store.ts` ≈ 620 lines, `chains/monthly-close.ts` ≈ 640 lines, `__tests__/mission-store.test.ts` ≈ 560 lines, `chains/__tests__/monthly-close.test.ts` ≈ 310 lines, `extensions/register.ts` ±30, tasks/apply-progress ≈ 80. Roughly 2,200 additions / 60 deletions across 6 files.
+- The tasks.md per-PR table estimated 350–450 lines for PR #3; measured size exceeds the 400-line review budget (chained-pr skill). This apply implemented the full assigned S3a slice per the parent's explicit instruction; whether PR #3 is split at creation time belongs to the parent (T-GATE-002/003).
+- Runtime harness scenario: N/A for this slice (no CLI surface yet — commands land in PR #5/#6). Library/chain-level scenarios: crash/replay recovery, evidence wait, gate block, one-phase continuation, durable survival — covered by the suites above.
+- Rollback boundary: revert PR #3 as a unit; stores are schema-versioned v1 and new-only — no migration of pre-existing mission data exists (no production missions yet).
+
+### Remaining work (later PRs, untouched by this apply)
+
+- PR #4 S3b: T-S3B-001..004 (evidence graph, trusted keys, receipt store/verification) — unchecked rows in `tasks.md`
+- PR #5 S4a: T-S4A-001..004 · PR #6 S4b: T-S4B-001..004 · PR #7 S5a: T-S5A-001..002 · PR #8 S5b: T-S5B-001..003 · PR #9 S6: T-S6-001..004
+- Parent gates T-GATE-001..004 deferred (parent-owned).
