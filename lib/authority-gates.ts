@@ -225,9 +225,15 @@ export interface AuthorityGateInput {
   approvals: ApprovalRecord[];
   /** The trusted approval receipt; required for EXECUTE. */
   approvalReceipt?: SignedReceipt;
-  /** Explicit trusted-key allow-list; EXECUTE requires a non-empty list. */
-  trustedKeys: SigningKeyInfo[];
-}
+      /** Explicit trusted-key allow-list; EXECUTE requires a non-empty list. */
+      trustedKeys: SigningKeyInfo[];
+      /**
+       * Read-only chains (e.g. verify): the EXECUTE-family ceremony (materiality,
+       * approval, receipt) is not applicable — completing the mission is a state
+       * record, never an accounting mutation (REQ-AUTH-009).
+       */
+      readOnlyAction?: boolean;
+    }
 
 /** One ordered pipeline result (design §5.3). */
 export interface AuthorityGateResult {
@@ -360,7 +366,7 @@ function evaluateModeStage(input: AuthorityGateInput): AuthorityGateResult {
 
 function evaluateMaterialityStage(input: AuthorityGateInput): AuthorityGateResult {
   const { action, materiality } = input;
-  if (READ_ONLY_FAMILIES.has(action)) {
+  if (READ_ONLY_FAMILIES.has(action) || input.readOnlyAction === true) {
     return result(
       "materiality",
       "not_applicable",
@@ -413,7 +419,7 @@ interface EngineSegment {
  * self-trust).
  */
 function engineSegmentFor(action: ActionFamily, input: AuthorityGateInput): EngineSegment {
-  if (READ_ONLY_FAMILIES.has(action)) {
+  if (READ_ONLY_FAMILIES.has(action) || input.readOnlyAction === true) {
     return { gates: [] };
   }
   if (action === ACTION_FAMILY.PREPARE_CANDIDATE) {

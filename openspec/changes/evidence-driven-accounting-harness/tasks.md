@@ -414,7 +414,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Fixed check list with per-check verdicts and first-failure stop (REQ-CHAIN-003, 005; SC-CHAIN-003).
   - Read-only: no mutation of accounting outputs (REQ-AUTH-009).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S5B-001 — verify chain. <!-- sdd-owner: implementation -->
+- [x] T-S5B-001 — verify chain. <!-- sdd-owner: implementation -->
 
 #### T-S5B-002 — `chains/evidence.ts`: evidence add/query chain
 
@@ -424,7 +424,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Evidence chain adds and queries graph records with lineage rules (REQ-CHAIN-004; SC-CHAIN-006).
   - No uncited conclusions accepted (REQ-EVID-004).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S5B-002 — evidence chain. <!-- sdd-owner: implementation -->
+- [x] T-S5B-002 — evidence chain. <!-- sdd-owner: implementation -->
 
 #### T-S5B-003 — Wire `verify`/`evidence` handler bodies + complete the monthly-close 12-step fixture flow
 
@@ -435,7 +435,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Evidence-wait loop and gate-block paths behave per spec (SC-CHAIN-002, 004).
   - All 14 command handlers delegate to lib/chains (REQ-CMD-004).
   - Baseline 54 tests preserved (REQ-CHAIN-008); `bun test`, `bun run typecheck`, `bun run build` green.
-- [ ] T-S5B-003 — handler wiring + full close flow. <!-- sdd-owner: implementation -->
+- [x] T-S5B-003 — handler wiring + full close flow. <!-- sdd-owner: implementation -->
 
 ---
 

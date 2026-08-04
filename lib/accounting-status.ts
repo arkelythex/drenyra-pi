@@ -28,14 +28,14 @@ import {
   type MissionStep,
 } from "drenyra-ai/missions";
 import type {
-	AuthorityMode,
-	CanonicalScopeReport,
+  AuthorityMode,
+  CanonicalScopeReport,
 } from "../runtime/context.js";
 import type { RuntimeStatus } from "../runtime/status.js";
 import {
-	ACTION_FAMILY,
-	requiredModeFor,
-	type ActionFamily,
+  ACTION_FAMILY,
+  requiredModeFor,
+  type ActionFamily,
 } from "./authority-gates.js";
 import type { ScopeBinding } from "./canonicalization.js";
 
@@ -57,6 +57,19 @@ export const EDA_PHASE = {
 } as const;
 
 export type EdaPhase = (typeof EDA_PHASE)[keyof typeof EDA_PHASE];
+
+/**
+ * Harness-only chain intents beyond the engine's five (design §11.4/§11.5).
+ * The verify and evidence chains run their own missions through the shared
+ * pipeline; the engine accepts any intent string at runtime and the local
+ * applicability matrix carries the phase policy for these two.
+ */
+export const HARNESS_INTENTS = ["verify", "evidence"] as const;
+
+export type HarnessIntent = (typeof HARNESS_INTENTS)[number];
+
+/** Every intent the harness can run: the engine's five plus the two chains. */
+export type EdaIntent = MissionIntent | HarnessIntent;
 
 /** The canonical phase order; every mission ships all 13 steps (REQ-MISS-001). */
 export const EDA_PHASE_ORDER: readonly EdaPhase[] = [
@@ -102,9 +115,14 @@ const CONDITIONAL: PhaseApplicability = "conditional";
  * every intent (skips remain visible in `MissionStep[]`); "materiality-driven"
  * approve/execute rows are represented as "conditional" in v0.1 and are
  * resolved from persisted evidence once the evidence graph lands (PR #4).
+ * The harness-only chain intents (`verify`, `evidence` — design §11.4/§11.5)
+ * run their phase skeletons as required so every phase stays visible, with the
+ * propose/approve/execute/close ceremony conditional: the verify chain is
+ * read-only (no proposal, no approvals) and the evidence chain adds/queries
+ * graph records without an approval ceremony.
  */
 export const PHASE_APPLICABILITY: Readonly<
-  Record<MissionIntent, Readonly<Record<EdaPhase, PhaseApplicability>>>
+  Record<string, Readonly<Record<EdaPhase, PhaseApplicability>>>
 > = {
   "monthly-close": {
     intake: REQUIRED,
@@ -181,19 +199,54 @@ export const PHASE_APPLICABILITY: Readonly<
     close: REQUIRED,
     archive: REQUIRED,
   },
+  // Harness-only chain intents (design §11.4/§11.5). The verify chain runs a
+  // fixed read-only check list; the evidence chain adds/queries graph records.
+  // The propose/approve/execute/close ceremony stays conditional so neither
+  // chain fabricates a proposal or demands an approval ceremony: verify is
+  // read-only and evidence additions are investigation-phase work.
+  verify: {
+    intake: REQUIRED,
+    "bind-scope": REQUIRED,
+    ingest: REQUIRED,
+    normalize: REQUIRED,
+    classify: REQUIRED,
+    reconcile: REQUIRED,
+    investigate: REQUIRED,
+    propose: CONDITIONAL,
+    verify: REQUIRED,
+    approve: CONDITIONAL,
+    execute: CONDITIONAL,
+    close: CONDITIONAL,
+    archive: REQUIRED,
+  },
+  evidence: {
+    intake: REQUIRED,
+    "bind-scope": REQUIRED,
+    ingest: REQUIRED,
+    normalize: REQUIRED,
+    classify: REQUIRED,
+    reconcile: REQUIRED,
+    investigate: REQUIRED,
+    propose: CONDITIONAL,
+    verify: REQUIRED,
+    approve: CONDITIONAL,
+    execute: CONDITIONAL,
+    close: CONDITIONAL,
+    archive: REQUIRED,
+  },
 };
-
+    
 /** The applicability of one phase for one intent (design §4.3). */
 export function applicabilityFor(
-  intent: MissionIntent,
+  intent: string,
   phase: EdaPhase,
 ): PhaseApplicability {
-  return PHASE_APPLICABILITY[intent][phase];
+  return PHASE_APPLICABILITY[intent]?.[phase] ?? "required";
 }
 
 /** The action family a phase executes (design §4.2; used by the chain pipeline). */
 export function familyForPhase(phase: EdaPhase): ActionFamily {
-	return PHASE_FAMILY[phase];
+  return PHASE_FAMILY[phase];
 }
 
 function isEdaPhase(value: string): value is EdaPhase {
@@ -204,7 +257,7 @@ function isEdaPhase(value: string): value is EdaPhase {
  * Build the ordered 13-step plan for an intent (REQ-MISS-001). Every step is
  * PENDING and stays visible even when the intent marks it conditional.
  */
-export function createEdaSteps(intent: MissionIntent): MissionStep[] {
+export function createEdaSteps(intent: string): MissionStep[] {
   return EDA_PHASE_ORDER.map((phase) => ({
     id: phase,
     name: PHASE_NAMES[phase],
@@ -299,8 +352,8 @@ export function derivePreparedStep(
     disposition = "WAIT";
   } else {
     const policy = applicabilityFor(snapshot.intent, phase);
-		disposition =
-			policy === "conditional" && !hasTriggeringCondition(snapshot)
+    disposition =
+      policy === "conditional" && !hasTriggeringCondition(snapshot)
       ? "SKIP"
       : "RUN";
   }
@@ -352,8 +405,8 @@ export function nextAuthorizedActionFor(
         return {
           actionFamily: ACTION_FAMILY.INVESTIGATE,
           requiredMode: requiredModeFor(ACTION_FAMILY.INVESTIGATE),
-					reason:
-						"mission waits for evidence — provide cited evidence to resume",
+          reason:
+            "mission waits for evidence — provide cited evidence to resume",
         };
       case WaitReason.APPROVAL:
         return {
@@ -365,8 +418,8 @@ export function nextAuthorizedActionFor(
         return {
           actionFamily: ACTION_FAMILY.APPROVE,
           requiredMode: requiredModeFor(ACTION_FAMILY.APPROVE),
-					reason:
-						"policy gate requires approval input before the phase advances",
+          reason:
+            "policy gate requires approval input before the phase advances",
         };
       case WaitReason.MANUAL_INTERVENTION:
         return {
@@ -465,14 +518,14 @@ export interface AccountingStatusInput {
 export async function buildAccountingStatus(
   input: AccountingStatusInput,
 ): Promise<AccountingStatusView> {
-	const {
-		runtime,
-		scopeReport,
-		binding,
-		mission,
-		linkedSources,
-		pendingReconciliations,
-	} = input;
+  const {
+    runtime,
+    scopeReport,
+    binding,
+    mission,
+    linkedSources,
+    pendingReconciliations,
+  } = input;
 
   let missionView: MissionStatusView | undefined;
   let nextAuthorizedAction: NextAuthorizedAction | undefined;
@@ -499,8 +552,8 @@ export async function buildAccountingStatus(
   const anomalies =
     mission === undefined
       ? 0
-			: mission.blockers.filter((blocker) => blocker.resolvedAt === undefined)
-					.length;
+      : mission.blockers.filter((blocker) => blocker.resolvedAt === undefined)
+          .length;
 
   const proposalPending =
     mission !== undefined &&
@@ -531,6 +584,6 @@ export async function buildAccountingStatus(
     authority,
     nextAuthorizedAction,
     ...(linkedSources === undefined ? {} : { linkedSources }),
-		...(pendingReconciliations === undefined ? {} : { pendingReconciliations }),
+    ...(pendingReconciliations === undefined ? {} : { pendingReconciliations }),
   };
 }

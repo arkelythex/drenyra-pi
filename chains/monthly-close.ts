@@ -32,12 +32,14 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   AccountingMissionStatus,
   IntentRegistryImpl,
   MissionEventType,
   MissionRuntime,
-  type WaitReason,
+  WaitReason,
   waitReasonFor,
   type BoundMissionCommand,
   type IntentHandler,
@@ -68,7 +70,9 @@ import {
   type PreparedStep,
 } from "../lib/accounting-status.js";
 import { createDurableMissionStores, type DurableMissionStores } from "../lib/mission-store.js";
-import type { ScopeBinding } from "../lib/canonicalization.js";
+    import type { EvidenceNode } from "../lib/evidence-graph.js";
+    import { sha256Canonical, type ScopeBinding } from "../lib/canonicalization.js";
+    import { ReceiptStore, type HarnessReceiptRecord } from "../lib/receipt-store.js";
 import { assertMissionScopeReady } from "../runtime/context.js";
 
 /** Upper bound for `run()`: 13 phases plus gate/evidence resolution slack. */
@@ -94,6 +98,12 @@ export interface MonthlyCloseStepInput {
   /** The human approver for the R2 approval gate (required at the approve phase). */
   approverId?: string;
   reason?: string;
+      /**
+       * Explicitly resume an EVIDENCE wait after evidence landed in the mission's
+       * evidence graph (REQ-MISS-009: never auto-advanced; the engine-legal
+       * WAITING_FOR_EVIDENCE -> RUNNING transition is the only resume).
+       */
+      satisfyEvidence?: boolean;
 }
 
 /** The result of one bounded continuation (exactly one EDA phase, or a wait). */
@@ -183,6 +193,8 @@ function markInProgress(mission: MissionSnapshot, phase: EdaPhase): MissionSnaps
 export class MonthlyCloseChain {
   /** The durable store set the chain runs over (design §8). */
   readonly stores: DurableMissionStores;
+  /** The stores root used for the evidence graph and export artifacts. */
+  private readonly storesRoot: string;
 
   private readonly binding: ScopeBinding;
   private readonly runtime: MissionRuntime;
@@ -191,10 +203,12 @@ export class MonthlyCloseChain {
   private readonly materialityByMission = new Map<string, MaterialityInput>();
   private approveGateBlocked = false;
   private lastReceipt?: SignedReceipt;
+  private lastReceiptRecord?: HarnessReceiptRecord;
 
   constructor(binding: ScopeBinding, options: { storesRoot?: string } = {}) {
     assertMissionScopeReady(binding.scope);
     this.binding = binding;
+    this.storesRoot = options.storesRoot ?? process.cwd();
     this.stores = createDurableMissionStores(options.storesRoot);
     this.approvalGate = new ApprovalGate();
     this.runtime = new MissionRuntime({
@@ -304,6 +318,18 @@ export class MonthlyCloseChain {
   }
 
   private evidenceFor(missionId: string): EvidenceItem[] {
+    // The evidence graph is the source of truth for cited evidence (design
+    // §7): every node appended through the evidence chain is cited. When the
+    // graph is empty (legacy direct close with source references), fall back
+    // to the bounded source references for backward compatibility.
+    const nodes = this.graphNodes(missionId);
+    if (nodes.length > 0) {
+      return nodes.map((node) => ({
+    id: node.id,
+    label: node.nodeKind,
+    type: node.nodeKind,
+      }));
+    }
     const refs = this.sourceRefsByMission.get(missionId) ?? [];
     return refs.map((ref, index) => ({
       id: `src-${index + 1}`,
@@ -311,6 +337,40 @@ export class MonthlyCloseChain {
       type: "source-reference",
     }));
   }
+
+      private graphNodes(missionId: string): EvidenceNode[] {
+        // The evidence graph ndjson is the durable source of truth; read it
+        // synchronously (fail-closed: unreadable/missing -> empty, so the
+        // source-reference fallback applies).
+        const graphPath = join(
+          this.storesRoot,
+          ".local",
+          "evidence",
+          `${missionId}.ndjson`,
+        );
+        let raw: string;
+        try {
+          raw = readFileSync(graphPath, "utf8");
+        } catch {
+          return [];
+        }
+        const nodes: EvidenceNode[] = [];
+        for (const line of raw.split(/\r?\n/)) {
+          if (line.trim().length === 0) {
+            continue;
+          }
+          try {
+            const record = JSON.parse(line) as { recordKind?: string } & EvidenceNode;
+            if (record.recordKind === "node") {
+              nodes.push(record);
+            }
+          } catch {
+            // A corrupt line fails closed: treat the graph as unavailable.
+            return [];
+          }
+        }
+        return nodes;
+      }
 
   private makeApproval(input: MonthlyCloseStepInput): ApprovalRecord {
     const approverId = input.approverId?.trim() ?? "";
@@ -377,6 +437,22 @@ export class MonthlyCloseChain {
         const mission = await this.completeApproval(snapshot, input);
         return this.resultFor(mission, EDA_PHASE.APPROVE);
       }
+      if (
+        wait === WaitReason.EVIDENCE &&
+        input.satisfyEvidence === true
+      ) {
+        // Engine-legal resume: the intent handler returns null for a WAIT, so
+        // resolveTarget defaults to RUNNING (WAITING_FOR_EVIDENCE -> RUNNING
+        // is in VALID_TRANSITIONS). Never an auto-advance.
+        const applied = await this.runtime.apply(
+          this.executeCommand(snapshot.id, snapshot.version),
+          {
+        expectedMissionVersion: snapshot.version,
+        idempotencyKey: `mc:${snapshot.id}:resume:v${snapshot.version}`,
+          },
+        );
+        return this.resultFor(applied.snapshot, null);
+      }
       return { mission: snapshot, preparedStep: prepared, phase: null, waitReason: wait ?? undefined };
     }
 
@@ -391,7 +467,8 @@ export class MonthlyCloseChain {
     switch (prepared.phase) {
       case EDA_PHASE.INGEST: {
         const refs = this.sourceRefsByMission.get(snapshot.id) ?? [];
-        if (refs.length === 0) {
+        const graphEvidence = this.graphNodes(snapshot.id).length;
+        if (refs.length === 0 && graphEvidence === 0) {
           const applied = await this.runtime.apply(
             this.executeCommand(snapshot.id, snapshot.version),
             {
@@ -432,6 +509,11 @@ export class MonthlyCloseChain {
         const mission = await this.phaseOnlyUpdate(snapshot, (m) =>
           this.sealClose(m, input.approverId?.trim() || this.binding.scope.actor),
         );
+        // Persist the signed completion receipt in the immutable receipt store
+        // (REQ-CHAIN-007) so /drenyra:receipt and the verify chain can read it.
+        if (this.lastReceiptRecord !== undefined) {
+          await new ReceiptStore(this.storesRoot).save(this.lastReceiptRecord);
+        }
         return this.resultFor(mission, EDA_PHASE.CLOSE);
       }
       case EDA_PHASE.INTAKE:
@@ -591,12 +673,27 @@ export class MonthlyCloseChain {
     }
     this.assertMateriality(input.materiality);
 
-    let current = await this.startMission(input);
+    let current =
+      (await this.findActiveMission()) ?? (await this.startMission(input));
+    // Ensure the reused mission carries the run's materiality + source refs.
+    if (!this.materialityByMission.has(current.id)) {
+      this.materialityByMission.set(current.id, input.materiality);
+    }
+    if (!this.sourceRefsByMission.has(current.id)) {
+      this.sourceRefsByMission.set(current.id, input.sourceRefs ?? []);
+    }
     for (let index = 0; index < MONTHLY_CLOSE_MAX_ADVANCES; index += 1) {
+      // An evidence wait is satisfied automatically within the explicit close
+      // run when the mission's graph already holds evidence (the operator
+      // invoked the close; REQ-MISS-009 forbids AUTO-advance outside it).
+      const atEvidenceWait =
+        current.status === AccountingMissionStatus.WAITING_FOR_EVIDENCE &&
+        this.graphNodes(current.id).length > 0;
       const step = await this.advance({
         missionId: current.id,
         approverId,
         reason: input.reason,
+        satisfyEvidence: atEvidenceWait,
       });
       current = step.mission;
       if (current.status === AccountingMissionStatus.COMPLETED) {
@@ -618,6 +715,21 @@ export class MonthlyCloseChain {
     if (receipt === undefined) {
       throw new Error("monthly-close: completion receipt missing after the close");
     }
+        // Export artifact (v0.1 step 12): an immutable export record under
+        // .local/exports/<mission-id>.json.
+        const exportDir = join(this.storesRoot, ".local", "exports");
+        mkdirSync(exportDir, { recursive: true });
+        const exportPayload = {
+          schemaVersion: 1,
+          kind: "monthly-close-export",
+          missionId: current.id,
+          evidenceHash: current.proposal?.evidenceHash ?? computeEvidenceHash([]),
+          receiptHash: receipt.receiptHash,
+        };
+        writeFileSync(
+          join(exportDir, `${current.id}.json`),
+          `${JSON.stringify(exportPayload, null, 2)}\n`,
+        );
     return {
       mission: current,
       receipt,
@@ -628,6 +740,24 @@ export class MonthlyCloseChain {
       },
     };
   }
+
+      /**
+       * The active non-terminal monthly-close mission for the bound scope, or
+       * undefined when none exists (run() continues an in-flight close instead of
+       * starting a second one).
+       */
+      private async findActiveMission(): Promise<MissionSnapshot | undefined> {
+        const all = await this.stores.store.list();
+        return all.find(
+          (mission) =>
+            mission.companyId === this.binding.scope.company &&
+            mission.fiscalPeriod === this.binding.scope.fiscalPeriod &&
+            mission.intent === "monthly-close" &&
+            mission.status !== AccountingMissionStatus.COMPLETED &&
+            mission.status !== AccountingMissionStatus.FAILED &&
+            mission.status !== AccountingMissionStatus.REJECTED,
+        );
+      }
 
   private buildProposal(mission: MissionSnapshot): MissionSnapshot["proposal"] {
     const evidence = this.evidenceFor(mission.id);
@@ -654,6 +784,19 @@ export class MonthlyCloseChain {
     const proposal = mission.proposal;
     const evidenceHash = proposal?.evidenceHash ?? computeEvidenceHash([]);
     const proposalVersion = proposal?.version ?? mission.version;
+    const binding: HarnessReceiptRecord["binding"] = {
+      version: "drenyra.receipt-binding.v1",
+      scopeHash: this.binding.scopeHash,
+      authorizationId: `auth-${mission.id}-close`,
+      policyVersion: this.binding.scope.policyVersion,
+      targetHash: sha256Canonical({
+        chain: "monthly-close",
+        phase: "close",
+        proposalVersion,
+        evidenceHash,
+      }),
+      evidenceHash,
+    };
     const keyPair = generateReceiptKeyPair("close_" + mission.id.slice(0, 8));
     const receipt = buildSignedReceipt(
       {
@@ -665,12 +808,13 @@ export class MonthlyCloseChain {
         evidenceHash,
         previousStatus: AccountingMissionStatus.APPROVED,
         newStatus: AccountingMissionStatus.COMPLETED,
-        payloadHash: evidenceHash,
+        payloadHash: sha256Canonical(binding),
         timestamp: new Date().toISOString(),
       },
       keyPair,
     );
     this.lastReceipt = receipt;
+    this.lastReceiptRecord = { binding, receipt };
     return {
       ...completeStep(mission, EDA_PHASE.CLOSE, "COMPLETED"),
       receiptId: receipt.receiptHash,

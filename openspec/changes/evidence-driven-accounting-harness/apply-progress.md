@@ -614,3 +614,15 @@ All 4 implementation-owned PR #6 rows verified `- [x]` in the persisted artifact
 **Gate results:** bun test 373/0 (345 baseline + 28 new), typecheck clean, build emits dist/lib/chain-pipeline.js + dist/chains/reconcile.js, verify-package-files OK, verify-packed-install OK.
 
 **Deviations documented:** steady-state phases advance phase-only (engine rejects same-status transitions); `/drenyra:evidence` + `/drenyra:verify` remain structured not_available denials until PR #8 (S5b).
+
+## PR #8 (S5b) — verify chain + evidence chain + full monthly-close 12-step flow
+
+**status:** success (completed inline by orchestrator after 1 subagent timeout left partial work; provider API errors on retry)
+
+**Tasks:** T-S5B-001 chains/verify.ts (read-only integrity verify chain: source-integrity, normalization, ledger equations, reconciliation-correctness, graph-integrity, scope-binding, receipt-binding checks; VerifyChainBlockedError carries structured verdicts; NEVER mutates), T-S5B-002 chains/evidence.ts (append-only evidence ops: add-node/add-edge with citation validation and DERIVED_FROM edges, query-node/query-lineage read-only; parseEvidenceOp bounded envelope), T-S5B-003 wire /drenyra:verify + /drenyra:evidence handlers (replacing S4b not_available denials — 14/14 command surface fully behavioral) + complete the monthly-close 12-step fixture flow (intake -> evidence wait -> evidence satisfaction via the evidence chain -> proposal with real graph evidence hash -> R2 approval -> signed receipt persisted + export artifact -> verify-chain pass).
+
+**Key engineering decisions:** readOnly flag on ChainDefinition (verify's archive completes as a state record — EXECUTE-family ceremony not_applicable; never-R0 materiality preserved for write chains); SKIP-before-gates branch (deterministic no-op ceremony phases never evaluate materiality/approval/receipt); evidence graph is the proposal citation source (monthly-close evidenceFor reads the graph ndjson, sourceRefs fallback); run() reuses the active mission (findActiveMission) and auto-satisfies evidence within the explicit close run; sealClose persists the HarnessReceiptRecord with payloadHash = sha256Canonical(binding) so the verify chain's receipt-binding check passes; export artifact .local/exports/<mission-id>.json (v0.1 step 12).
+
+**Gate results:** bun test 391/0 (373 baseline + 18 new: 8 verify + 8 evidence + 2 close-flow), typecheck clean, build emits dist/chains/{verify,evidence}.js, verify-package-files OK, verify-packed-install OK.
+
+**Deviations documented:** ChainDefinition.intent widened to EdaIntent (harness intents verify/evidence are not engine MissionIntents; cast at the engine boundary); steady-state phases advance phase-only; graph-integrity test uses a scope with a matching digest; fixture bank legs share the bankAccount account.

@@ -36,7 +36,6 @@ import { showStartupPanel, type StartupPanelDeps } from "./startup-panel.js";
 import {
   renderContinueResult,
   renderMissionStarted,
-  renderNotAvailableDenial,
   renderReceiptVerification,
   renderReceiptView,
   renderResumeResult,
@@ -47,6 +46,17 @@ import {
 	reconcileChain,
 	type ReconcileSourceManifest,
 } from "../chains/reconcile.js";
+import {
+  parseVerifyInput,
+  verifyChain,
+  VerifyChainBlockedError,
+  type VerifyChainInput,
+} from "../chains/verify.js";
+import {
+  parseEvidenceOp,
+  evidenceChain,
+  type EvidenceChainInput,
+} from "../chains/evidence.js";
 
 /**
  * Drenyra Pi package version. Keep in sync with package.json — the pin's
@@ -672,26 +682,10 @@ export function registerDrenyraPiExtension(
           console.log(JSON.stringify(output.machine, null, 2));
         } catch (error) {
           console.log(`drenyra:receipt: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      }
-    
-      function notAvailableHandler(command: string) {
-        return async (_args: string, _ctx: PiCommandContext): Promise<void> => {
-          const outcome = scopeGuard.evaluate(command);
-          if (!outcome.ok) {
-            console.log(`${command}: ${outcome.error}`);
-            return;
+            }
           }
-			const output = renderNotAvailableDenial(
-				command,
-				outcome.binding?.scopeHash,
-			);
-          console.log(output.summary);
-          console.log(JSON.stringify(output.machine, null, 2));
-        };
-      }
 
-	/**
+          /**
 	 * /drenyra:reconcile — run the reconciliation chain (T-S5A-002). The
 	 * handler is thin: validate scope, parse the bounded manifest, run exactly
 	 * one chain step, render the outcome. The chain enforces the ANALYZE
@@ -723,11 +717,7 @@ export function registerDrenyraPiExtension(
 				console.log(`drenyra:reconcile: ${message}`);
 				console.log(
 					JSON.stringify(
-						{
-							command: "reconcile",
-							status: "invalid_manifest",
-							error: message,
-						},
+                    { command: "reconcile", status: "invalid_manifest", error: message },
 						null,
 						2,
 					),
@@ -782,6 +772,175 @@ export function registerDrenyraPiExtension(
 			);
 		}
 	}
+
+          /**
+           * /drenyra:verify — run the read-only integrity verify chain (T-S5B-001).
+           * The chain never mutates; VerifyChainBlockedError carries the structured
+           * per-check verdicts (SC-CHAIN-003).
+           */
+          async function verifyHandler(
+            args: string,
+            _ctx: PiCommandContext,
+          ): Promise<void> {
+            const inputText = args.trim();
+            const outcome = scopeGuard.evaluate("drenyra:verify");
+            if (!outcome.ok) {
+              console.log(`drenyra:verify: ${outcome.error}`);
+              return;
+            }
+            const binding = outcome.binding;
+            if (binding === undefined) {
+              console.log(
+                "drenyra:verify: canonical scope present but invalid — re-bind via /drenyra:scope",
+              );
+              return;
+            }
+            let input: VerifyChainInput | undefined;
+            if (inputText.length > 0) {
+              try {
+                input = parseVerifyInput(inputText);
+              } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                console.log(`drenyra:verify: ${message}`);
+                console.log(
+                  JSON.stringify(
+                    { command: "verify", status: "invalid_input", error: message },
+                    null,
+                    2,
+                  ),
+                );
+                return;
+              }
+            }
+            try {
+              const result = await runChainStep(verifyChain, {
+                binding,
+                input: input ?? {},
+                storesRoot,
+              });
+              const mission = result.mission;
+              console.log(
+                `drenyra:verify: chain ${result.chain} on mission ${mission?.id ?? "?"} — ` +
+                  `phase ${result.phase ?? "started"} (${mission?.status ?? "?"})`,
+              );
+              console.log(
+                JSON.stringify(
+                  {
+                    command: "verify",
+                    chain: result.chain,
+                    missionId: mission?.id,
+                    intent: result.intent,
+                    phase: result.phase,
+                    status: mission?.status,
+                  },
+                  null,
+                  2,
+                ),
+              );
+            } catch (error) {
+              if (error instanceof VerifyChainBlockedError) {
+                console.log(`drenyra:verify: ${error.message}`);
+                console.log(
+                  JSON.stringify(
+                    {
+                      command: "verify",
+                      status: "blocked",
+                      verdict: "issues",
+                      phase: error.phase,
+                      checks: error.checks,
+                    },
+                    null,
+                    2,
+                  ),
+                );
+                return;
+              }
+              console.log(
+                `drenyra:verify: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            }
+          }
+
+          /**
+           * /drenyra:evidence — run one bounded evidence op against the target
+           * mission's evidence graph (T-S5B-002). Append-only ops; queries read-only.
+           */
+          async function evidenceHandler(
+            args: string,
+            _ctx: PiCommandContext,
+          ): Promise<void> {
+            const opText = args.trim();
+            const outcome = scopeGuard.evaluate("drenyra:evidence");
+            if (!outcome.ok) {
+              console.log(`drenyra:evidence: ${outcome.error}`);
+              return;
+            }
+            const binding = outcome.binding;
+            if (binding === undefined) {
+              console.log(
+                "drenyra:evidence: canonical scope present but invalid — re-bind via /drenyra:scope",
+              );
+              return;
+            }
+            if (opText.length === 0) {
+              console.log(
+                "drenyra:evidence: usage — /drenyra:evidence <op-envelope-json> " +
+                  '({"op":"add-node","node":{"id":"src-1","nodeKind":"source","payload":{...}}})',
+              );
+              return;
+            }
+            let parsed: { missionId?: string; op: EvidenceChainInput["op"] };
+            try {
+              parsed = parseEvidenceOp(opText);
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              console.log(`drenyra:evidence: ${message}`);
+              console.log(
+                JSON.stringify(
+                  { command: "evidence", status: "invalid_input", error: message },
+                  null,
+                  2,
+                ),
+              );
+              return;
+            }
+            try {
+              const result = await runChainStep(evidenceChain, {
+                binding,
+                input: {
+                  ...(parsed.missionId === undefined ? {} : { missionId: parsed.missionId }),
+                  op: parsed.op,
+                },
+                storesRoot,
+              });
+              const mission = result.mission;
+              console.log(
+                `drenyra:evidence: op ${parsed.op.op} on mission ${mission?.id ?? "?"} — ` +
+                  `phase ${result.phase ?? "started"} (${mission?.status ?? "?"})`,
+              );
+              console.log(
+                JSON.stringify(
+                  {
+                    command: "evidence",
+                    chain: result.chain,
+                    op: parsed.op.op,
+                    missionId: mission?.id,
+                    phase: result.phase,
+                    nodeId: result.output?.node?.id ?? null,
+                    node: result.output?.node,
+                    queriedNode: result.output?.queriedNode,
+                    lineage: result.output?.lineage,
+                  },
+                  null,
+                  2,
+                ),
+              );
+            } catch (error) {
+              console.log(
+                `drenyra:evidence: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            }
+          }
 
   pi.registerCommand("drenyra:status", {
     description:
@@ -853,13 +1012,15 @@ export function registerDrenyraPiExtension(
   });
   pi.registerCommand("drenyra:evidence", {
     description:
-      "Evidence graph operations for the active mission (registered; the chain lands in PR #8).",
-    handler: notAvailableHandler("drenyra:evidence"),
+      "Run one bounded evidence op against the target mission's evidence graph " +
+      "(append-only add-node/add-edge; read-only query-node/query-lineage).",
+    handler: evidenceHandler,
   });
   pi.registerCommand("drenyra:verify", {
     description:
-      "Run the integrity verify chain (registered; the chain lands in PR #8).",
-    handler: notAvailableHandler("drenyra:verify"),
+      "Run the read-only integrity verify chain (source integrity, ledger equations, " +
+      "reconciliation, graph integrity, scope binding, receipt binding).",
+    handler: verifyHandler,
   });
   pi.registerCommand("drenyra:reconcile", {
     description:
