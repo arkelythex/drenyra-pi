@@ -252,7 +252,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Node kinds, lineage, hashes, citation, append-only invariants hold (REQ-EVID-001..005; SC-EVID-001, 002, 004).
   - Corruption/truncation fails closed (design §7.2, §15).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S3B-001 — evidence graph store. <!-- sdd-owner: implementation -->
+- [x] T-S3B-001 — evidence graph store. <!-- sdd-owner: implementation -->
 
 #### T-S3B-002 — `lib/evidence-graph.ts`: integrity validation + receipt evidence hash
 
@@ -263,7 +263,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Evidence hash is insertion-order stable (REQ-EVID-006; SC-EVID-005).
   - Action traceability complete (REQ-EVID-007).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S3B-002 — graph validation + receipt hash. <!-- sdd-owner: implementation -->
+- [x] T-S3B-002 — graph validation + receipt hash. <!-- sdd-owner: implementation -->
 
 #### T-S3B-003 — `lib/trusted-key-registry.ts`: workspace-local trusted public-key registry
 
@@ -274,7 +274,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Unknown/expired/revoked key states are representable and blocked at verification time.
   - Fresh read per verification; atomic writes; path safety (design §15).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S3B-003 — trusted-key registry. <!-- sdd-owner: implementation -->
+- [x] T-S3B-003 — trusted-key registry. <!-- sdd-owner: implementation -->
 
 #### T-S3B-004 — `lib/receipt-store.ts` + `lib/receipt-verification.ts`: immutable records + trusted verification
 
@@ -285,7 +285,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - No path trusts an embedded public key (design §15).
   - Receipt store is immutable and replay-safe.
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S3B-004 — receipt store + verification. <!-- sdd-owner: implementation -->
+- [x] T-S3B-004 — receipt store + verification. <!-- sdd-owner: implementation -->
 
 ---
 
