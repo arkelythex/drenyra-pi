@@ -33,6 +33,12 @@ export interface FiscalPeriodContext {
 export interface ScopeContext {
   company?: CompanyContext;
   period?: FiscalPeriodContext;
+  /**
+   * Optional full 10-element canonical scope (S4a). Bound by the
+   * `/drenyra:scope` command; legacy company/period stay compatible and are
+   * derived into the canonical report when the full scope is absent.
+   */
+  canonical?: CanonicalScope;
 }
 
 /**
@@ -102,16 +108,51 @@ export interface CanonicalScopeReport {
 const AUTHORITY_MODE_VALUES: readonly string[] = Object.values(AUTHORITY_MODE);
 
 /**
- * Load legacy company/period context into the canonical scope model. Valid
- * values map to the `company` and `fiscalPeriod` elements; everything else is
- * reported missing until explicitly bound.
+ * Fail-closed local validation for a persisted canonical scope (runtime layer
+ * cannot import `lib/canonicalization` — dependency direction is lib → runtime).
+ * Checks element presence/non-emptiness, RUC check digit, period shape, and
+ * authority mode; the strict digest/whitespace rules live in
+ * `lib/canonicalization.bindScope`, which every command runs before acting.
+ */
+export function isValidCanonicalScopeValue(scope: CanonicalScope): boolean {
+  for (const element of CANONICAL_SCOPE_ELEMENTS) {
+    const value = scope[element];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      return false;
+    }
+  }
+  if (!isValidRuc(scope.company)) return false;
+  if (!isValidPeriod(scope.fiscalPeriod)) return false;
+  if (!AUTHORITY_MODE_VALUES.includes(scope.authorityLevel)) return false;
+  return true;
+}
+
+/**
+ * Load legacy company/period context into the canonical scope model. A bound
+ * full canonical scope maps all 10 elements; legacy values fill in when the
+ * full scope is absent (or a legacy element is missing). Valid values map to
+ * the `company` and `fiscalPeriod` elements; everything else is reported
+ * missing until explicitly bound.
  */
 export function loadCanonicalScope(context: ScopeContext): CanonicalScopeReport {
   const scope: Partial<CanonicalScope> = {};
-  if (context.company !== undefined && isValidRuc(context.company.ruc)) {
+  if (context.canonical !== undefined && isValidCanonicalScopeValue(context.canonical)) {
+    const canonical = context.canonical;
+    scope.tenant = canonical.tenant;
+    scope.organization = canonical.organization;
+    scope.company = canonical.company;
+    scope.fiscalPeriod = canonical.fiscalPeriod;
+    scope.ledgerBook = canonical.ledgerBook;
+    scope.operationType = canonical.operationType;
+    scope.sourceSnapshot = canonical.sourceSnapshot;
+    scope.policyVersion = canonical.policyVersion;
+    scope.actor = canonical.actor;
+    scope.authorityLevel = canonical.authorityLevel;
+  }
+  if (scope.company === undefined && context.company !== undefined && isValidRuc(context.company.ruc)) {
     scope.company = context.company.ruc;
   }
-  if (context.period !== undefined && isValidPeriod(context.period.period)) {
+  if (scope.fiscalPeriod === undefined && context.period !== undefined && isValidPeriod(context.period.period)) {
     scope.fiscalPeriod = context.period.period;
   }
   const missing = CANONICAL_SCOPE_ELEMENTS.filter(
@@ -160,6 +201,9 @@ export function isValidPeriod(period: string): boolean {
 
 /** Validate a full scope (both fields, when present). */
 export function isValidScope(scope: ScopeContext): boolean {
+  if (scope.canonical !== undefined && !isValidCanonicalScopeValue(scope.canonical)) {
+    return false;
+  }
   if (scope.company !== undefined && !isValidRuc(scope.company.ruc)) {
     return false;
   }
@@ -213,6 +257,10 @@ export class ScopeContextStore {
       ) {
         scope.period = { period: period.period };
       }
+      const canonical = record.canonical as unknown;
+      if (isCanonicalScopeRecord(canonical)) {
+        scope.canonical = canonical;
+      }
       return scope;
     } catch {
       // Corrupt store → empty scope (fail closed; the user re-sets context).
@@ -250,4 +298,30 @@ export class ScopeContextStore {
     this.save(next);
     return { period };
   }
+
+  /**
+   * Bind and persist the full 10-element canonical scope (S4a). Local
+   * validation is fail-closed (non-empty elements, RUC, period, authority
+   * mode); strict digest/whitespace validation runs in `bindScope` before
+   * any command acts on the binding.
+   */
+  setCanonicalScope(scope: CanonicalScope): CanonicalScope {
+    if (!isValidCanonicalScopeValue(scope)) {
+      throw new Error(
+        "invalid canonical scope: all 10 elements are required (company: check-digit RUC, " +
+          "fiscalPeriod: YYYYMM, authorityLevel: ASK | ANALYZE | PREPARE | EXECUTE)",
+      );
+    }
+    const next = { ...this.load(), canonical: scope };
+    this.save(next);
+    return scope;
+  }
+}
+
+/** True when the record is a structurally valid canonical scope object. */
+function isCanonicalScopeRecord(value: unknown): value is CanonicalScope {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  return isValidCanonicalScopeValue(value as CanonicalScope);
 }
