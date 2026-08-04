@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -181,7 +181,9 @@ describe("registerDrenyraPiExtension", () => {
 
 describe("entrypoint packaging (T-S4A-004)", () => {
   it("points pi.extensions at the exact compiled entry file (one entrypoint)", () => {
-    const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+		const pkg = JSON.parse(
+			readFileSync(join(process.cwd(), "package.json"), "utf8"),
+		) as {
       pi?: { extensions?: unknown };
       exports?: Record<string, unknown>;
     };
@@ -199,7 +201,11 @@ describe("entrypoint packaging (T-S4A-004)", () => {
     expect(output).toContain("capabilities");
     const machine = parseMachineOutput(output) as {
       engine?: { protocolVersion?: string };
-      harness?: { commands?: string[]; authorityModes?: string[]; scopeElements?: string[] };
+			harness?: {
+				commands?: string[];
+				authorityModes?: string[];
+				scopeElements?: string[];
+			};
     };
     expect(machine.engine?.protocolVersion).toBeDefined();
     expect(machine.harness?.commands).toContain("/drenyra:capabilities");
@@ -257,7 +263,10 @@ describe("entrypoint packaging (T-S4A-004)", () => {
     expect(command).toBeDefined();
     const output = await runHandler(command!.handler, "");
     expect(output).toContain("model-routing");
-    const machine = parseMachineOutput(output) as { version?: string; routing?: unknown[] };
+		const machine = parseMachineOutput(output) as {
+			version?: string;
+			routing?: unknown[];
+		};
     expect(machine.version).toBe("drenyra.model-routing.v1");
     expect(machine.routing).toHaveLength(13);
     cleanupTempStore(store);
@@ -292,11 +301,12 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     expect(drenyraPiExtension.provides).toHaveLength(13);
   });
 
-  it("registers evidence/verify/reconcile with structured not_available denials (REQ-CMD-008)", async () => {
+	it("registers evidence/verify with structured not_available denials (REQ-CMD-008)", async () => {
+		// /drenyra:reconcile is wired to the reconciliation chain in PR #7 (S5a);
+		// the evidence/verify chain bodies land in PR #8 (S5b).
     const expectations: Record<string, string> = {
       "drenyra:evidence": "PR #8",
       "drenyra:verify": "PR #8",
-      "drenyra:reconcile": "PR #7",
     };
     for (const [name, expectedAfter] of Object.entries(expectations)) {
       // Fresh store per command: the fail-closed check must see no scope.
@@ -324,4 +334,103 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       cleanupTempStore(store);
     }
   });
+});
+
+describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () => {
+	const RECONCILE_MANIFEST = JSON.stringify({
+		bank: [
+			{ reference: "B001", amountCents: 10_000 },
+			{ reference: "B002", amountCents: 2_500 },
+		],
+		ledger: [
+			{ reference: "B001", amountCents: 10_000 },
+			{ reference: "B002", amountCents: 2_300 },
+		],
+	});
+
+	it("fails closed without a complete canonical scope (SC-CMD-002)", async () => {
+		const { pi, registered } = makeMockPi();
+		const store = makeTempStore();
+		registerDrenyraPiExtension(pi, { contextStore: store });
+		const command = registered.find((c) => c.name === "drenyra:reconcile");
+		expect(command).toBeDefined();
+		const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
+		expect(output).toContain("missing");
+		cleanupTempStore(store);
+	});
+
+	it("denies detection below the ANALYZE authority minimum", async () => {
+		const { pi, registered } = makeMockPi();
+		const store = makeTempStore();
+		registerDrenyraPiExtension(pi, { contextStore: store });
+		store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ASK" }));
+		const command = registered.find((c) => c.name === "drenyra:reconcile");
+		expect(command).toBeDefined();
+		const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
+		expect(output).toContain("ANALYZE");
+		const machine = parseMachineOutput(output) as {
+			status: string;
+			reason: string;
+		};
+		expect(machine.status).toBe("denied");
+		expect(machine.reason).toMatch(/ANALYZE/);
+		cleanupTempStore(store);
+	});
+
+	it("runs the reconciliation chain with structured output under ANALYZE (detection)", async () => {
+		const root = mkdtempSync(join(tmpdir(), "drenyra-reconcile-cmd-"));
+		try {
+			const { pi, registered } = makeMockPi();
+			const store = new ScopeContextStore(join(root, "context.json"));
+			registerDrenyraPiExtension(pi, {
+				contextStore: store,
+				storesRoot: root,
+			});
+			store.setCanonicalScope(
+				makeCanonicalScope({ authorityLevel: "ANALYZE" }),
+			);
+			const command = registered.find((c) => c.name === "drenyra:reconcile");
+			expect(command).toBeDefined();
+			const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
+			expect(output).toContain("drenyra:reconcile:");
+			const machine = parseMachineOutput(output) as {
+				command: string;
+				chain: string;
+				missionId: string;
+				intent: string;
+				phase: string | null;
+				status: string;
+				version: number;
+			};
+			expect(machine.command).toBe("reconcile");
+			expect(machine.chain).toBe("reconcile");
+			expect(machine.missionId.length).toBeGreaterThan(0);
+			expect(machine.intent).toBe("reconciliation");
+			expect(machine.phase).toBe("intake");
+			expect(machine.version).toBeGreaterThanOrEqual(1);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	});
+
+	it("rejects a malformed manifest without running the chain", async () => {
+		const root = mkdtempSync(join(tmpdir(), "drenyra-reconcile-cmd-"));
+		try {
+			const { pi, registered } = makeMockPi();
+			const store = new ScopeContextStore(join(root, "context.json"));
+			registerDrenyraPiExtension(pi, {
+				contextStore: store,
+				storesRoot: root,
+			});
+			store.setCanonicalScope(
+				makeCanonicalScope({ authorityLevel: "ANALYZE" }),
+			);
+			const command = registered.find((c) => c.name === "drenyra:reconcile");
+			expect(command).toBeDefined();
+			const output = await runHandler(command!.handler, "{ not json");
+			expect(output).toContain("not valid JSON");
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	});
 });
