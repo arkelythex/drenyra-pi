@@ -57,11 +57,11 @@ try {
     if (
       !installedPkg.pi ||
       !Array.isArray(installedPkg.pi.extensions) ||
-      !installedPkg.pi.extensions.includes("./dist/extensions")
+      !installedPkg.pi.extensions.some((e) => e.startsWith("./dist/extensions"))
     ) {
-      failures.push("installed package.json lacks pi.extensions ./dist/extensions");
+      failures.push("installed package.json lacks a pi.extensions entry under ./dist/extensions");
     } else {
-      console.log("packed-install: pi manifest present with ./dist/extensions — OK");
+      console.log("packed-install: pi manifest present with a ./dist/extensions entry — OK");
     }
   } catch {
     failures.push("installed package.json not readable");

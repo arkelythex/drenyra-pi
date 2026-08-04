@@ -6,10 +6,24 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ScopeContextStore, loadCanonicalScope } from "../runtime/context.js";
+import {
+  AUTHORITY_MODE,
+  CANONICAL_SCOPE_ELEMENTS,
+  ScopeContextStore,
+  type AuthorityMode,
+  type CanonicalScope,
+} from "../runtime/context.js";
 import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
 import { status } from "../runtime/status.js";
+import { bindScope } from "../lib/canonicalization.js";
+import { ScopeGuard } from "./scope-guard.js";
+import {
+  renderCapabilitiesView,
+  renderModelsRegistry,
+  renderStatusView,
+} from "./mission-status.js";
+import { showStartupPanel, type StartupPanelDeps } from "./startup-panel.js";
 
 /**
  * Drenyra Pi package version. Keep in sync with package.json — the pin's
@@ -20,8 +34,8 @@ const DRENYRA_PI_VERSION = "0.0.1-prealpha.1";
 /**
  * Pi extension registration model (verified against the installed gentle-pi):
  *
- * - gentle-pi package.json declares `"pi": { "extensions": ["./extensions"] }` —
- *   a directory whose `.ts` files are extension entrypoints.
+ * - gentle-pi package.json declares `"pi": { "extensions": ["./dist/extensions/register.js"] }`
+ *   (S4a: exact compiled entry file — helper modules are named exports only).
  * - Each entrypoint default-exports an `ExtensionFactory`:
  *   `(pi: ExtensionAPI) => void | Promise<void>`.
  * - Commands register through `pi.registerCommand(name, options)` where
@@ -108,15 +122,25 @@ export interface DrenyraPiExtensionDescriptor {
 export const drenyraPiExtension = {
   name: "drenyra-pi",
   version: DRENYRA_PI_VERSION,
-  provides: ["status", "doctor", "context"] as const,
+  provides: [
+    "status",
+    "doctor",
+    "context",
+    "capabilities",
+    "scope",
+    "models",
+  ] as const,
   commands: [
     "/drenyra:status",
     "/drenyra:doctor",
     "/drenyra:company",
     "/drenyra:period",
     "/drenyra:context",
+    "/drenyra:capabilities",
+    "/drenyra:scope",
+    "/drenyra:models",
     "/drenyra:close",
-      ] as const,
+  ] as const,
   runtime: {
     package: DEFAULT_PIN.package,
     version: DEFAULT_PIN.version,
@@ -124,95 +148,201 @@ export const drenyraPiExtension = {
   },
 } as const satisfies DrenyraPiExtensionDescriptor;
 
-async function statusHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
-  const result = await status({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
-  console.log(result.human);
-  console.log(JSON.stringify(result.machine, null, 2));
+/** Optional per-registration dependencies (tests inject a temp context store). */
+export interface DrenyraPiExtensionDeps {
+  contextStore?: ScopeContextStore;
 }
 
-async function doctorHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
-  const report = await doctor({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
-  console.log(report.verdict);
-  console.log(JSON.stringify(report, null, 2));
-}
-
-/** Context store for the company/period commands (user-level, atomic writes). */
-const contextStore = new ScopeContextStore();
-
-async function companyHandler(args: string, _ctx: PiCommandContext): Promise<void> {
-  const ruc = args.trim();
-  if (ruc.length === 0) {
-    console.log("drenyra:company: usage: /drenyra:company <ruc> (11 digits, checksummed)");
-    return;
-  }
-  try {
-    const company = contextStore.setCompany(ruc);
-    console.log(`drenyra:company: RUC ${company.ruc} set and persisted.`);
-  } catch (error) {
-    console.log(`drenyra:company: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
-async function periodHandler(args: string, _ctx: PiCommandContext): Promise<void> {
-  const period = args.trim();
-  if (period.length === 0) {
-    console.log("drenyra:period: usage: /drenyra:period <YYYYMM>");
-    return;
-  }
-  try {
-    const fiscal = contextStore.setPeriod(period);
-    console.log(`drenyra:period: period ${fiscal.period} set and persisted.`);
-  } catch (error) {
-    console.log(`drenyra:period: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
-async function contextHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
-  const scope = contextStore.load();
-  const company = scope.company?.ruc ?? "NOT SET";
-  const period = scope.period?.period ?? "NOT SET";
-  console.log(`drenyra:context: company RUC ${company} | fiscal period ${period}`);
-  console.log(JSON.stringify(scope, null, 2));
-}
-
-    async function closeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
-      const approverId = args.trim();
-      if (approverId.length === 0) {
-        console.log("drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)");
-        return;
-      }
-      try {
-        const scope = contextStore.load();
-        const report = loadCanonicalScope(scope);
-        if (!report.complete) {
-          console.log(
-            `drenyra:close: cannot run — canonical scope incomplete; missing: ${report.missing.join(", ")}. ` +
-              "Bind the full 10-element scope before closing (PR #5 scope-guard).",
-          );
-          return;
-        }
-        console.log(
-          "drenyra:close: the monthly-close chain requires a complete canonical scope and explicit " +
-            "materiality — the command wiring lands with the PR #5 scope-guard (S4a).",
-        );
-      } catch (error) {
-        console.log(`drenyra:close: ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
+const SCOPE_USAGE =
+  "drenyra:scope: usage — /drenyra:scope (read) | " +
+  "/drenyra:scope set <tenant> <organization> <company> <fiscalPeriod> " +
+  "<ledgerBook> <operationType> <sourceSnapshot> <policyVersion> <actor> <authorityLevel>";
 
 /**
  * Register the drenyra-pi extension against a Pi ExtensionAPI.
  *
- * `/drenyra:status` and `/drenyra:doctor` run the same fail-closed runtime
- * verification core (runtime/doctor.ts); `/drenyra:company`, `/drenyra:period`
- * and `/drenyra:context` manage the RUC/period scope (runtime/context.ts).
- * Full Pi UI rendering (ctx.ui panels) belongs to a later vertical —
- * see contracts/package-contract.md "Command contract".
+ * Every handler follows the parse → scope policy → lib/chain delegation →
+ * structured render order (design §10.3; REQ-CMD-004): the scope guard runs
+ * first, mission/chain/evidence/approval/receipt commands fail closed without a
+ * complete canonical scope, and bootstrap/read commands run under the explicit
+ * pre-scope policy. Handlers contain no accounting or fiscal logic.
  */
-export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
+export function registerDrenyraPiExtension(
+  pi: PiExtensionApi,
+  deps: DrenyraPiExtensionDeps = {},
+): void {
+  const contextStore = deps.contextStore ?? new ScopeContextStore();
+  const scopeGuard = new ScopeGuard(contextStore);
+
+  async function statusHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+    const outcome = scopeGuard.evaluate("drenyra:status");
+    const runtime = await status({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
+    const scope = contextStore.load();
+    const output = await renderStatusView({
+      company: scope.company?.ruc,
+      period: scope.period?.period,
+      runtime,
+      scopeReport: outcome.report,
+      binding: outcome.binding,
+    });
+    console.log(output.summary);
+    console.log(JSON.stringify(output.machine, null, 2));
+  }
+
+  async function doctorHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+    const report = await doctor({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
+    console.log(report.verdict);
+    console.log(JSON.stringify(report, null, 2));
+  }
+
+  async function companyHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+    const ruc = args.trim();
+    if (ruc.length === 0) {
+      console.log("drenyra:company: usage: /drenyra:company <ruc> (11 digits, check-digit-validated)");
+      return;
+    }
+    try {
+      const company = contextStore.setCompany(ruc);
+      console.log(`drenyra:company: RUC ${company.ruc} set and persisted.`);
+    } catch (error) {
+      console.log(`drenyra:company: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async function periodHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+    const period = args.trim();
+    if (period.length === 0) {
+      console.log("drenyra:period: usage: /drenyra:period <YYYYMM>");
+      return;
+    }
+    try {
+      const fiscal = contextStore.setPeriod(period);
+      console.log(`drenyra:period: period ${fiscal.period} set and persisted.`);
+    } catch (error) {
+      console.log(`drenyra:period: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async function contextHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+    const scope = contextStore.load();
+    const company = scope.company?.ruc ?? "NOT SET";
+    const period = scope.period?.period ?? "NOT SET";
+    console.log(`drenyra:context: company RUC ${company} | fiscal period ${period}`);
+    console.log(JSON.stringify(scope, null, 2));
+  }
+
+  async function capabilitiesHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+    const outcome = scopeGuard.evaluate("drenyra:capabilities");
+    if (!outcome.ok) {
+      console.log(`drenyra:capabilities: ${outcome.error}`);
+      return;
+    }
+    const output = renderCapabilitiesView({
+      version: DRENYRA_PI_VERSION,
+      commands: drenyraPiExtension.commands,
+      authorityModes: Object.values(AUTHORITY_MODE),
+      scopeElements: [...CANONICAL_SCOPE_ELEMENTS],
+    });
+    console.log(output.summary);
+    console.log(JSON.stringify(output.machine, null, 2));
+  }
+
+  async function scopeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+    const tokens = args.trim().split(/\s+/).filter((token) => token.length > 0);
+    if (tokens.length === 0) {
+      const outcome = scopeGuard.evaluate("drenyra:scope");
+      const binding = outcome.binding;
+      console.log(
+        outcome.complete
+          ? `drenyra:scope: complete — scopeHash ${binding?.scopeHash}`
+          : `drenyra:scope: incomplete — missing: ${outcome.missing.join(", ")}`,
+      );
+      console.log(
+        JSON.stringify(
+          {
+            scope: outcome.report.scope,
+            complete: outcome.complete,
+            missing: outcome.missing,
+            ...(binding === undefined ? {} : { scopeHash: binding.scopeHash }),
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
+    if (tokens[0] !== "set" || tokens.length !== 11) {
+      console.log(SCOPE_USAGE);
+      return;
+    }
+    const [
+      tenant,
+      organization,
+      company,
+      fiscalPeriod,
+      ledgerBook,
+      operationType,
+      sourceSnapshot,
+      policyVersion,
+      actor,
+      authorityLevel,
+    ] = tokens.slice(1);
+    try {
+      const scope: CanonicalScope = {
+        tenant,
+        organization,
+        company,
+        fiscalPeriod,
+        ledgerBook,
+        operationType,
+        sourceSnapshot,
+        policyVersion,
+        actor,
+        authorityLevel: authorityLevel as AuthorityMode,
+      };
+      // Strict binding validates first; only a valid scope is persisted.
+      const binding = bindScope(scope);
+      contextStore.setCanonicalScope(scope);
+      console.log(`drenyra:scope: bound 10-element canonical scope — scopeHash ${binding.scopeHash}`);
+      console.log(
+        JSON.stringify({ scope, scopeHash: binding.scopeHash, version: binding.version }, null, 2),
+      );
+    } catch (error) {
+      console.log(`drenyra:scope: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async function modelsHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+    const outcome = scopeGuard.evaluate("drenyra:models");
+    if (!outcome.ok) {
+      console.log(`drenyra:models: ${outcome.error}`);
+      return;
+    }
+    const output = renderModelsRegistry();
+    console.log(output.summary);
+    console.log(JSON.stringify(output.machine, null, 2));
+  }
+
+  async function closeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+    const approverId = args.trim();
+    if (approverId.length === 0) {
+      console.log("drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)");
+      return;
+    }
+    const outcome = scopeGuard.evaluate("drenyra:close");
+    if (!outcome.ok) {
+      console.log(`drenyra:close: ${outcome.error}`);
+      return;
+    }
+    console.log(
+      "drenyra:close: the monthly-close chain requires explicit materiality — " +
+        "the command body lands with the PR #5 scope-guard (S4a).",
+    );
+  }
+
   pi.registerCommand("drenyra:status", {
     description:
-      "Show verification status of the pinned Drenyra AI runtime (checksum + version, package-local).",
+      "Show verification status of the pinned Drenyra AI runtime plus the active scope and mission projection (structured JSON + human summary).",
     handler: statusHandler,
   });
   pi.registerCommand("drenyra:doctor", {
@@ -222,7 +352,7 @@ export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
   });
   pi.registerCommand("drenyra:company", {
     description:
-      "Set the company context (RUC, checksummed) for the session — scope for every command.",
+      "Set the company context (RUC, check-digit-validated) for the session — scope for every command.",
     handler: companyHandler,
   });
   pi.registerCommand("drenyra:period", {
@@ -234,6 +364,21 @@ export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
     description: "Show the current company (RUC) and fiscal period context.",
     handler: contextHandler,
   });
+  pi.registerCommand("drenyra:capabilities", {
+    description:
+      "Report engine capabilities plus harness capabilities: authority modes, registered commands, and the 10 scope elements.",
+    handler: capabilitiesHandler,
+  });
+  pi.registerCommand("drenyra:scope", {
+    description:
+      "Read or bind the full 10-element canonical scope (supersedes and stays compatible with company/period/context).",
+    handler: scopeHandler,
+  });
+  pi.registerCommand("drenyra:models", {
+    description:
+      "Show the documented model-routing capability registry (advisory; no Pi model-routing API in this slice).",
+    handler: modelsHandler,
+  });
   pi.registerCommand("drenyra:close", {
     description:
       "Run the monthly-close RDA chain for the current scope with explicit R2 approval.",
@@ -244,7 +389,23 @@ export function registerDrenyraPiExtension(pi: PiExtensionApi): void {
 /**
  * Default export: the extension factory, matching gentle-pi's
  * `ExtensionFactory = (pi: ExtensionAPI) => void | Promise<void>` shape.
+ *
+ * The factory is async: it registers commands first, then emits the activation
+ * banner (design §10.2). A banner failure degrades status without granting any
+ * mission capability, and never breaks command registration. The optional
+ * deps (injectable context store + banner sink) exist for tests; Pi invokes
+ * the factory with a single argument.
  */
-export default function drenyraPi(pi: PiExtensionApi): void {
-  registerDrenyraPiExtension(pi);
+export default async function drenyraPi(
+  pi: PiExtensionApi,
+  deps: DrenyraPiExtensionDeps & Partial<StartupPanelDeps> = {},
+): Promise<void> {
+  registerDrenyraPiExtension(pi, deps);
+  await showStartupPanel({
+    writeLine: (line) => console.log(line),
+    packageRoot: PACKAGE_ROOT,
+    contextStore: deps.contextStore ?? new ScopeContextStore(),
+    ...(deps.writeLine === undefined ? {} : { writeLine: deps.writeLine }),
+    ...(deps.packageRoot === undefined ? {} : { packageRoot: deps.packageRoot }),
+  });
 }

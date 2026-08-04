@@ -23,12 +23,12 @@ The package must:
 | ---------------- | --------------------------------------------------------------- |
 | Persona          | Accounting operator persona, fiscal-first, warm and direct      |
 | Startup panel    | Loads and shows company + fiscal period context at session start |
-| Commands         | `/drenyra:status`, `:company`, `:period`, `:mission`, `:receipt`, `:ledger` |
+| Commands         | `/drenyra:status`, `:doctor`, `:company`, `:period`, `:context`, `:capabilities`, `:scope`, `:models`, `:close` (registered; the 14 intended commands plus legacy extras per REQ-CMD-001/002 — `mission`/`continue`/`resume`/`evidence`/`verify`/`receipt`/`reconcile` register with S4b) |
 | Subagents        | Pi-native accounting agents (explore, apply, verify, review)    |
 | Skills           | Drenyra-specific skills shipped with the package                |
 | Chains           | RDA chains (monthly close, reconcile, review)                   |
 | Themes           | Pi themes                                                        |
-| Model routing    | Per-phase model selection for fiscal work                       |
+| Model routing    | Documented model-routing capability registry (`/drenyra:models`); advisory only — the installed Pi host slice exposes no model-routing API (G30) and model suggestions never grant authority |
 | Memory access    | Reads Drenyra Engram context; never authorizes operations       |
 
 ## Command contract
@@ -52,7 +52,10 @@ The first verifiable vertical of this contract ships in `runtime/` and `extensio
 
 - `runtime/pin.ts` — the pinned Drenyra AI runtime (`DEFAULT_PIN`, currently `pending-release`), validated by `createPin`.
 - `runtime/doctor.ts` — fail-closed verification (checksum + version, package-local); `runtime/status.ts` renders human + machine status for the startup panel.
-- `extensions/register.ts` — Pi extension registration descriptor (`drenyraPiExtension`) and factory, registering `/drenyra:status` and `/drenyra:doctor`.
+- `extensions/register.ts` — the exact compiled entrypoint (`pi.extensions` → `./dist/extensions/register.js`), registering `/drenyra:status`, `:doctor`, `:company`, `:period`, `:context`, `:capabilities`, `:scope`, `:models`, `:close`.
+- `extensions/scope-guard.ts` — per-command scope policy: bootstrap/read commands run pre-scope; scope-requiring commands fail closed on incomplete or changed canonical scope.
+- `extensions/mission-status.ts` — status/capabilities rendering: status projection (company/period, mission, next authorized action, sources, reconciliations, anomalies, approvals) plus engine and harness capabilities; every command returns a human summary + structured JSON.
+- `extensions/startup-panel.ts` — activation banner (runtime verdict + scope completeness) printed through an injected output function; no unverified `ctx.ui` dependency in v0.1.
 
 Install + doctor behavior (contract item 3) is exercised by `__tests__/doctor.test.ts` and `__tests__/status.test.ts`; fail-closed behavior (contract item 4) is the fail-closed matrix in `__tests__/doctor.test.ts`.
 

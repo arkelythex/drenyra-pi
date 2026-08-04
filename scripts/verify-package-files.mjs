@@ -36,6 +36,12 @@ for (const entry of [
   "dist/runtime/installer.js",
   "dist/extensions/register.js",
   "dist/extensions/register.d.ts",
+  "dist/extensions/scope-guard.js",
+  "dist/extensions/scope-guard.d.ts",
+  "dist/extensions/mission-status.js",
+  "dist/extensions/mission-status.d.ts",
+  "dist/extensions/startup-panel.js",
+  "dist/extensions/startup-panel.d.ts",
   "dist/scripts/install-drenyra-ai.js",
 ]) {
   check(entry, undefined, undefined);
@@ -66,8 +72,14 @@ if (
     "package.json postinstall must run node dist/scripts/install-drenyra-ai.js",
   );
 }
-if (!Array.isArray(pkg.pi?.extensions) || !pkg.pi.extensions.includes("./dist/extensions")) {
-  errors.push("package.json pi.extensions must include ./dist/extensions");
+if (
+  !Array.isArray(pkg.pi?.extensions) ||
+  pkg.pi.extensions.length !== 1 ||
+  pkg.pi.extensions[0] !== "./dist/extensions/register.js"
+) {
+  errors.push(
+"package.json pi.extensions must be exactly [\"./dist/extensions/register.js\"] (one compiled entrypoint)",
+  );
 }
 if (!Array.isArray(pkg.pi?.prompts) || !pkg.pi.prompts.includes("./prompts")) {
   errors.push("package.json pi.prompts must include ./prompts");
