@@ -41,6 +41,12 @@ import {
   renderReceiptView,
   renderResumeResult,
 } from "./mission-commands.js";
+import { runChainStep } from "../lib/chain-pipeline.js";
+import {
+	parseReconcileManifest,
+	reconcileChain,
+	type ReconcileSourceManifest,
+} from "../chains/reconcile.js";
 
 /**
  * Drenyra Pi package version. Keep in sync with package.json — the pin's
@@ -233,27 +239,43 @@ export function registerDrenyraPiExtension(
     console.log(JSON.stringify(output.machine, null, 2));
   }
 
-  async function doctorHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
-    const report = await doctor({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
+	async function doctorHandler(
+		_args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
+		const report = await doctor({
+			pin: DEFAULT_PIN,
+			packageRoot: PACKAGE_ROOT,
+		});
     console.log(report.verdict);
     console.log(JSON.stringify(report, null, 2));
   }
 
-  async function companyHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+	async function companyHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
     const ruc = args.trim();
     if (ruc.length === 0) {
-      console.log("drenyra:company: usage: /drenyra:company <ruc> (11 digits, check-digit-validated)");
+			console.log(
+				"drenyra:company: usage: /drenyra:company <ruc> (11 digits, check-digit-validated)",
+			);
       return;
     }
     try {
       const company = contextStore.setCompany(ruc);
       console.log(`drenyra:company: RUC ${company.ruc} set and persisted.`);
     } catch (error) {
-      console.log(`drenyra:company: ${error instanceof Error ? error.message : String(error)}`);
+			console.log(
+				`drenyra:company: ${error instanceof Error ? error.message : String(error)}`,
+			);
     }
   }
 
-  async function periodHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+	async function periodHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
     const period = args.trim();
     if (period.length === 0) {
       console.log("drenyra:period: usage: /drenyra:period <YYYYMM>");
@@ -263,19 +285,29 @@ export function registerDrenyraPiExtension(
       const fiscal = contextStore.setPeriod(period);
       console.log(`drenyra:period: period ${fiscal.period} set and persisted.`);
     } catch (error) {
-      console.log(`drenyra:period: ${error instanceof Error ? error.message : String(error)}`);
+			console.log(
+				`drenyra:period: ${error instanceof Error ? error.message : String(error)}`,
+			);
     }
   }
 
-  async function contextHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+	async function contextHandler(
+		_args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
     const scope = contextStore.load();
     const company = scope.company?.ruc ?? "NOT SET";
     const period = scope.period?.period ?? "NOT SET";
-    console.log(`drenyra:context: company RUC ${company} | fiscal period ${period}`);
+		console.log(
+			`drenyra:context: company RUC ${company} | fiscal period ${period}`,
+		);
     console.log(JSON.stringify(scope, null, 2));
   }
 
-  async function capabilitiesHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+	async function capabilitiesHandler(
+		_args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
     const outcome = scopeGuard.evaluate("drenyra:capabilities");
     if (!outcome.ok) {
       console.log(`drenyra:capabilities: ${outcome.error}`);
@@ -291,8 +323,14 @@ export function registerDrenyraPiExtension(
     console.log(JSON.stringify(output.machine, null, 2));
   }
 
-  async function scopeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
-    const tokens = args.trim().split(/\s+/).filter((token) => token.length > 0);
+	async function scopeHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
+		const tokens = args
+			.trim()
+			.split(/\s+/)
+			.filter((token) => token.length > 0);
     if (tokens.length === 0) {
       const outcome = scopeGuard.evaluate("drenyra:scope");
       const binding = outcome.binding;
@@ -347,16 +385,27 @@ export function registerDrenyraPiExtension(
       // Strict binding validates first; only a valid scope is persisted.
       const binding = bindScope(scope);
       contextStore.setCanonicalScope(scope);
-      console.log(`drenyra:scope: bound 10-element canonical scope — scopeHash ${binding.scopeHash}`);
       console.log(
-        JSON.stringify({ scope, scopeHash: binding.scopeHash, version: binding.version }, null, 2),
+				`drenyra:scope: bound 10-element canonical scope — scopeHash ${binding.scopeHash}`,
+			);
+			console.log(
+				JSON.stringify(
+					{ scope, scopeHash: binding.scopeHash, version: binding.version },
+					null,
+					2,
+				),
       );
     } catch (error) {
-      console.log(`drenyra:scope: ${error instanceof Error ? error.message : String(error)}`);
+			console.log(
+				`drenyra:scope: ${error instanceof Error ? error.message : String(error)}`,
+			);
     }
   }
 
-  async function modelsHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+	async function modelsHandler(
+		_args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
     const outcome = scopeGuard.evaluate("drenyra:models");
     if (!outcome.ok) {
       console.log(`drenyra:models: ${outcome.error}`);
@@ -367,10 +416,15 @@ export function registerDrenyraPiExtension(
     console.log(JSON.stringify(output.machine, null, 2));
   }
 
-  async function closeHandler(args: string, _ctx: PiCommandContext): Promise<void> {
+	async function closeHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
     const approverId = args.trim();
     if (approverId.length === 0) {
-      console.log("drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)");
+			console.log(
+				"drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)",
+			);
       return;
     }
     const outcome = scopeGuard.evaluate("drenyra:close");
@@ -396,7 +450,10 @@ export function registerDrenyraPiExtension(
           return;
         }
         const binding = outcome.binding;
-        if (binding === undefined || !(EDA_INTENTS as readonly string[]).includes(intent)) {
+		if (
+			binding === undefined ||
+			!(EDA_INTENTS as readonly string[]).includes(intent)
+		) {
           console.log(MISSION_USAGE);
           console.log(
             JSON.stringify(
@@ -437,7 +494,9 @@ export function registerDrenyraPiExtension(
         }
         const binding = outcome.binding;
         if (binding === undefined) {
-          console.log("drenyra:continue: canonical scope present but invalid — re-bind via /drenyra:scope");
+			console.log(
+				"drenyra:continue: canonical scope present but invalid — re-bind via /drenyra:scope",
+			);
           return;
         }
         const coordinator = new EdaMissionCoordinator(binding, { storesRoot });
@@ -490,14 +549,18 @@ export function registerDrenyraPiExtension(
         }
         const binding = outcome.binding;
         if (binding === undefined) {
-          console.log("drenyra:resume: canonical scope present but invalid — re-bind via /drenyra:scope");
+			console.log(
+				"drenyra:resume: canonical scope present but invalid — re-bind via /drenyra:scope",
+			);
           return;
         }
         const coordinator = new EdaMissionCoordinator(binding, { storesRoot });
         try {
           const exists = await coordinator.stores.store.findById(missionId);
           if (exists === undefined) {
-            console.log(`drenyra:resume: mission ${missionId} not found in the durable mission store`);
+				console.log(
+					`drenyra:resume: mission ${missionId} not found in the durable mission store`,
+				);
             console.log(
               JSON.stringify(
                 {
@@ -539,7 +602,9 @@ export function registerDrenyraPiExtension(
         }
         const binding = outcome.binding;
         if (binding === undefined) {
-          console.log("drenyra:receipt: canonical scope present but invalid — re-bind via /drenyra:scope");
+			console.log(
+				"drenyra:receipt: canonical scope present but invalid — re-bind via /drenyra:scope",
+			);
           return;
         }
         const store = new ReceiptStore(storesRoot);
@@ -556,10 +621,17 @@ export function registerDrenyraPiExtension(
             const id = tokens[1] ?? "";
             const record = await store.load(id);
             if (record === undefined) {
-              console.log(`drenyra:receipt verify ${id}: receipt not found in the local receipt store`);
+					console.log(
+						`drenyra:receipt verify ${id}: receipt not found in the local receipt store`,
+					);
               console.log(
                 JSON.stringify(
-                  { command: "receipt:verify", receiptHash: id, valid: false, error: "receipt not found" },
+							{
+								command: "receipt:verify",
+								receiptHash: id,
+								valid: false,
+								error: "receipt not found",
+							},
                   null,
                   2,
                 ),
@@ -610,11 +682,106 @@ export function registerDrenyraPiExtension(
             console.log(`${command}: ${outcome.error}`);
             return;
           }
-          const output = renderNotAvailableDenial(command, outcome.binding?.scopeHash);
+			const output = renderNotAvailableDenial(
+				command,
+				outcome.binding?.scopeHash,
+			);
           console.log(output.summary);
           console.log(JSON.stringify(output.machine, null, 2));
         };
       }
+
+	/**
+	 * /drenyra:reconcile — run the reconciliation chain (T-S5A-002). The
+	 * handler is thin: validate scope, parse the bounded manifest, run exactly
+	 * one chain step, render the outcome. The chain enforces the ANALYZE
+	 * authority minimum (stage "mode" blocks below it).
+	 */
+	async function reconcileHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
+		const manifestText = args.trim();
+		const outcome = scopeGuard.evaluate("drenyra:reconcile");
+		if (!outcome.ok) {
+			console.log(`drenyra:reconcile: ${outcome.error}`);
+			return;
+		}
+		const binding = outcome.binding;
+		if (binding === undefined) {
+			console.log(
+				"drenyra:reconcile: canonical scope present but invalid — re-bind via /drenyra:scope",
+			);
+			return;
+		}
+		let manifest: ReconcileSourceManifest | undefined;
+		if (manifestText.length > 0) {
+			try {
+				manifest = parseReconcileManifest(manifestText);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error);
+				console.log(`drenyra:reconcile: ${message}`);
+				console.log(
+					JSON.stringify(
+						{
+							command: "reconcile",
+							status: "invalid_manifest",
+							error: message,
+						},
+						null,
+						2,
+					),
+				);
+				return;
+			}
+		}
+		try {
+			const result = await runChainStep(reconcileChain, {
+				binding,
+				input: { manifest },
+				storesRoot,
+			});
+			if (result.blocked !== undefined) {
+				console.log(`drenyra:reconcile: ${result.blocked.reason}`);
+				console.log(
+					JSON.stringify(
+						{
+							command: "reconcile",
+							status: result.blocked.stage === "mode" ? "denied" : "blocked",
+							reason: result.blocked.reason,
+						},
+						null,
+						2,
+					),
+				);
+				return;
+			}
+			const mission = result.mission;
+			console.log(
+				`drenyra:reconcile: chain ${result.chain} on mission ${mission?.id ?? "?"} — ` +
+					`phase ${result.phase ?? "started"} (${mission?.status ?? "?"})`,
+			);
+			console.log(
+				JSON.stringify(
+					{
+						command: "reconcile",
+						chain: result.chain,
+						missionId: mission?.id,
+						intent: result.intent,
+						phase: result.phase,
+						status: mission?.status,
+						version: mission?.version,
+					},
+					null,
+					2,
+				),
+			);
+		} catch (error) {
+			console.log(
+				`drenyra:reconcile: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
+	}
 
   pi.registerCommand("drenyra:status", {
     description:
@@ -696,8 +863,10 @@ export function registerDrenyraPiExtension(
   });
   pi.registerCommand("drenyra:reconcile", {
     description:
-      "Run the reconciliation chain (registered; the chain lands in PR #7).",
-    handler: notAvailableHandler("drenyra:reconcile"),
+			"Run the reconciliation chain: ingest the bounded source manifest, detect " +
+			"bank-vs-ledger discrepancies as evidence-cited anomalies, wait for evidence, " +
+			"and raise an evidence-cited proposal (ANALYZE minimum; PREPARE for proposals).",
+		handler: reconcileHandler,
   });
 }
 
@@ -721,6 +890,8 @@ export default async function drenyraPi(
     packageRoot: PACKAGE_ROOT,
     contextStore: deps.contextStore ?? new ScopeContextStore(),
     ...(deps.writeLine === undefined ? {} : { writeLine: deps.writeLine }),
-    ...(deps.packageRoot === undefined ? {} : { packageRoot: deps.packageRoot }),
+		...(deps.packageRoot === undefined
+			? {}
+			: { packageRoot: deps.packageRoot }),
   });
 }

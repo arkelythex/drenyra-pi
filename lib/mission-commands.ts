@@ -149,11 +149,18 @@ function completeStep(
 }
 
 /** Mark one step IN_PROGRESS (phase started but not completed). */
-function markInProgress(mission: MissionSnapshot, phase: EdaPhase): MissionSnapshot {
+function markInProgress(
+	mission: MissionSnapshot,
+	phase: EdaPhase,
+): MissionSnapshot {
   const now = new Date().toISOString();
   const steps = mission.steps.map((step) =>
     step.id === phase
-      ? { ...step, status: "IN_PROGRESS" as const, startedAt: step.startedAt ?? now }
+			? {
+					...step,
+					status: "IN_PROGRESS" as const,
+					startedAt: step.startedAt ?? now,
+				}
       : step,
   );
   return { ...mission, steps, currentStep: phase };
@@ -217,8 +224,21 @@ function genericIntentHandler(intent: MissionIntent): IntentHandler {
 }
 
 function buildRegistry(): IntentRegistry {
+	return buildEdaIntentRegistry(EDA_INTENTS);
+}
+
+/**
+ * Build the generic per-intent engine registry over the canonical EDA
+ * transitions (lifecycle phases through engine-legal transitions, evidence
+ * waits, steady-state phases as null so the coordinator advances them
+ * phase-only). Shared by the S4b coordinator and the PR #7 chain pipeline so
+ * every mission runs the same engine semantics.
+ */
+export function buildEdaIntentRegistry(
+	intents: readonly MissionIntent[] = EDA_INTENTS,
+): IntentRegistry {
   const registry = new IntentRegistryImpl();
-  for (const intent of EDA_INTENTS) {
+	for (const intent of intents) {
     registry.register(genericIntentHandler(intent));
   }
   return registry;
@@ -265,7 +285,9 @@ export class EdaMissionCoordinator {
       companyId: this.binding.scope.company,
       fiscalPeriod: this.binding.scope.fiscalPeriod,
       intent: input.intent,
-      input: { instruction: `Run ${input.intent} for ${this.binding.scope.fiscalPeriod}` },
+			input: {
+				instruction: `Run ${input.intent} for ${this.binding.scope.fiscalPeriod}`,
+			},
     });
     this.sourceRefsByMission.set(started.id, input.sourceRefs ?? []);
     return this.phaseOnlyUpdate(started, (mission) => ({
@@ -281,7 +303,9 @@ export class EdaMissionCoordinator {
    * auto-advance; a phase whose required authority mode exceeds the bound mode
    * is denied before any write (design §5.1).
    */
-  async advance(input: AdvanceEdaMissionInput): Promise<AdvanceEdaMissionResult> {
+	async advance(
+		input: AdvanceEdaMissionInput,
+	): Promise<AdvanceEdaMissionResult> {
     const snapshot = await this.stores.store.findById(input.missionId);
     if (snapshot === undefined) {
       throw new Error(`mission-commands: mission ${input.missionId} not found`);
@@ -301,7 +325,12 @@ export class EdaMissionCoordinator {
     const wait = waitReasonFor(snapshot.status);
 
     if (prepared === null) {
-      return { mission: snapshot, preparedStep: null, phase: null, waitReason: wait ?? undefined };
+			return {
+				mission: snapshot,
+				preparedStep: null,
+				phase: null,
+				waitReason: wait ?? undefined,
+			};
     }
 
     // Authority binding: the scope's bound mode must permit the prepared phase's
@@ -309,7 +338,10 @@ export class EdaMissionCoordinator {
     const next = nextAuthorizedActionFor(prepared, wait);
     if (prepared.disposition !== "WAIT" && next !== undefined) {
       try {
-        assertMonotonicAuthority(this.binding.scope.authorityLevel, next.requiredMode);
+				assertMonotonicAuthority(
+					this.binding.scope.authorityLevel,
+					next.requiredMode,
+				);
       } catch {
         return {
           mission: snapshot,
@@ -326,7 +358,12 @@ export class EdaMissionCoordinator {
     }
 
     if (prepared.disposition === "WAIT") {
-      return { mission: snapshot, preparedStep: prepared, phase: null, waitReason: wait ?? undefined };
+			return {
+				mission: snapshot,
+				preparedStep: prepared,
+				phase: null,
+				waitReason: wait ?? undefined,
+			};
     }
 
     if (prepared.disposition === "SKIP") {
@@ -345,7 +382,11 @@ export class EdaMissionCoordinator {
             this.executeCommand(snapshot.id, snapshot.version),
             {
               expectedMissionVersion: snapshot.version,
-              idempotencyKey: this.idempotencyKeyFor(snapshot.id, EDA_PHASE.INGEST, snapshot.version),
+							idempotencyKey: this.idempotencyKeyFor(
+								snapshot.id,
+								EDA_PHASE.INGEST,
+								snapshot.version,
+							),
             },
           );
           return this.resultFor(applied.snapshot, null);
@@ -375,7 +416,11 @@ export class EdaMissionCoordinator {
           this.executeCommand(snapshot.id, snapshot.version),
           {
             expectedMissionVersion: snapshot.version,
-            idempotencyKey: this.idempotencyKeyFor(snapshot.id, prepared.phase, snapshot.version),
+						idempotencyKey: this.idempotencyKeyFor(
+							snapshot.id,
+							prepared.phase,
+							snapshot.version,
+						),
           },
         );
         return this.resultFor(applied.snapshot, prepared.phase);
@@ -417,7 +462,11 @@ export class EdaMissionCoordinator {
     };
   }
 
-  private idempotencyKeyFor(missionId: string, phase: EdaPhase, version: number): string {
+	private idempotencyKeyFor(
+		missionId: string,
+		phase: EdaPhase,
+		version: number,
+	): string {
     return `eda:${missionId}:${phase}:v${version}`;
   }
 
@@ -451,7 +500,10 @@ export class EdaMissionCoordinator {
     };
   }
 
-  private resultFor(mission: MissionSnapshot, phase: EdaPhase | null): AdvanceEdaMissionResult {
+	private resultFor(
+		mission: MissionSnapshot,
+		phase: EdaPhase | null,
+	): AdvanceEdaMissionResult {
     return {
       mission,
       preparedStep: derivePreparedStep(mission, this.binding.scopeHash),

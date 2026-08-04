@@ -602,3 +602,15 @@ All 4 implementation-owned PR #6 rows verified `- [x]` in the persisted artifact
 - PR #7 S5a: T-S5A-001..002 (shared chain pipeline `executePreparedStep`, reconcile chain + `/drenyra:reconcile` body) — unchecked rows in `tasks.md`
 - PR #8 S5b: T-S5B-001..003 (verify + evidence chains, `/drenyra:verify`/`/drenyra:evidence` bodies, full monthly-close 12-step flow) · PR #9 S6: T-S6-001..004
 - Parent gates T-GATE-001..004 deferred (parent-owned).
+
+## PR #7 (S5a) — shared chain pipeline + reconcile chain
+
+**status:** success (completed inline by orchestrator after 2 subagent provider failures + 1 timeout left partial work)
+
+**Tasks:** T-S5A-001 `lib/chain-pipeline.ts` (shared scope → mission → gate → receipt pipeline: full canonical scope validation, explicit materiality never R0, stale-scope invalidation before any write (design §15), authority gates, ONE prepared EDA step per run, evidence recording, signed COMPLETION receipt on close bound to mission/evidence/scope/target), T-S5A-002 `chains/reconcile.ts` (reconciliation intent chain: bounded manifest boundary, anomaly detection as evidence conclusion nodes with DERIVED_FROM edges to sources + statement, evidence wait with persisted blocker, refutation, evidence-cited proposal, candidate-only execute, close receipt) + `/drenyra:reconcile` wired in register.ts (ANALYZE minimum denial, malformed-manifest rejection, structured output).
+
+**TDD evidence:** RED via extension + chain tests written before modules; fixes applied: manifest fixtures bigint→JSON integers at the boundary (toBigIntCents hardened with explicit bigint rejection), DERIVED_FROM edge direction (sources are roots; edges run source→conclusion), wait blocker persisted via phaseOnlyUpdate, receipt evidence hash binds the proposal's approved hash, receipt test loop captures the close-step receipt.
+
+**Gate results:** bun test 373/0 (345 baseline + 28 new), typecheck clean, build emits dist/lib/chain-pipeline.js + dist/chains/reconcile.js, verify-package-files OK, verify-packed-install OK.
+
+**Deviations documented:** steady-state phases advance phase-only (engine rejects same-status transitions); `/drenyra:evidence` + `/drenyra:verify` remain structured not_available denials until PR #8 (S5b).

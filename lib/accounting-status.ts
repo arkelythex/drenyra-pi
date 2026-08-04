@@ -27,9 +27,16 @@ import {
   type MissionSnapshot,
   type MissionStep,
 } from "drenyra-ai/missions";
-import type { AuthorityMode, CanonicalScopeReport } from "../runtime/context.js";
+import type {
+	AuthorityMode,
+	CanonicalScopeReport,
+} from "../runtime/context.js";
 import type { RuntimeStatus } from "../runtime/status.js";
-import { ACTION_FAMILY, requiredModeFor, type ActionFamily } from "./authority-gates.js";
+import {
+	ACTION_FAMILY,
+	requiredModeFor,
+	type ActionFamily,
+} from "./authority-gates.js";
 import type { ScopeBinding } from "./canonicalization.js";
 
 /** The 13 canonical EDA phases (REQ-MISS-001; design §4.2). */
@@ -184,6 +191,11 @@ export function applicabilityFor(
   return PHASE_APPLICABILITY[intent][phase];
 }
 
+/** The action family a phase executes (design §4.2; used by the chain pipeline). */
+export function familyForPhase(phase: EdaPhase): ActionFamily {
+	return PHASE_FAMILY[phase];
+}
+
 function isEdaPhase(value: string): value is EdaPhase {
   return (EDA_PHASE_ORDER as readonly string[]).includes(value);
 }
@@ -287,7 +299,8 @@ export function derivePreparedStep(
     disposition = "WAIT";
   } else {
     const policy = applicabilityFor(snapshot.intent, phase);
-    disposition = policy === "conditional" && !hasTriggeringCondition(snapshot)
+		disposition =
+			policy === "conditional" && !hasTriggeringCondition(snapshot)
       ? "SKIP"
       : "RUN";
   }
@@ -339,7 +352,8 @@ export function nextAuthorizedActionFor(
         return {
           actionFamily: ACTION_FAMILY.INVESTIGATE,
           requiredMode: requiredModeFor(ACTION_FAMILY.INVESTIGATE),
-          reason: "mission waits for evidence — provide cited evidence to resume",
+					reason:
+						"mission waits for evidence — provide cited evidence to resume",
         };
       case WaitReason.APPROVAL:
         return {
@@ -351,7 +365,8 @@ export function nextAuthorizedActionFor(
         return {
           actionFamily: ACTION_FAMILY.APPROVE,
           requiredMode: requiredModeFor(ACTION_FAMILY.APPROVE),
-          reason: "policy gate requires approval input before the phase advances",
+					reason:
+						"policy gate requires approval input before the phase advances",
         };
       case WaitReason.MANUAL_INTERVENTION:
         return {
@@ -450,7 +465,14 @@ export interface AccountingStatusInput {
 export async function buildAccountingStatus(
   input: AccountingStatusInput,
 ): Promise<AccountingStatusView> {
-  const { runtime, scopeReport, binding, mission, linkedSources, pendingReconciliations } = input;
+	const {
+		runtime,
+		scopeReport,
+		binding,
+		mission,
+		linkedSources,
+		pendingReconciliations,
+	} = input;
 
   let missionView: MissionStatusView | undefined;
   let nextAuthorizedAction: NextAuthorizedAction | undefined;
@@ -477,7 +499,8 @@ export async function buildAccountingStatus(
   const anomalies =
     mission === undefined
       ? 0
-      : mission.blockers.filter((blocker) => blocker.resolvedAt === undefined).length;
+			: mission.blockers.filter((blocker) => blocker.resolvedAt === undefined)
+					.length;
 
   const proposalPending =
     mission !== undefined &&
@@ -508,8 +531,6 @@ export async function buildAccountingStatus(
     authority,
     nextAuthorizedAction,
     ...(linkedSources === undefined ? {} : { linkedSources }),
-    ...(pendingReconciliations === undefined
-      ? {}
-      : { pendingReconciliations }),
+		...(pendingReconciliations === undefined ? {} : { pendingReconciliations }),
   };
 }

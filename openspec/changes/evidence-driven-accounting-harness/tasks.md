@@ -390,7 +390,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - One step per call; bounded and deterministic (REQ-CHAIN-006; REQ-MISS-004).
   - Signed completion receipt bound to mission/evidence/scope/target (REQ-CHAIN-007).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S5A-001 — shared chain pipeline. <!-- sdd-owner: implementation -->
+- [x] T-S5A-001 — shared chain pipeline. <!-- sdd-owner: implementation -->
 
 #### T-S5A-002 — `chains/reconcile.ts`: reconciliation intent chain + wire `/drenyra:reconcile`
 
@@ -400,7 +400,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Reconcile chain performs ingest → normalize → reconcile → anomaly → evidence wait → proposal (REQ-CHAIN-002; SC-CHAIN-002, 005).
   - No mutation beyond proposal/candidate (REQ-AUTH-009).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S5A-002 — reconcile chain. <!-- sdd-owner: implementation -->
+- [x] T-S5A-002 — reconcile chain. <!-- sdd-owner: implementation -->
 
 ---
 

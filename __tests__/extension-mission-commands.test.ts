@@ -25,7 +25,10 @@ import {
   AccountingMissionStatus,
   type MissionIntent,
 } from "drenyra-ai/missions";
-import { buildSignedReceipt, generateReceiptKeyPair } from "drenyra-ai/receipts";
+import {
+	buildSignedReceipt,
+	generateReceiptKeyPair,
+} from "drenyra-ai/receipts";
 import type { ReceiptContent, SigningKeyInfo } from "drenyra-ai/receipts";
 import {
   registerDrenyraPiExtension,
@@ -35,10 +38,18 @@ import {
 import { ScopeContextStore, AUTHORITY_MODE } from "../runtime/context.js";
 import { bindScope } from "../lib/canonicalization.js";
 import { EdaMissionCoordinator } from "../lib/mission-commands.js";
-import { ReceiptStore, type ReceiptBinding, type HarnessReceiptRecord } from "../lib/receipt-store.js";
+import {
+	ReceiptStore,
+	type ReceiptBinding,
+	type HarnessReceiptRecord,
+} from "../lib/receipt-store.js";
 import { TrustedKeyRegistry } from "../lib/trusted-key-registry.js";
 import { sha256Canonical } from "../lib/canonicalization.js";
-import { makeCanonicalScope, makeScopeBinding, type ApprovalReceiptFixture } from "./helpers/authority-fixtures.js";
+import {
+	makeCanonicalScope,
+	makeScopeBinding,
+	type ApprovalReceiptFixture,
+} from "./helpers/authority-fixtures.js";
 
 interface RegisteredCommand {
   name: string;
@@ -149,7 +160,10 @@ async function seedReceiptAndKey(
   fixture: { record: HarnessReceiptRecord; key: SigningKeyInfo },
 ): Promise<void> {
   await new ReceiptStore(root).save(fixture.record);
-  const registry = new TrustedKeyRegistry(join(root, ".local", "trusted-keys.json"), root);
+	const registry = new TrustedKeyRegistry(
+		join(root, ".local", "trusted-keys.json"),
+		root,
+	);
   await registry.put(fixture.key);
 }
 
@@ -170,7 +184,10 @@ describe("T-S4B-001 /drenyra:mission (REQ-CMD-001; SC-CMD-002)", () => {
     const command = findCommand(ctx, "drenyra:mission");
     const output = await runHandler(command.handler, "not-an-intent");
     expect(output).toContain("usage");
-    const machine = parseMachineOutput(output) as { error?: string; intents?: string[] };
+		const machine = parseMachineOutput(output) as {
+			error?: string;
+			intents?: string[];
+		};
     expect(machine.error).toBeDefined();
     expect(machine.intents).toHaveLength(5);
   });
@@ -198,8 +215,12 @@ describe("T-S4B-001 /drenyra:mission (REQ-CMD-001; SC-CMD-002)", () => {
     expect(machine.authorityMode).toBe(AUTHORITY_MODE.EXECUTE);
     // Durable: the mission persists under the injected stores root.
     const binding = makeScopeBinding();
-    const coordinator = new EdaMissionCoordinator(binding, { storesRoot: ctx.root });
-    const persisted = await coordinator.stores.store.findById(machine.missionId);
+		const coordinator = new EdaMissionCoordinator(binding, {
+			storesRoot: ctx.root,
+		});
+		const persisted = await coordinator.stores.store.findById(
+			machine.missionId,
+		);
     expect(persisted).toBeDefined();
     expect(persisted!.steps).toHaveLength(13);
     expect(persisted!.companyId).toBe(makeCanonicalScope().company);
@@ -207,7 +228,10 @@ describe("T-S4B-001 /drenyra:mission (REQ-CMD-001; SC-CMD-002)", () => {
 });
 
 describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", () => {
-  async function startMission(ctx: HarnessContext, intent: MissionIntent): Promise<string> {
+	async function startMission(
+		ctx: HarnessContext,
+		intent: MissionIntent,
+	): Promise<string> {
     const command = findCommand(ctx, "drenyra:mission");
     const output = await runHandler(command.handler, intent);
     const machine = parseMachineOutput(output) as { missionId: string };
@@ -275,7 +299,9 @@ describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", 
     // engine-legal evidence wait, and no phase is reported as completed.
     expect(waitMachine.phase).toBeNull();
     expect(waitMachine.advanced).toBe(false);
-    expect(waitMachine.status).toBe(AccountingMissionStatus.WAITING_FOR_EVIDENCE);
+		expect(waitMachine.status).toBe(
+			AccountingMissionStatus.WAITING_FOR_EVIDENCE,
+		);
     expect(waitMachine.waitReason).toBe("EVIDENCE");
     expect(waitOutput).toContain("no auto-advance");
 
@@ -291,7 +317,9 @@ describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", 
     expect(stuckMachine.phase).toBeNull();
     expect(stuckMachine.advanced).toBe(false);
     expect(stuckMachine.waitReason).toBe("EVIDENCE");
-    expect(stuckMachine.status).toBe(AccountingMissionStatus.WAITING_FOR_EVIDENCE);
+		expect(stuckMachine.status).toBe(
+			AccountingMissionStatus.WAITING_FOR_EVIDENCE,
+		);
   });
 
   it("continues the active mission for the bound scope when no id is given", async () => {
@@ -300,7 +328,10 @@ describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", 
     const missionId = await startMission(ctx, "monthly-close");
     const command = findCommand(ctx, "drenyra:continue");
     const output = await runHandler(command.handler, "");
-    const machine = parseMachineOutput(output) as { missionId: string; phase: string | null };
+		const machine = parseMachineOutput(output) as {
+			missionId: string;
+			phase: string | null;
+		};
     expect(machine.missionId).toBe(missionId);
     expect(machine.phase).toBe("intake");
   });
@@ -311,7 +342,10 @@ describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", 
     const command = findCommand(ctx, "drenyra:continue");
     const output = await runHandler(command.handler, "");
     expect(output).toContain("no active mission");
-    const machine = parseMachineOutput(output) as { error?: string; status?: string };
+		const machine = parseMachineOutput(output) as {
+			error?: string;
+			status?: string;
+		};
     expect(machine.error).toBeDefined();
   });
 
@@ -329,7 +363,8 @@ describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", 
     // Start a mission under the fixture scope, then bind a DIFFERENT company.
     const missionCmd = findCommand(ctx, "drenyra:mission");
     const started = await runHandler(missionCmd.handler, "monthly-close");
-    const missionId = (parseMachineOutput(started) as { missionId: string }).missionId;
+		const missionId = (parseMachineOutput(started) as { missionId: string })
+			.missionId;
     ctx.store.setCanonicalScope(makeCanonicalScope({ company: "20603083343" }));
     const command = findCommand(ctx, "drenyra:continue");
     const output = await runHandler(command.handler, missionId);
@@ -337,9 +372,16 @@ describe("T-S4B-001 /drenyra:continue (REQ-CMD-005; SC-CMD-003; REQ-MISS-004)", 
   });
 
   it("denies advancing past the bound authority mode (authority binding)", async () => {
-    const binding = bindScope(makeCanonicalScope({ authorityLevel: AUTHORITY_MODE.ANALYZE }));
-    const coordinator = new EdaMissionCoordinator(binding, { storesRoot: mkdtempSync(join(tmpdir(), "drenyra-s4b-auth-")) });
-    await coordinator.start({ intent: "monthly-close", sourceRefs: ["ref://balance-202507"] });
+		const binding = bindScope(
+			makeCanonicalScope({ authorityLevel: AUTHORITY_MODE.ANALYZE }),
+		);
+		const coordinator = new EdaMissionCoordinator(binding, {
+			storesRoot: mkdtempSync(join(tmpdir(), "drenyra-s4b-auth-")),
+		});
+		await coordinator.start({
+			intent: "monthly-close",
+			sourceRefs: ["ref://balance-202507"],
+		});
     const mission = await coordinator.findActiveMission();
     expect(mission).toBeDefined();
     // intake, bind-scope, ingest, normalize, classify, reconcile, investigate pass
@@ -370,7 +412,10 @@ describe("T-S4B-001 lib coordinator: conditional phases skip deterministically",
     const coordinator = new EdaMissionCoordinator(binding, {
       storesRoot: mkdtempSync(join(tmpdir(), "drenyra-s4b-skip-")),
     });
-    await coordinator.start({ intent: "reconciliation", sourceRefs: ["ref://ledger-202507"] });
+		await coordinator.start({
+			intent: "reconciliation",
+			sourceRefs: ["ref://ledger-202507"],
+		});
     const mission = await coordinator.findActiveMission();
     expect(mission).toBeDefined();
     const advanced: string[] = [];
@@ -392,7 +437,10 @@ describe("T-S4B-001 lib coordinator: conditional phases skip deterministically",
 });
 
 describe("T-S4B-002 /drenyra:resume (REQ-CMD-007; SC-CMD-006)", () => {
-  async function startAndRun(ctx: HarnessContext, continues: number): Promise<string> {
+	async function startAndRun(
+		ctx: HarnessContext,
+		continues: number,
+	): Promise<string> {
     const missionCmd = findCommand(ctx, "drenyra:mission");
     const output = await runHandler(missionCmd.handler, "monthly-close");
     const machine = parseMachineOutput(output) as { missionId: string };
@@ -446,7 +494,9 @@ describe("T-S4B-002 /drenyra:resume (REQ-CMD-007; SC-CMD-006)", () => {
     expect(machine.recovery.recovered).toContain(missionId);
     // Evidence-based decision: the operator decides the next step; nothing re-ran.
     const binding = makeScopeBinding();
-    const coordinator = new EdaMissionCoordinator(binding, { storesRoot: ctx.root });
+		const coordinator = new EdaMissionCoordinator(binding, {
+			storesRoot: ctx.root,
+		});
     const persisted = await coordinator.stores.store.findById(missionId);
     expect(persisted!.status).toBe(AccountingMissionStatus.UNKNOWN);
   });
@@ -471,8 +521,13 @@ describe("T-S4B-002 /drenyra:resume (REQ-CMD-007; SC-CMD-006)", () => {
   it("leaves terminal missions untouched (never replayed)", async () => {
     const binding = makeScopeBinding();
     const root = mkdtempSync(join(tmpdir(), "drenyra-s4b-terminal-"));
-    const coordinator = new EdaMissionCoordinator(binding, { storesRoot: root });
-    await coordinator.start({ intent: "reconciliation", sourceRefs: ["ref://ledger-202507"] });
+		const coordinator = new EdaMissionCoordinator(binding, {
+			storesRoot: root,
+		});
+		await coordinator.start({
+			intent: "reconciliation",
+			sourceRefs: ["ref://ledger-202507"],
+		});
     const mission = await coordinator.findActiveMission();
     let result = await coordinator.advance({ missionId: mission!.id });
     let guard = 0;
@@ -488,7 +543,10 @@ describe("T-S4B-002 /drenyra:resume (REQ-CMD-007; SC-CMD-006)", () => {
     const command = findCommand(ctx, "drenyra:resume");
     const output = await runHandler(command.handler, mission!.id);
     expect(output).toContain("preserved");
-    const machine = parseMachineOutput(output) as { outcome: string; status: string };
+		const machine = parseMachineOutput(output) as {
+			outcome: string;
+			status: string;
+		};
     expect(machine.outcome).toBe("preserved");
     expect(machine.status).toBe(AccountingMissionStatus.COMPLETED);
   });
@@ -500,12 +558,17 @@ describe("T-S4B-002 /drenyra:resume (REQ-CMD-007; SC-CMD-006)", () => {
     const command = findCommand(ctx, "drenyra:resume");
     await runHandler(command.handler, missionId); // RUNNING -> UNKNOWN (once)
     const binding = makeScopeBinding();
-    const coordinator = new EdaMissionCoordinator(binding, { storesRoot: ctx.root });
+		const coordinator = new EdaMissionCoordinator(binding, {
+			storesRoot: ctx.root,
+		});
     const before = await coordinator.stores.store.findById(missionId);
     // UNKNOWN missions are decided by evidence (REQ-MISS-007): a second pass
     // preserves the mission untouched and never re-runs it.
     const second = await runHandler(command.handler, missionId);
-    const machine = parseMachineOutput(second) as { outcome: string; status: string };
+		const machine = parseMachineOutput(second) as {
+			outcome: string;
+			status: string;
+		};
     expect(machine.outcome).toBe("preserved");
     expect(machine.status).toBe(AccountingMissionStatus.UNKNOWN);
     const after = await coordinator.stores.store.findById(missionId);
@@ -533,7 +596,10 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     const fixture = makeHarnessReceiptRecord(binding);
     await new ReceiptStore(ctx.root).save(fixture.record);
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, fixture.record.receipt.receiptHash);
+		const output = await runHandler(
+			command.handler,
+			fixture.record.receipt.receiptHash,
+		);
     expect(output).toContain(fixture.record.receipt.receiptHash);
     const machine = parseMachineOutput(output) as {
       command: string;
@@ -543,7 +609,9 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     expect(machine.command).toBe("receipt");
     expect(machine.receiptHash).toBe(fixture.record.receipt.receiptHash);
     expect(machine.receipt.receiptType).toBe("APPROVAL");
-    expect(machine.receipt.signerKeyId).toBe(fixture.record.receipt.signerKeyId);
+		expect(machine.receipt.signerKeyId).toBe(
+			fixture.record.receipt.signerKeyId,
+		);
   });
 
   it("reports usage when no id is given", async () => {
@@ -561,7 +629,10 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     const fixture = makeHarnessReceiptRecord(binding);
     await seedReceiptAndKey(ctx.root, fixture);
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${fixture.record.receipt.receiptHash}`);
+		const output = await runHandler(
+			command.handler,
+			`verify ${fixture.record.receipt.receiptHash}`,
+		);
     expect(output).toContain("VALID");
     const machine = parseMachineOutput(output) as {
       command: string;
@@ -589,11 +660,17 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     // Tamper AFTER signing: mutate the signed content.
     fixture.record = {
       ...fixture.record,
-      receipt: { ...fixture.record.receipt, content: { ...fixture.record.receipt.content, decision: "REJECT" } },
+			receipt: {
+				...fixture.record.receipt,
+				content: { ...fixture.record.receipt.content, decision: "REJECT" },
+			},
     };
     await seedReceiptAndKey(ctx.root, fixture);
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${fixture.record.receipt.receiptHash}`);
+		const output = await runHandler(
+			command.handler,
+			`verify ${fixture.record.receipt.receiptHash}`,
+		);
     expect(output).not.toContain(": VALID");
     const machine = parseMachineOutput(output) as {
       valid: boolean;
@@ -613,8 +690,14 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     // Persist the record but NOT the trusted key -> UNKNOWN_SIGNER.
     await new ReceiptStore(ctx.root).save(fixture.record);
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${fixture.record.receipt.receiptHash}`);
-    const machine = parseMachineOutput(output) as { valid: boolean; engineStatus: string };
+		const output = await runHandler(
+			command.handler,
+			`verify ${fixture.record.receipt.receiptHash}`,
+		);
+		const machine = parseMachineOutput(output) as {
+			valid: boolean;
+			engineStatus: string;
+		};
     expect(machine.valid).toBe(false);
     expect(machine.engineStatus).toBe("UNKNOWN_SIGNER");
   });
@@ -630,10 +713,19 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
       issuedAt: "2020-01-01T00:00:00.000Z",
       expiresAt: "2021-01-01T00:00:00.000Z",
     };
-    await seedReceiptAndKey(ctx.root, { record: fixture.record, key: expiredKey });
+		await seedReceiptAndKey(ctx.root, {
+			record: fixture.record,
+			key: expiredKey,
+		});
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${fixture.record.receipt.receiptHash}`);
-    const machine = parseMachineOutput(output) as { valid: boolean; engineStatus: string };
+		const output = await runHandler(
+			command.handler,
+			`verify ${fixture.record.receipt.receiptHash}`,
+		);
+		const machine = parseMachineOutput(output) as {
+			valid: boolean;
+			engineStatus: string;
+		};
     expect(machine.valid).toBe(false);
     expect(machine.engineStatus).toBe("KEY_EXPIRED");
   });
@@ -649,10 +741,19 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
       issuedAt: "2020-01-01T00:00:00.000Z",
       revokedAt: "2026-06-01T00:00:00.000Z",
     };
-    await seedReceiptAndKey(ctx.root, { record: fixture.record, key: revokedKey });
+		await seedReceiptAndKey(ctx.root, {
+			record: fixture.record,
+			key: revokedKey,
+		});
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${fixture.record.receipt.receiptHash}`);
-    const machine = parseMachineOutput(output) as { valid: boolean; engineStatus: string };
+		const output = await runHandler(
+			command.handler,
+			`verify ${fixture.record.receipt.receiptHash}`,
+		);
+		const machine = parseMachineOutput(output) as {
+			valid: boolean;
+			engineStatus: string;
+		};
     expect(machine.valid).toBe(false);
     expect(machine.engineStatus).toBe("KEY_REVOKED");
   });
@@ -664,7 +765,10 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     const fixture = makeHarnessReceiptRecord(wrongBinding);
     await seedReceiptAndKey(ctx.root, fixture);
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${fixture.record.receipt.receiptHash}`);
+		const output = await runHandler(
+			command.handler,
+			`verify ${fixture.record.receipt.receiptHash}`,
+		);
     const machine = parseMachineOutput(output) as {
       valid: boolean;
       scopeValid: boolean;
@@ -679,7 +783,10 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     const ctx = makeHarness();
     setupScope(ctx);
     const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, `verify ${"0".repeat(64)}`);
+		const output = await runHandler(
+			command.handler,
+			`verify ${"0".repeat(64)}`,
+		);
     expect(output).toContain("not found");
   });
 

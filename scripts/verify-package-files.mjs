@@ -59,7 +59,14 @@ for (const entry of [
 }
 
 // Asset placeholder dirs ship with a README each (layout contract, README.md).
-for (const dir of ["assets", "prompts", "skills", "agents", "chains", "themes"]) {
+for (const dir of [
+	"assets",
+	"prompts",
+	"skills",
+	"agents",
+	"chains",
+	"themes",
+]) {
   check(`${dir}/README.md`, undefined, undefined);
 }
 
@@ -80,7 +87,7 @@ if (
   pkg.pi.extensions[0] !== "./dist/extensions/register.js"
 ) {
   errors.push(
-"package.json pi.extensions must be exactly [\"./dist/extensions/register.js\"] (one compiled entrypoint)",
+		'package.json pi.extensions must be exactly ["./dist/extensions/register.js"] (one compiled entrypoint)',
   );
 }
 if (!Array.isArray(pkg.pi?.prompts) || !pkg.pi.prompts.includes("./prompts")) {
@@ -93,10 +100,12 @@ if (!Array.isArray(pkg.pi?.themes) || !pkg.pi.themes.includes("./themes")) {
   errors.push("package.json pi.themes must include ./themes");
 }
 if (pkg.exports?.["."] !== "./dist/index.js") {
-  errors.push("package.json exports[\".\"] must be ./dist/index.js");
+	errors.push('package.json exports["."] must be ./dist/index.js');
 }
 if (pkg.exports?.["./extensions"] !== "./dist/extensions/register.js") {
-  errors.push("package.json exports[\"./extensions\"] must be ./dist/extensions/register.js");
+	errors.push(
+		'package.json exports["./extensions"] must be ./dist/extensions/register.js',
+	);
 }
 
 if (errors.length > 0) {
