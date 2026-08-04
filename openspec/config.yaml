@@ -28,11 +28,11 @@ conventions:
   money: BigInt cents — never floats
   checksums: lowercase hex sha256
   error_codes: JSON integer codes
-  testing: vitest runner, fast suite (54 tests / ~1s), strict mode active
-
+  testing: vitest runner, fast suite (493 tests / ~1s), strict mode active
+    
 current_test_state:
-  files: 8
-  tests: 54
+  files: 29
+  tests: 493
   passing: true
   command: bun test
 
