@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -319,7 +319,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
        registerDrenyraPiExtension(pi, { contextStore: store });
       const command = registered.find((c) => c.name === "drenyra:verify");
       expect(command).toBeDefined();
-      let output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
+      const output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
        expect(output).toContain("missing");
       cleanupTempStore(store);
     }
@@ -450,7 +450,66 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
         }
   });
   });
-describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () => {
+    describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", () => {
+      it("ships the seven agents and their asset mirrors in the package", () => {
+        const roles = [
+          "accounting-scout",
+          "evidence-builder",
+          "ledger-analyst",
+          "reconciliation-agent",
+          "tax-controller-pe",
+          "anomaly-refuter",
+          "close-controller",
+        ];
+        const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+          files?: string[];
+        };
+        expect(pkg.files).toContain("agents");
+        expect(pkg.files).toContain("assets");
+        for (const role of roles) {
+          const source = readFileSync(join(process.cwd(), "agents", `${role}.md`), "utf8");
+          const mirror = readFileSync(
+            join(process.cwd(), "assets", "agents", `${role}.md`),
+            "utf8",
+          );
+          expect(mirror, `${role} mirror`).toBe(source);
+        }
+      });
+
+      it("ships prompts, skills, and themes that the pi manifest entries resolve", () => {
+        const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+          pi?: { prompts?: string[]; skills?: string[]; themes?: string[] };
+        };
+        const dirs = ["prompts", "skills", "themes"] as const;
+        for (const key of dirs) {
+          const entries = pkg.pi?.[key] ?? [];
+          expect(entries.length, `pi.${key} must declare entries`).toBeGreaterThan(0);
+          for (const entry of entries) {
+            const resolved = join(process.cwd(), entry.replace(/^\.\//, ""));
+            expect(statSync(resolved).isDirectory(), `${entry} must resolve to a directory`).toBe(
+              true,
+            );
+          }
+        }
+        // Concrete content counts (REQ-SKPT-001/002/003).
+        expect(
+              readdirSync(join(process.cwd(), "prompts")).filter(
+                (f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md",
+              ),
+            ).toHaveLength(15);
+            expect(
+              readdirSync(join(process.cwd(), "skills"))
+                .filter((entry) => entry.toLowerCase() !== "readme.md")
+                .sort(),
+            ).toEqual(["chain-operation", "evidence-citation", "scope-discipline"]);
+        const themeManifest = JSON.parse(
+          readFileSync(join(process.cwd(), "themes", "fiscal-operator", "manifest.json"), "utf8"),
+        ) as { variants?: Record<string, string> };
+        expect(Object.keys(themeManifest.variants ?? {})).toEqual(["light", "dark"]);
+      });
+    });
+
+    describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () => {
 	const RECONCILE_MANIFEST = JSON.stringify({
 		bank: [
 			{ reference: "B001", amountCents: 10_000 },

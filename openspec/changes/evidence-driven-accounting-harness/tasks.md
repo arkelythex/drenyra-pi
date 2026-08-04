@@ -452,7 +452,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Common contract present in every definition (REQ-AGENT-003..006; SC-AGENT-002, 003, 005).
   - Refutation gate enforced for anomaly-refuter (REQ-AGENT-007; SC-AGENT-004).
   - `bun test` green; `bun run typecheck` green.
-- [ ] T-S6-001 — agents + mirrors. <!-- sdd-owner: implementation -->
+- [x] T-S6-001 — agents + mirrors. <!-- sdd-owner: implementation -->
 
 #### T-S6-002 — Policy, schema, and chain assets
 
@@ -462,7 +462,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Policies encode all five v0.1 non-goals (REQ-SKPT-005, 008; SC-SKPT-002).
   - Schema + chain assets are real, valid content (REQ-SKPT-004, 006).
   - `bun test` green.
-- [ ] T-S6-002 — policy/schema/chain assets. <!-- sdd-owner: implementation -->
+- [x] T-S6-002 — policy/schema/chain assets. <!-- sdd-owner: implementation -->
 
 #### T-S6-003 — Skills, prompts, and fiscal-operator theme
 
@@ -472,7 +472,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - 1–3 real skills; persona + 14-command prompts aligned (REQ-SKPT-001, 002; SC-SKPT-004, 005).
   - One theme with light/dark variants resolving via manifest (REQ-SKPT-003; SC-SKPT-003).
   - `bun test` green.
-- [ ] T-S6-003 — skills, prompts, theme. <!-- sdd-owner: implementation -->
+- [x] T-S6-003 — skills, prompts, theme. <!-- sdd-owner: implementation -->
 
 #### T-S6-004 — Package verification extension: manifest + shipped-file conformance
 
@@ -482,7 +482,7 @@ PR #1  S1  contracts + scope model + canonicalization
   - Agent definitions included in package verification (REQ-AGENT-009).
   - Manifest conformance for prompts/skills/themes + asset tree (REQ-SKPT-007; SC-SKPT-001).
   - `bun test`, `bun run build`, `node scripts/verify-package-files.mjs` all green.
-- [ ] T-S6-004 — package verification. <!-- sdd-owner: implementation -->
+- [x] T-S6-004 — package verification. <!-- sdd-owner: implementation -->
 
 ---
 
