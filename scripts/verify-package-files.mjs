@@ -42,6 +42,8 @@ for (const entry of [
   "dist/extensions/mission-status.d.ts",
   "dist/extensions/startup-panel.js",
   "dist/extensions/startup-panel.d.ts",
+  "dist/extensions/mission-commands.js",
+  "dist/extensions/mission-commands.d.ts",
   "dist/scripts/install-drenyra-ai.js",
 ]) {
   check(entry, undefined, undefined);
