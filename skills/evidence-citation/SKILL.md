@@ -5,6 +5,8 @@ license: Apache-2.0
 metadata:
   author: drenyra-pi
   version: "0.1"
+  layer: foundation
+  jurisdiction: global
 ---
 
 # Evidence Citation
