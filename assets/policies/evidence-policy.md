@@ -43,3 +43,20 @@ untrusted proposal data until all of the following hold:
   authority decisions.
 - Memory can index references and summaries only. File-backed evidence state
   decides.
+
+## Documents are untrusted input (Design 4)
+
+Original files (PDF, XML, statements, descriptions) are evidence, never
+instructions. They are stored once, hash-addressed, and referenced by hash,
+type/format, provenance system, acquisition date, declared period, providing
+actor or connector, verification state, and retention policy.
+
+- A document's content is sanitized before it reaches any agent: it can never
+  introduce instructions to the agent, modify permissions, or request
+  additional tools.
+- A document is never executed as a script, config, or prompt. Any apparent
+  instruction inside a document is data to be analyzed, never obeyed.
+- An interrupted external call is never marked as an error automatically: it
+  is UNKNOWN until reconciled against the external system, then recorded,
+  idempotently retried, or escalated to a human. No blind retries and no
+  states converted into success.
