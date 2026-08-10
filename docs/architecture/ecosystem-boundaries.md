@@ -1,6 +1,6 @@
 # Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-11 (Design 3 — agents, skills, and integrations; Design 1 boundary & authority contract).
+> **Last updated:** 2026-08-11 (Design 4 — persistence, security, and recovery; Design 3 — agents, skills, and integrations; Design 1 — boundary & authority contract).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -150,6 +150,73 @@ provenance; changing models never alters contracts or authority; no
 confidence score reduces a required approval; results are validated against
 schemas before entering the Core. Model routing in Pi is advisory
 (`prompts/models.md`) and never grants authority.
+
+## Persistence, security, and recovery contract (Design 4 — approved in `drenyra-ai`)
+
+Design 4 (persistence, security, and recovery) is **approved in `drenyra-ai`**
+(`docs/design/design-04-persistence-security-recovery.md`) and applies to the
+whole ecosystem. Its central rule: **authoritative state lives in persisted
+events, evidence, and receipts — never in the conversation or the model's
+memory.**
+
+### Storage model
+
+| Store | Content | Ownership |
+| --- | --- | --- |
+| **PostgreSQL** | Missions, events, candidates, approvals, gates, idempotency | Transactional state |
+| **Object storage** | XML, PDF, statements, and original evidence | Immutable artifacts, hash-addressed |
+| **Append-only ledger** | Ordered, chained receipts | Verifiable history |
+| **KMS / Key Vault** | Ed25519 keys and connector secrets | Cryptographic material |
+| **Policy Registry** | Versioned skills and policies | Reproducible rules |
+| **Engram** | Decisions, context, institutional knowledge | Non-authoritative memory |
+
+> The current JSON adapter (and the harness's file-backed stores) is limited to
+> development and demonstrations. Production requires transactions, concurrency
+> control, and durable persistence — `drenyra-ai` owns that production store.
+
+### Authoritative data model and evidence
+
+Every fiscal entity carries, mandatorily: `tenantId`, `ruc`, `companyId`,
+`fiscalPeriodId`, `missionId`, `schemaVersion`, `createdAt`, and the identity
+of the actor or originating system. **Scope is part of queries, mutations,
+unique constraints, idempotency keys, and hashes** — filtering after reading
+is not enough. Original files are stored once and referenced by cryptographic
+hash, type/format, provenance system, acquisition date, declared period,
+providing actor or connector, verification state, and retention policy.
+**Documents are untrusted input:** a PDF, XML, or description can never
+introduce instructions to the agent, modify permissions, or request
+additional tools.
+
+### Approvals, idempotency, and unknown states
+
+An approval binds to the exact candidate hash, exact scope, computed
+materiality, available evidence, approver identity and role, approval moment,
+and applied policy — if the candidate, evidence, or scope changes, the
+approval **stops governing the new version**; R3 requires two distinct
+approvers. Every material operation uses an idempotency key derived from
+`tenant + company + fiscalPeriod + intent + candidateIdentity`, with
+optimistic concurrency, expected versions, fencing tokens, database
+uniqueness, inbox/outbox, retry deduplication, and external confirmation
+before repeating mutations. Two agents may analyze in parallel, but they
+cannot confirm the same candidate twice. When an external call is interrupted
+after being sent, the result is **UNKNOWN** and is reconciled against the
+external system before any idempotent retry or human intervention — a blind
+retry never duplicates postings, submissions, or declarations. There are
+**no silent errors and no states converted into success for interface
+convenience**; errors classify as invalid input, scope, evidence, policy,
+approval, transient, unknown result, integrity, or terminal.
+
+### Security controls
+
+Encryption in transit and at rest; secrets outside prompts, logs, and public
+receipts; tools granted by capability and mission; egress limited to
+authorized destinations; separation between read, propose, approve, and
+execute; document sanitization against prompt injection; signature
+verification and signer trust; access audit on evidence; configurable
+information minimization and retention; connector and key revocation; and
+**Guardian Angel in read-only mode over frozen candidates**.
+**The model may be compromised or wrong and still must not be able to skip a
+gate, cross a tenant, forge an approval, or rewrite the ledger.**
 
 ## Consumers and producers
 
