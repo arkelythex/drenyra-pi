@@ -1,6 +1,6 @@
 # Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-11 (Design 1 — boundary & authority contract).
+> **Last updated:** 2026-08-11 (Design 3 — agents, skills, and integrations; Design 1 boundary & authority contract).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -79,6 +79,77 @@ flowchart TD
 - Drenyra and Drenyra Pi consume **published versions** of Drenyra-AI. Drenyra-AI never depends on them.
 - The UI may go down and rebuild from Core state; a transcript may be lost and the mission recovered from events and evidence.
 - **No consumer may convert a Core rejection into an approval.**
+
+## Agent orchestration contract (Design 3 — approved in `drenyra-ai`)
+
+Design 3 (agents, skills, and integrations) is **approved in `drenyra-ai`**
+(`docs/design/design-03-agents-skills-integrations.md`) and applies to the whole
+ecosystem. Its architectural rule: **use AI to interpret, investigate, and
+propose; use deterministic code to compute, validate, authorize, and record.**
+Not every function becomes an "agent" — monetary calculations, states,
+materiality, isolation, gates, hashes, and receipts stay outside the model.
+
+```mermaid
+flowchart TD
+S["Drenyra · Pi · External hosts"] --> I["SDK · MCP · CLI"]
+I --> O["Mission Orchestrator"]
+O --> W["Specialized agents"]
+W --> C["Structured candidates"]
+C --> K["Deterministic Core"]
+K --> R["Gates · Receipts · Ledger"]
+```
+
+### MissionOrchestrator holds no fiscal authority
+
+The MissionOrchestrator controls the mission but **never authorizes**:
+it splits the close into bounded jobs, selects compatible agents and skills,
+provides minimal context and immutable evidence, controls budget, attempts,
+and concurrency, receives structured results, delivers candidates to the
+Core, and pauses when evidence or a human decision is missing.
+**The Core remains the only component able to accept a transition.**
+
+### Agents propose; they never decide
+
+Each specialized agent receives a bounded task and returns a **known schema**
+(evidence manifest, exceptions and candidates, explained differences,
+candidate journal entries, compliance findings, close plan). Free text may
+accompany the explanation but never replaces structured values, references,
+hashes, or states. The seven ecosystem roles (Close Coordinator, Evidence
+Agent, Invoice/SIRE Agent, Reconciliation Agent, Journal Candidate Agent,
+Compliance Agent, Guardian Angel — which produces findings, never approval)
+map to Pi subagents in `agents/README.md`.
+
+### Skills are layered and versioned
+
+Skills follow three layers: **Foundation** (evidence, isolation, money,
+candidates, recovery — very stable), **Peru** (SUNAT, SIRE, IGV, detractions,
+withholdings, perceptions — versioned by validity period), and
+**Practice / sector** (commerce, services, agriculture, mining, accounting
+firms — extensible later). Each skill declares identifier/version,
+jurisdiction/validity, normative sources, declared inputs/outputs, required
+permissions, maximum autonomy, tests and fixtures, contract compatibility,
+signature/checksum, and replacement/retirement policy. A normative update
+never retroactively modifies a mission; the receipt records exactly which
+skill and policy version was used.
+
+### Integrations and CLI
+
+v1.0 integrations in order: Drenyra SDK/API (Command Center primary surface),
+Drenyra Pi (its own harness with an exact Drenyra AI version), MCP server
+(uniform access for external hosts), Codex/Claude Code/OpenCode (first agent
+adapters), and ERP/SUNAT/banks connectors (evidence and confirmed execution).
+Drenyra AI **detects and configures existing hosts** — following Gentle-AI's
+philosophy, it never installs Codex, Claude, or OpenCode for the user.
+The runtime CLI is `drenyra-ai install | doctor | sync | capabilities`.
+
+### Models are provider-agnostic
+
+Models are selected by capability, cost, and risk; a mission may use
+different models per specialty; prompts and models are recorded as
+provenance; changing models never alters contracts or authority; no
+confidence score reduces a required approval; results are validated against
+schemas before entering the Core. Model routing in Pi is advisory
+(`prompts/models.md`) and never grants authority.
 
 ## Consumers and producers
 
