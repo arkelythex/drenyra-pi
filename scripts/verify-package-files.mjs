@@ -132,7 +132,7 @@ function check(relativePath, predicate, message) {
       check(`${dir}/README.md`, undefined, undefined);
     }
 
-    // The seven agent definitions ship under agents/ and mirror byte-for-byte
+    // The ten agent definitions ship under agents/ and mirror byte-for-byte
     // under assets/agents/ (REQ-AGENT-001/002/009).
     const AGENT_ROLES = [
       "accounting-scout",
@@ -142,6 +142,9 @@ function check(relativePath, predicate, message) {
       "tax-controller-pe",
       "anomaly-refuter",
       "close-controller",
+      "invoice-sire-agent",
+      "journal-candidate-agent",
+      "guardian-angel",
     ];
     for (const role of AGENT_ROLES) {
       check(`agents/${role}.md`, undefined, undefined);
