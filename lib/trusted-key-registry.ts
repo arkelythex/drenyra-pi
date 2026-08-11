@@ -36,6 +36,7 @@ import {
 import { randomBytes } from "node:crypto";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import type { SigningKeyInfo } from "drenyra-ai/receipts";
+import { parseJsonOrThrow } from "./parse.js";
 
 /** The workspace-local trusted-key registry document (design §6.1). */
 export interface TrustedKeyRegistryDocument {
@@ -227,14 +228,10 @@ export class TrustedKeyRegistry {
     } catch {
       throw new Error(`trusted-key registry corrupt: ${this.filePath} is unreadable`);
     }
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(raw) as unknown;
-    } catch {
-      throw new Error(
-        `trusted-key registry corrupt: ${this.filePath} is not valid JSON — repair is explicit and never automatic`,
-      );
-    }
+    const parsed = parseJsonOrThrow(
+      raw,
+      `trusted-key registry corrupt: ${this.filePath} is not valid JSON — repair is explicit and never automatic`,
+    );
     assertValidDocument(parsed as TrustedKeyRegistryDocument);
     return parsed as TrustedKeyRegistryDocument;
   }
