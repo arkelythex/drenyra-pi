@@ -36,6 +36,6 @@ Extracted via vertical PRs and versioned releases, **not** a bulk move:
 
 ## Non-goals (for now)
 
-- Full accounting engine (that is `arkelythex/Drenyra`)
+- Full accounting engine (that is `arkelythex/drenyra-app-web`)
 - Agent runtime (that is `arkelythex/drenyra-ai`)
 - Memory engine (that is `arkelythex/drenyra-engram`)

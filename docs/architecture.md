@@ -66,4 +66,4 @@ Pi host
 
 ## Repository scope
 
-This repo is the Pi harness only. The accounting engine, UI, and product surfaces live in `arkelythex/Drenyra`; the agent runtime in `arkelythex/drenyra-ai`; the memory engine in `arkelythex/drenyra-engram`.
+This repo is the Pi harness only. The accounting engine, UI, and product surfaces live in `arkelythex/drenyra-app-web`; the agent runtime in `arkelythex/drenyra-ai`; the memory engine in `arkelythex/drenyra-engram`.
