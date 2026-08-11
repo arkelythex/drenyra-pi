@@ -47,13 +47,18 @@ cyan `#2ECFC2` edges, pin to `#6B54A8`, padlock to `#1A8F52`, arcs to
 `#D4D4D0`.
 
 ## Validate
-
+    
 ```bash
-node /home/dreamcoder08/Documents/PROYECTOS/drenyra-ai/scripts/brand-conformance.mjs \
+node ../drenyra-ai/scripts/brand-conformance.mjs \
   assets/branding/drenyra-pi-banner.png
 # expect: ✓ <file> (coverage >= 0.92) ... PASS
 ```
-
+    
+The checker is referenced from the sibling-checkout layout: clone `drenyra-ai`
+next to this repository so `../drenyra-ai/scripts/brand-conformance.mjs`
+resolves (the same `../<repo>` layout `drenyra-ai/scripts/brand-ecosystem-status.mjs`
+assumes) — no host-specific absolute path.
+    
 Iterate with the checker's off-palette feedback until coverage ≥ 0.92. Then
 `bun run brand:ecosystem` in drenyra-ai must report this repo `PASS` before
 brand-system can freeze to v0.3.
