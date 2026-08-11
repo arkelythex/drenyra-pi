@@ -30,6 +30,7 @@ import { dirname, join, resolve, sep } from "node:path";
 import { ACTION_FAMILY, type ActionFamily, type AuthorizationRecord } from "./authority-gates.js";
 import { AUTHORITY_MODE } from "../runtime/context.js";
 import { sha256Canonical } from "./canonicalization.js";
+import { eachNdjsonLine, parseJsonOrThrow } from "./parse.js";
 
 const SAFE_IDENTIFIER_RE = /^[A-Za-z0-9._-]{1,128}$/;
 const SCOPE_HASH_RE = /^[0-9a-f]{64}$/;
@@ -155,19 +156,11 @@ export class AuthorityStore {
     }
     const raw = readFileSync(path, "utf8");
     const records: AuthorizationRecord[] = [];
-    const lines = raw.split("\n");
-    for (const line of lines) {
-      if (line.trim().length === 0) {
-        continue;
-      }
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(line) as unknown;
-      } catch {
-        throw new Error(
-          `authority log corrupt: ${path} contains a malformed line — repair is explicit and never automatic`,
-        );
-      }
+    eachNdjsonLine(raw, (line) => {
+      const parsed = parseJsonOrThrow(
+        line,
+        `authority log corrupt: ${path} contains a malformed line — repair is explicit and never automatic`,
+      );
       const record = parsed as AuthorizationRecord;
       if (
         typeof record !== "object" ||
@@ -181,7 +174,7 @@ export class AuthorityStore {
         );
       }
       records.push(record);
-    }
+    });
     return records;
   }
 

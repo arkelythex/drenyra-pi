@@ -29,6 +29,7 @@ import { randomBytes } from "node:crypto";
 import { dirname, join } from "node:path";
 import type { ReceiptContent, ReceiptType, SignedReceipt } from "drenyra-ai/receipts";
 import { sha256Canonical } from "./canonicalization.js";
+import { parseJsonOrThrow } from "./parse.js";
 
 /** The harness receipt binding (design §3.3) signed through the engine payloadHash. */
 export interface ReceiptBinding {
@@ -231,14 +232,10 @@ function parseRecordFile(path: string): HarnessReceiptRecord {
   } catch {
     throw new Error(`receipt store corrupt: ${path} is unreadable`);
   }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw) as unknown;
-  } catch {
-    throw new Error(
-      `receipt store corrupt: ${path} is not valid JSON — repair is explicit and never automatic`,
-    );
-  }
+  const parsed = parseJsonOrThrow(
+    raw,
+    `receipt store corrupt: ${path} is not valid JSON — repair is explicit and never automatic`,
+  );
   const validation = validateHarnessReceiptRecord(parsed);
   if (!validation.valid) {
     throw new Error(`receipt store corrupt: ${path} — ${validation.errors.join("; ")}`);

@@ -33,6 +33,7 @@ import type {
   ChainStepContext,
   ChainStepOutcome,
 } from "../lib/chain-pipeline.js";
+import { parseJsonOrThrow } from "../lib/parse.js";
 
 /** One bounded evidence op envelope (the command boundary). */
 export type EvidenceOp =
@@ -133,12 +134,11 @@ export function parseEvidenceOp(json: string): {
   missionId?: string;
   op: EvidenceOp;
 } {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json) as unknown;
-  } catch (error) {
-    throw new Error(`evidence: the op envelope is not valid JSON — ${(error as Error).message}`);
-  }
+  const parsed = parseJsonOrThrow<unknown>(
+    json,
+    "evidence: the op envelope is not valid JSON",
+    { includeMessage: true },
+  );
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
     throw new Error("evidence: the op envelope must be an object");
   }

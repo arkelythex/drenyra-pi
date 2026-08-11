@@ -39,6 +39,7 @@ import type {
 	ChainStepContext,
 	ChainStepOutcome,
 } from "../lib/chain-pipeline.js";
+import { parseJsonOrThrow } from "../lib/parse.js";
 
 /** One manifest entry: a reference plus money at the JSON boundary. */
 export interface ReconcileManifestEntry {
@@ -172,14 +173,11 @@ function parseEntryList(
  * over-limit entry lists all fail closed.
  */
 export function parseReconcileManifest(json: string): ReconcileSourceManifest {
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(json) as unknown;
-	} catch (error) {
-		throw new Error(
-			`reconcile: the source manifest is not valid JSON — ${(error as Error).message}`,
-		);
-	}
+	const parsed = parseJsonOrThrow<unknown>(
+		json,
+		"reconcile: the source manifest is not valid JSON",
+		{ includeMessage: true },
+	);
 	if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
 		throw new Error(
 			"reconcile: the source manifest must be an object with bank and ledger entry lists",

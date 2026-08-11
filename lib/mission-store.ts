@@ -57,6 +57,7 @@ import {
 } from "drenyra-ai/missions";
 import type { MissionRuntime } from "drenyra-ai/missions";
 import { isSafeStoreIdentifier } from "./authority-store.js";
+import { eachNdjsonLine, parseJsonOrThrow } from "./parse.js";
 
 /** The versioned store schema shared by every envelope (design §8.1). */
 export const MISSION_STORE_SCHEMA_VERSION = 1;
@@ -310,13 +311,10 @@ function parseJsonFile(path: string, label: string): unknown {
   } catch {
     throw new Error(`mission store corrupt: ${label} at ${path} is unreadable`);
   }
-  try {
-    return JSON.parse(raw) as unknown;
-  } catch {
-    throw new Error(
-      `mission store corrupt: ${label} at ${path} is not valid JSON — repair is explicit and never automatic`,
-    );
-  }
+  return parseJsonOrThrow(
+    raw,
+    `mission store corrupt: ${label} at ${path} is not valid JSON — repair is explicit and never automatic`,
+  );
 }
 
 function readSnapshotFile(path: string): MissionSnapshot {
@@ -330,14 +328,10 @@ function readSnapshotFile(path: string): MissionSnapshot {
 }
 
 function readEventLine(line: string, path: string, missionId: string): MissionEvent {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(line) as unknown;
-  } catch {
-    throw new Error(
-      `mission event log corrupt: ${path} contains a malformed line — repair is explicit and never automatic`,
-    );
-  }
+  const parsed = parseJsonOrThrow(
+    line,
+    `mission event log corrupt: ${path} contains a malformed line — repair is explicit and never automatic`,
+  );
   const envelope = assertEnvelopeVersion(parsed, path);
   if (envelope.schema !== SCHEMA_IDS.EVENT) {
     throw new Error(`mission event log corrupt: ${path} is not a mission event document`);
@@ -483,12 +477,9 @@ export class FileMissionEventStore implements MissionEventStore {
     }
     const raw = readFileSync(path, "utf8");
     const events: MissionEvent[] = [];
-    for (const line of raw.split("\n")) {
-      if (line.trim().length === 0) {
-        continue;
-      }
+    eachNdjsonLine(raw, (line) => {
       events.push(readEventLine(line, path, missionId));
-    }
+    });
     events.sort((a, b) => a.sequence - b.sequence);
     return events;
   }

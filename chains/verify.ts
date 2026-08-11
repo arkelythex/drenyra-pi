@@ -25,6 +25,7 @@ import { AUTHORITY_MODE } from "../runtime/context.js";
 import { EDA_PHASE, type EdaPhase } from "../lib/accounting-status.js";
 import { bindScope, sha256Canonical, type ScopeBinding } from "../lib/canonicalization.js";
 import { AuthorityStore } from "../lib/authority-store.js";
+import { parseJsonOrThrow } from "../lib/parse.js";
 import type { EvidenceGraphStore } from "../lib/evidence-graph.js";
 import {
   ReceiptStore,
@@ -282,14 +283,11 @@ function parseManifestRecord(value: unknown): VerifySourceManifest {
  * over-limit entry lists all fail closed.
  */
 export function parseVerifyInput(json: string): VerifyChainInput {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json) as unknown;
-  } catch (error) {
-    throw new Error(
-      `verify: the source manifest is not valid JSON — ${(error as Error).message}`,
-    );
-  }
+  const parsed = parseJsonOrThrow<unknown>(
+    json,
+    "verify: the source manifest is not valid JSON",
+    { includeMessage: true },
+  );
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
     throw new Error(
       "verify: the source manifest must be an object with ledger and bank entry lists",

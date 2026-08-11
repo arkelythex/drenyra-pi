@@ -40,6 +40,7 @@ import {
 import { join } from "node:path";
 import { computeEvidenceHash, type EvidenceItem } from "drenyra-ai/receipts";
 import { sha256Canonical, canonicalizePayload } from "./canonicalization.js";
+import { eachNdjsonLine, parseJsonOrThrow } from "./parse.js";
 import { isSafeStoreIdentifier } from "./authority-store.js";
 
 export const EVIDENCE_RECORD_KIND = {
@@ -376,18 +377,11 @@ export class EvidenceGraphStore {
     const raw = readFileSync(path, "utf8");
     const nodes: EvidenceNode[] = [];
     const edges: EvidenceEdge[] = [];
-    for (const line of raw.split("\n")) {
-      if (line.trim().length === 0) {
-        continue;
-      }
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(line) as unknown;
-      } catch {
-        throw new Error(
-          `evidence log corrupt: ${path} contains a malformed or truncated line — repair is explicit and never automatic`,
-        );
-      }
+    eachNdjsonLine(raw, (line) => {
+      const parsed = parseJsonOrThrow(
+        line,
+        `evidence log corrupt: ${path} contains a malformed or truncated line — repair is explicit and never automatic`,
+      );
       if (typeof parsed !== "object" || parsed === null) {
         throw new Error(
           `evidence log corrupt: ${path} contains a non-object record — repair is explicit and never automatic`,
@@ -418,7 +412,7 @@ export class EvidenceGraphStore {
           `evidence log corrupt: ${path} contains an unknown record kind "${String(kind)}" — repair is explicit and never automatic`,
         );
       }
-    }
+    });
         return { missionId, nodes, edges };
       }
 

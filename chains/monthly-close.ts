@@ -73,6 +73,7 @@ import { createDurableMissionStores, type DurableMissionStores } from "../lib/mi
     import type { EvidenceNode } from "../lib/evidence-graph.js";
     import { sha256Canonical, type ScopeBinding } from "../lib/canonicalization.js";
     import { ReceiptStore, type HarnessReceiptRecord } from "../lib/receipt-store.js";
+    import { eachNdjsonLine, parseJsonOrThrow } from "../lib/parse.js";
 import { assertMissionScopeReady } from "../runtime/context.js";
 
 /** Upper bound for `run()`: 13 phases plus gate/evidence resolution slack. */
@@ -354,22 +355,26 @@ export class MonthlyCloseChain {
         } catch {
           return [];
         }
-        const nodes: EvidenceNode[] = [];
-        for (const line of raw.split(/\r?\n/)) {
-          if (line.trim().length === 0) {
-            continue;
-          }
-          try {
-            const record = JSON.parse(line) as { recordKind?: string } & EvidenceNode;
-            if (record.recordKind === "node") {
-              nodes.push(record);
+            const nodes: EvidenceNode[] = [];
+            try {
+              eachNdjsonLine(
+                raw,
+                (line) => {
+                  const record = parseJsonOrThrow<{ recordKind?: string } & EvidenceNode>(
+                    line,
+                    "evidence log corrupt: malformed line — graph unavailable",
+                  );
+                  if (record.recordKind === "node") {
+                    nodes.push(record);
+                  }
+                },
+                /\r?\n/,
+              );
+            } catch {
+              // A corrupt line fails closed: treat the graph as unavailable.
+              return [];
             }
-          } catch {
-            // A corrupt line fails closed: treat the graph as unavailable.
-            return [];
-          }
-        }
-        return nodes;
+            return nodes;
       }
 
   private makeApproval(input: MonthlyCloseStepInput): ApprovalRecord {
