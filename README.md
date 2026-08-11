@@ -1,10 +1,10 @@
 # Drenyra Pi
 
-> **Private commercial product** — this repository is **private**; distribution is contractual, never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/drenyra-app-web/blob/main/docs/products/private-product-policy.md).
+> **Private commercial product** — this repository is **private**; distribution is contractual, never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/drenyra-command-center/blob/main/docs/products/private-product-policy.md).
 
 > **Pi-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
 
-> **Status: pre-alpha.** The harness is being extracted from `arkelythex/drenyra-app-web` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
+> **Status: pre-alpha.** The harness is being extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
 
@@ -68,7 +68,7 @@ Drenyra Pi uses an **exact, verified, package-local version of Drenyra AI** — 
 
 | Project                                                        | Role                                    |
 | -------------------------------------------------------------- | --------------------------------------- |
-| [Drenyra App Web](https://github.com/arkelythex/drenyra-app-web)               | Command Center — web application (consumes AI) |
+| [Drenyra Command Center](https://github.com/arkelythex/drenyra-command-center)               | Command Center — web application (consumes AI) |
 | [Drenyra AI](https://github.com/arkelythex/drenyra-ai)         | Agent ecosystem (installed, pinned)     |
 | [Drenyra Engram](https://github.com/arkelythex/drenyra-engram) | Institutional accounting memory (used)  |
 

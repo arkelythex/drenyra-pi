@@ -1,7 +1,7 @@
 /**
  * RUC validation — SUNAT Módulo 11 (checksummed, zero-dependency).
  *
- * Ported from arkelythex/drenyra-app-web `packages/shared/src/validation/ruc.ts`.
+ * Ported from arkelythex/drenyra-command-center `packages/shared/src/validation/ruc.ts`.
  * A valid Peruvian RUC is exactly 11 digits whose check digit (11th) matches
  * the Módulo 11 calculation over the first 10 digits.
  *

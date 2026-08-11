@@ -26,7 +26,7 @@ Drenyra Pi does **not** contain the accounting engine. It **installs and consume
 
 Drenyra Pi is **not**:
 
-- The accounting engine — that is `arkelythex/drenyra-app-web` (product) and `arkelythex/drenyra-ai` (runtime).
+- The accounting engine — that is `arkelythex/drenyra-command-center` (product) and `arkelythex/drenyra-ai` (runtime).
 - An agent runtime — missions, candidates, receipts, gates, and ledger belong to `drenyra-ai`.
 - A memory engine — observations and scope-first search belong to `drenyra-engram`.
 
