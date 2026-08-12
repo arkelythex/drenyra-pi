@@ -2,6 +2,16 @@
 
 > **Last updated:** 2026-08-01. Status: pre-alpha.
 
+## Program alignment
+
+Drenyra Pi participates in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion), the federated program master in `drenyra-ai` that fixes vision, authority, contracts, dependencies, gates, and sequencing across every Drenyra repository. The roadmap phases below align to the program waves:
+
+| Roadmap phase | Drenyra Dominion wave |
+| --- | --- |
+| Phase 1 — Contracts | Wave 0 (Constitution: authority, contracts, multi-repo compatibility) |
+| Phase 2 — Vertical slices | Wave 1 (Universal runtime: SDD-020 configurator, SDD-030 routing, SDD-040 RDA) |
+| Phase 3 — Ecosystem maturity | Waves 2–3 (Fiscal intelligence and flagship product) |
+
 ## Phase 0 — Identity (current)
 
 - [x] Repository created with identity scaffolding (README, LICENSE, SECURITY, CONTRIBUTING, CODEOWNERS)
