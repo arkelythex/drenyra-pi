@@ -60,3 +60,18 @@ actor or connector, verification state, and retention policy.
   is UNKNOWN until reconciled against the external system, then recorded,
   idempotently retried, or escalated to a human. No blind retries and no
   states converted into success.
+
+## National alignment
+
+Evidence integrity aligns with the national data strategy as direction, with a
+hard distinction:
+
+- **Integrity receipts are internal, not legal signatures.** Ed25519 receipt
+  signatures verify that a mission's evidence, scope, and executed target are
+  intact. They are **not** Peruvian legally-valid digital signatures and never
+  represent them.
+- The append-only, provenance-cited evidence model maps to the data quality,
+  management and privacy action line of the [Estrategia Nacional de Gobierno de
+  Datos 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030)
+  (approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm),
+  derived from the Política Nacional de Transformación Digital 2030).

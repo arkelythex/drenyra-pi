@@ -44,6 +44,17 @@ Extracted via vertical PRs and versioned releases, **not** a bulk move:
 - [ ] Multi-jurisdiction operator personas (Perú → LATAM)
 - [ ] v1.0 candidate when the harness runs a full monthly close end-to-end
 
+## National alignment direction
+
+Positioning for the Peruvian digital-government and data-protection context — roadmap direction, not implemented compliance:
+
+- [ ] Map the evidence/provenance design to the data quality, management and privacy action line of the [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030), approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm) and derived from the Política Nacional de Transformación Digital 2030
+- [ ] Track the [Reglamento de la Ley N.º 29733](https://www.gob.pe/institucion/anpd/normas-legales/6554453-16-2024-jus) (DS N.º 016-2024-JUS) as privacy-by-design input
+- [ ] Evaluate interoperable evidence adapters against the PIDE exchange model used by 450+ public entities — only with applicable authorization, purpose, and agreements ([PIDE guide](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad))
+- [ ] Track [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1) (RM N.° 152-2026-PCM) public-sector AI governance (OIA, Catálogo IA Perú) as context for supervised-AI positioning
+
+National alignment never weakens the fail-closed and no-autonomous-filing stance: integrity receipts remain internal (not legally-valid digital signatures), and State-entity exchange is never assumed.
+
 ## Non-goals (for now)
 
 - Full accounting engine (that is `arkelythex/drenyra-command-center`)

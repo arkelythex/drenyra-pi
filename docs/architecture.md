@@ -139,3 +139,16 @@ Design 04 fixes where authoritative state lives and how the harness stays safe:
 ## Repository scope
 
 This repo is the Pi harness only. The accounting engine, UI, and product surfaces live in `arkelythex/drenyra-command-center`; the agent runtime in `arkelythex/drenyra-ai`; the memory engine in `arkelythex/drenyra-engram`.
+
+## National alignment (positioning)
+
+National alignment is **strategy and roadmap direction**, not implemented compliance. The harness does not currently implement a full data catalog, a retention engine, an official digital signature, PIDE access, or a public-sector institutional edition.
+
+| National reference | Relevance |
+| --- | --- |
+| [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030) — approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm), derived from the Política Nacional de Transformación Digital 2030 | Vision of a trusted, innovative, secure digital ecosystem; six action lines including data regulatory framework; data quality, management and privacy; open data and interoperability; infrastructure/platforms, talent/culture, ecosystem/collaboration. Frames the governed-data direction. |
+| [PIDE](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad) | State-entity electronic data exchange used by more than 450 public entities. No automatic access: any integration requires applicable authorization, purpose, and agreements. |
+| [Reglamento de la Ley N.º 29733](https://www.gob.pe/institucion/anpd/normas-legales/6554453-16-2024-jus) (DS N.º 016-2024-JUS) | Context for security/privacy-by-design work. |
+| [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1) (RM N.° 152-2026-PCM) | Public-sector AI governance (OIA, Catálogo IA Perú) as context; not a private-sector legal classification of Drenyra's tax AI. |
+
+**Differentiators:** governed data, explicit provenance, evidence receipts, human authorization, interoperable adapters, security/privacy by design, and supervised AI. Internal Ed25519 integrity receipts verify harness state; they are distinct from Peruvian legally-valid digital signatures.

@@ -48,3 +48,22 @@ changes nothing.
   EXECUTE work.
 - Memory notes never grant authority: only the file-backed authorization,
   evidence, and receipt state decides.
+
+## National alignment
+
+- **No autonomous filing is preserved.** Peruvian digital-government strategy
+  does not change the harness's authority model: nothing is filed or submitted
+  without explicit human approval (see no-autonomous-filing above).
+- **State-entity exchange requires authorization.** [PIDE](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad)
+  enables electronic data exchange among more than 450 public entities; any use
+  by or for a private harness requires applicable authorization, purpose, and
+  agreements — no automatic access.
+- **Public-sector AI governance is context.** [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1)
+  (RM N.° 152-2026-PCM) establishes OIA and Catálogo IA Perú for the public
+  sector; it is not a private-sector legal classification of Drenyra's tax AI,
+  and it grants no authority here.
+- The [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030)
+  (approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm),
+  derived from the Política Nacional de Transformación Digital 2030) data
+  quality, management and privacy action line frames the governed-data
+  direction.
