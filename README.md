@@ -1,11 +1,3 @@
-<div align="center">
-
-<img width="1200" alt="Drenyra Pi flow — operator → Pi harness → pinned Drenyra AI runtime → Engram/evidence → receipt → operator" src="assets/branding/drenyra-pi-flow-banner.svg" />
-
-<p><code>operator → Pi harness → pinned Drenyra AI runtime → Engram/evidence → receipt → operator</code></p>
-
-</div>
-
 # Drenyra Pi
 
 > **Private commercial product** — this repository is **private**; distribution is contractual, never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/drenyra-command-center/blob/main/docs/products/private-product-policy.md).
