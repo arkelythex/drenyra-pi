@@ -6,6 +6,18 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     allow:
       - dependency-type: development
+  # Immutable action SHA pins (ci.yml) stay current: dependabot rewrites the
+  # pinned commit SHA together with the trailing tag comment on each release.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
