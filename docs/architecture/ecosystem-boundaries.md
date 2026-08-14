@@ -1,7 +1,7 @@
 # Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
 
 > **Last updated:** 2026-08-11 (Design 1 — boundary & authority contract).
-
+>
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
 ## Role in the ecosystem
@@ -14,7 +14,7 @@ Drenyra Pi does **not** contain the accounting engine. It **installs and consume
 
 - Accounting operator persona: warm, direct, fiscal-first behavior.
 - Startup panel: company and fiscal period context on session start.
-- `/drenyra:*` commands: status, company, period, mission, receipt, ledger.
+- `/drenyra:*` commands: doctor, scope, status, capabilities, company, period, mission, receipt, evidence, verify, reconcile, close.
 - Pi-native subagents: exploration, apply, verify, review.
 - Model routing: per-phase model selection for fiscal work.
 - Packaged skills and RDA (Receipt-Driven Accounting) command chains.
@@ -35,7 +35,6 @@ Drenyra Pi is **not**:
 - **Fiscal logic in command handlers.** Commands are thin: validate scope, delegate to Drenyra AI domain operations, render results.
 - **A second copy of the runtime.** The engine is installed and pinned, never vendored or re-implemented.
 - **Product surfaces** (UI, tenants, documents, SUNAT flows) — those live in Drenyra.
-
 
 ## Ecosystem authority contract (Design 1 — approved boundary)
 

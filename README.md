@@ -1,9 +1,9 @@
 # Drenyra Pi
 
 > **Private commercial product** — this repository is **private**; distribution is contractual, never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/drenyra-command-center/blob/main/docs/products/private-product-policy.md).
-
+>
 > **Pi-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
-
+>
 > **Status: pre-alpha.** The harness is being extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
@@ -12,7 +12,7 @@ Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a
 
 - **Accounting operator persona** — warm, direct, fiscal-first operator behavior.
 - **Startup panel** — company and fiscal period context on session start.
-- **`/drenyra:*` commands** — status, company, period, mission, receipt, ledger.
+- **`/drenyra:*` commands** — doctor, scope, status, capabilities, company/period context, missions, receipts, evidence, verify, and close (see [Command reference](#command-reference)).
 - **Pi-native subagents** — accounting agents for exploration, apply, verify, review.
 - **Model routing** — per-phase model selection for fiscal work.
 - **Packaged skills** — Drenyra-specific skills shipped with the extension.
@@ -40,31 +40,61 @@ Drenyra Pi executes agents and tools with pinned versions and **never authorizes
 pi install npm:drenyra-pi
 ```
 
-Then, inside Pi:
+## First run
 
-```text
-/drenyra:status
-/drenyra:company
-/drenyra:period
-/drenyra:mission
-/drenyra:receipt
-/drenyra:ledger
-```
+Inside Pi, follow this order — each step's prerequisite is the previous one:
+
+1. **`/drenyra:doctor`** — verifies the pinned, package-local Drenyra AI runtime (checksum + version, fails closed on any mismatch). The startup panel runs the same check at activation.
+2. **`/drenyra:scope`** — shows the 10-element canonical scope and what is missing. Bind it with `/drenyra:scope set <tenant> <organization> <company> <fiscalPeriod> <ledgerBook> <operationType> <sourceSnapshot> <policyVersion> <actor> <authorityLevel>` (or set company and period first via `/drenyra:company` and `/drenyra:period`).
+3. **`/drenyra:mission <intent>`** — starts a mission once the scope is complete (`monthly-close | correction | reconciliation | invoice-review | compliance-check`).
+4. **`/drenyra:status`** — confirms the active company/period, mission state, and next authorized action.
+
+## Command reference
+
+Bootstrap, context, and read commands run **before** the scope is complete (pre-scope policy):
+
+| Command | Purpose |
+| --- | --- |
+| `/drenyra:doctor` | Verify the pinned runtime; fails closed |
+| `/drenyra:status` | Read-only status: company, period, mission state, next authorized action |
+| `/drenyra:capabilities` | Engine + harness capabilities, authority modes, registered commands |
+| `/drenyra:scope` | Read or bind the 10-element canonical scope |
+| `/drenyra:company` | Set the company RUC (11 digits, check-digit-validated) |
+| `/drenyra:period` | Set the fiscal period (`YYYYMM`) |
+| `/drenyra:context` | Show the bound company + fiscal period |
+| `/drenyra:models` | Model routing registry |
+
+Mission, receipt, evidence, and chain commands require a **complete canonical scope** (they fail closed otherwise):
+
+| Command | Purpose |
+| --- | --- |
+| `/drenyra:mission <intent>` | Start an EDA mission |
+| `/drenyra:continue` | Advance the active mission |
+| `/drenyra:resume <mission-id>` | Resume a mission from the durable store |
+| `/drenyra:receipt <id>` | Show a receipt; `verify <id>` checks it |
+| `/drenyra:evidence <op-json>` | Evidence-graph operations (add node/edge, query lineage) |
+| `/drenyra:verify` | Read-only integrity verify chain |
+| `/drenyra:reconcile` | Bank-vs-ledger reconciliation chain |
+| `/drenyra:close <approverId>` | Monthly-close chain with explicit approval |
 
 ## Layout
 
 ```text
-assets/      Static assets (persona, branding, panels)
+agents/      Pi-native accounting subagents (mirrors in assets/agents/)
+assets/      Static assets (branding, chain maps, policies, schemas)
+chains/      RDA command chain implementations
 contracts/   Package and runtime contracts (see contracts/)
-extensions/  Pi extension entrypoints and registration
+docs/        Architecture and boundary documentation
+extensions/  Flat Pi extension entrypoints and registration
+lib/         Top-level domain logic (scope, missions, receipts, evidence)
+openspec/    SDD artifacts (changes/, specs/)
 prompts/     Prompt templates and command chains
-skills/      Packaged Drenyra skills
-agents/      Pi-native accounting subagents
-chains/      RDA command chains
-themes/      Pi themes
 runtime/     Runtime bootstrap, drenyra-ai pinning and verification
-scripts/     Install, doctor, update scripts
-tests/       Test suites for commands, chains, and permissions
+scripts/     Build, install, and package-verification scripts
+skills/      Packaged Drenyra skills
+themes/      Pi themes
+vendored/    Pinned drenyra-ai release artifact (never PATH)
+__tests__/   Test suites for commands, chains, and permissions
 ```
 
 ## Dependency
@@ -78,11 +108,11 @@ Drenyra Pi uses an **exact, verified, package-local version of Drenyra AI** — 
 
 ## Ecosystem
 
-| Project                                                        | Role                                    |
-| -------------------------------------------------------------- | --------------------------------------- |
-| [Drenyra Command Center](https://github.com/arkelythex/drenyra-command-center)               | Command Center — web application (consumes AI) |
-| [Drenyra AI](https://github.com/arkelythex/drenyra-ai)         | Agent ecosystem (installed, pinned)     |
-| [Drenyra Engram](https://github.com/arkelythex/drenyra-engram) | Institutional accounting memory (used)  |
+| Project | Role |
+| --- | --- |
+| [Drenyra Command Center](https://github.com/arkelythex/drenyra-command-center) | Command Center — web application (consumes AI) |
+| [Drenyra AI](https://github.com/arkelythex/drenyra-ai) | Agent ecosystem (installed, pinned) |
+| [Drenyra Engram](https://github.com/arkelythex/drenyra-engram) | Institutional accounting memory (used) |
 
 **Direction rule:** Drenyra Pi depends on Drenyra AI and Drenyra Engram. It never leaks into Drenyra AI's contracts, and Drenyra AI never knows Drenyra Pi exists.
 
