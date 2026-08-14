@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="460" viewBox="0 0 1400 460" role="img" aria-label="Drenyra Pi flow — operator, Pi harness, pinned Drenyra AI runtime, Engram and evidence, receipt, back to operator">
+  <!-- brand-system v0.2 flow banner: theme-aware (dark + light via prefers-color-scheme),
+       canonical tokens only (contracts/brand-system/tokens.json), zero embedded text.
+       Flow motif: operator -> Pi harness -> pinned Drenyra AI runtime ->
+       Engram/evidence -> receipt -> operator (return loop). -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop class="g-bg1" offset="0%"/>
+      <stop class="g-bg2" offset="55%"/>
+      <stop class="g-bg3" offset="100%"/>
+    </linearGradient>
+    <linearGradient id="flow-c" x1="0" y1="0" x2="1" y2="0">
+      <stop class="g-c1" offset="0%"/>
+      <stop class="g-c2" offset="100%"/>
+    </linearGradient>
+    <linearGradient id="flow-v" x1="0" y1="0" x2="1" y2="0">
+      <stop class="g-v1" offset="0%"/>
+      <stop class="g-v2" offset="100%"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop class="g-card1" offset="0%"/>
+      <stop class="g-card2" offset="100%"/>
+    </linearGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M 44 0 L 0 0 0 44" fill="none" stroke="var(--grid)" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <style>
+    :root {
+      --bg1: #0B0E11; --bg2: #12161B; --bg3: #1A1F26;
+      --grid: #FFFFFF;
+      --glow-c: #3CE6D8; --glow-v: #9B7FE8;
+      --c: #3CE6D8; --c-bright: #6AEFE4;
+      --v: #9B7FE8; --v-bright: #B8A2F0;
+      --ok: #4ADE94;
+      --n1: #12161B; --n2: #1A1F26; --n3: #20262E;
+      --border: #323A44; --border-subtle: #262C34;
+      --muted: #A8B0BC; --muted-dim: #6B7480;
+      --pending: #6B9FE8;
+      --spark: #6AEFE4;
+    }
+    .g-bg1 { stop-color: var(--bg1); }
+    .g-bg2 { stop-color: var(--bg2); }
+    .g-bg3 { stop-color: var(--bg3); }
+    .g-c1 { stop-color: var(--c); }
+    .g-c2 { stop-color: var(--c-bright); }
+    .g-v1 { stop-color: var(--v); }
+    .g-v2 { stop-color: var(--v-bright); }
+    .g-card1 { stop-color: var(--n1); }
+    .g-card2 { stop-color: var(--n2); }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg1: #FAFAF9; --bg2: #FFFFFF; --bg3: #F2F2F0;
+        --grid: #000000;
+        --glow-c: #2ECFC2; --glow-v: #6B54A8;
+        --c: #2ECFC2; --c-bright: #1F8A80;
+        --v: #6B54A8; --v-bright: #7B66C0;
+        --ok: #1A8F52;
+        --n1: #FFFFFF; --n2: #F2F2F0; --n3: #FFFFFF;
+        --border: #D4D4D0; --border-subtle: #E5E5E2;
+        --muted: #52565D; --muted-dim: #7A7F87;
+        --pending: #2E5FB8;
+        --spark: #1F8A80;
+      }
+    }
+  </style>
+
+  <!-- Background: canvas gradient + blueprint grid + cyan/violet aurora glows -->
+  <rect width="1400" height="460" fill="url(#bg)"/>
+  <rect width="1400" height="460" fill="url(#grid)"/>
+  <circle cx="1150" cy="90" r="280" fill="var(--glow-c)" opacity="0.06"/>
+  <circle cx="150" cy="410" r="320" fill="var(--glow-v)" opacity="0.05"/>
+
+  <!-- Node 1: operator (ring + core) -->
+  <g>
+    <circle cx="140" cy="235" r="36" fill="none" stroke="var(--c)" stroke-width="3"/>
+    <circle cx="140" cy="235" r="26" fill="none" stroke="var(--c)" stroke-opacity="0.35" stroke-width="1.5"/>
+    <circle cx="140" cy="235" r="9" fill="var(--c)"/>
+    <circle cx="140" cy="199" r="3.5" fill="var(--spark)"/>
+  </g>
+
+  <!-- Flow: operator -> Pi harness (cyan) -->
+  <path d="M 180 235 C 240 235 300 235 360 235" fill="none" stroke="url(#flow-c)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 352 228 L 366 235 L 352 242 Z" fill="var(--c)"/>
+  <circle cx="270" cy="235" r="3" fill="var(--spark)" opacity="0.9"/>
+
+  <!-- Node 2: Pi harness (terminal panel + cyan rail) -->
+  <g>
+    <rect x="370" y="180" width="170" height="110" rx="12" fill="var(--n1)" stroke="var(--border)" stroke-width="1.5"/>
+    <rect x="382" y="192" width="4" height="86" rx="2" fill="var(--c)" opacity="0.85"/>
+    <path d="M 424 224 L 438 235 L 424 246 Z" fill="var(--c)"/>
+    <path d="M 440 224 L 454 235 L 440 246 Z" fill="var(--c)" opacity="0.55"/>
+    <rect x="470" y="212" width="52" height="8" rx="4" fill="var(--muted)" opacity="0.5"/>
+    <rect x="470" y="230" width="34" height="8" rx="4" fill="var(--muted)" opacity="0.35"/>
+    <circle cx="526" cy="192" r="5" fill="var(--c)"/>
+  </g>
+
+  <!-- Flow: Pi harness -> pinned runtime (cyan) -->
+  <path d="M 544 235 C 590 235 610 235 654 235" fill="none" stroke="url(#flow-c)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 646 228 L 660 235 L 646 242 Z" fill="var(--c)"/>
+  <circle cx="600" cy="235" r="3" fill="var(--spark)" opacity="0.9"/>
+
+  <!-- Node 3: pinned Drenyra AI runtime (violet pin + cyan cube + green padlock) -->
+  <g>
+    <circle cx="730" cy="112" r="7" fill="var(--v)"/>
+    <path d="M 730 118 L 730 166" fill="none" stroke="var(--v)" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="730" cy="168" r="4" fill="var(--spark)"/>
+    <rect x="662" y="170" width="136" height="130" rx="12" fill="var(--n2)" stroke="var(--c)" stroke-width="2"/>
+    <path d="M 662 206 L 798 206" fill="none" stroke="var(--c)" stroke-opacity="0.3" stroke-width="1.5"/>
+    <path d="M 730 170 L 730 300" fill="none" stroke="var(--c)" stroke-opacity="0.3" stroke-width="1.5"/>
+    <path d="M 718 228 L 718 216 A 8 8 0 0 1 742 216 L 742 228" fill="none" stroke="var(--ok)" stroke-width="5" stroke-linecap="round"/>
+    <rect x="712" y="228" width="36" height="26" rx="6" fill="var(--ok)" opacity="0.9"/>
+    <circle cx="782" cy="182" r="5" fill="var(--c)"/>
+  </g>
+
+  <!-- Flow: pinned runtime -> Engram/evidence (violet) -->
+  <path d="M 802 235 C 830 235 850 235 884 235" fill="none" stroke="url(#flow-v)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 876 228 L 890 235 L 876 242 Z" fill="var(--v)"/>
+  <circle cx="845" cy="235" r="3" fill="var(--v-bright)" opacity="0.9"/>
+
+  <!-- Node 4: Engram/evidence (memory canopy over document) -->
+  <g>
+    <circle cx="895" cy="195" r="5" fill="var(--c)" opacity="0.9"/>
+    <circle cx="925" cy="178" r="5.5" fill="var(--v)"/>
+    <circle cx="958" cy="192" r="5" fill="var(--muted)" opacity="0.85"/>
+    <path d="M 895 195 C 905 185 915 181 925 178" fill="none" stroke="var(--c)" stroke-opacity="0.6" stroke-width="2"/>
+    <path d="M 925 178 C 938 183 948 187 958 192" fill="none" stroke="var(--v)" stroke-opacity="0.5" stroke-width="2"/>
+    <path d="M 910 184 L 908 234" fill="none" stroke="var(--border-subtle)" stroke-width="1.5"/>
+    <path d="M 942 182 L 944 234" fill="none" stroke="var(--border-subtle)" stroke-width="1.5"/>
+    <rect x="890" y="236" width="80" height="88" rx="8" fill="var(--n1)" stroke="var(--border-subtle)"/>
+    <rect x="902" y="250" width="56" height="7" rx="3.5" fill="var(--muted)" opacity="0.5"/>
+    <rect x="902" y="266" width="40" height="7" rx="3.5" fill="var(--muted)" opacity="0.35"/>
+    <circle cx="898" cy="300" r="4" fill="var(--muted)" opacity="0.8"/>
+    <circle cx="924" cy="306" r="4" fill="var(--muted)" opacity="0.8"/>
+    <circle cx="950" cy="300" r="4" fill="var(--muted)" opacity="0.8"/>
+    <circle cx="952" cy="196" r="5" fill="var(--v)"/>
+  </g>
+
+  <!-- Flow: Engram/evidence -> receipt (green, verified) -->
+  <path d="M 974 235 C 1020 235 1050 235 1098 235" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 1090 228 L 1104 235 L 1090 242 Z" fill="var(--ok)"/>
+  <circle cx="1020" cy="235" r="3" fill="var(--ok)"/>
+
+  <!-- Node 5: verified receipt endpoint (green seal + checkmark) -->
+  <g>
+    <rect x="1110" y="175" width="180" height="120" rx="12" fill="url(#card)" stroke="var(--border)" stroke-width="1.5"/>
+    <rect x="1122" y="187" width="156" height="8" rx="4" fill="var(--ok)" opacity="0.4"/>
+    <circle cx="1200" cy="245" r="34" fill="var(--ok)" opacity="0.14" stroke="var(--ok)" stroke-width="2"/>
+    <path d="M 1183 245 L 1195 257 L 1218 232" fill="none" stroke="var(--ok)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="1278" cy="183" r="3.5" fill="var(--spark)"/>
+  </g>
+
+  <!-- Return loop: receipt -> operator (dashed violet feedback path) -->
+  <g>
+    <path d="M 1200 299 C 1200 390 140 390 140 277" fill="none" stroke="var(--v)" stroke-width="2.5" stroke-dasharray="2 11" stroke-linecap="round" opacity="0.85"/>
+    <path d="M 133 280 L 140 270 L 147 280 Z" fill="var(--v)"/>
+    <circle cx="1180" cy="350" r="3.5" fill="var(--v-bright)"/>
+    <circle cx="600" cy="380" r="3" fill="var(--v)" opacity="0.7"/>
+  </g>
+</svg>
