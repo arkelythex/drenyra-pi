@@ -76,32 +76,32 @@ Pi host
 - **Context threads everywhere.** Company (RUC) and fiscal period are loaded at startup and threaded through every tool, command, and subagent prompt.
 - **Tool safety is default-deny.** Fiscal tools follow broad-deny, narrow-allow; permissions are part of the contract and reviewed like code.
 
-  ## Design 03 — agents, skills, and integrations
+## Design 03 — agents, skills, and integrations
 
-    Approved in `drenyra-ai` (`docs/design/design-03-agents-skills-integrations.md`),
-    Design 03 fixes the whole-ecosystem flow. Pi is one of the hosts on the left:
+Approved in `drenyra-ai` (`docs/design/design-03-agents-skills-integrations.md`),
+Design 03 fixes the whole-ecosystem flow. Pi is one of the hosts on the left:
 
-    ```text
-    Drenyra · Pi · External hosts
-      → SDK · MCP · CLI
-      → Mission Orchestrator      (splits jobs, selects agents/skills, controls
-      → Specialized agents         budget/attempts/concurrency — never authorizes)
-      → Structured candidates
-      → Deterministic Core        (only component able to accept a transition)
-      → Gates · Receipts · Ledger
-    ```
+```text
+Drenyra · Pi · External hosts
+  → SDK · MCP · CLI
+  → Mission Orchestrator      (splits jobs, selects agents/skills, controls
+  → Specialized agents         budget/attempts/concurrency — never authorizes)
+  → Structured candidates
+  → Deterministic Core        (only component able to accept a transition)
+  → Gates · Receipts · Ledger
+```
 
-  - **Agents propose, never decide.** Each returns a known schema (evidence
-      manifest, exceptions and candidates, explained differences, candidate
-      journal entries, compliance findings, close plan); free text never replaces
-      structured values, references, hashes, or states. Pi ships the ten subagents
-      in `agents/` (seven Design 03 ecosystem roles + three Pi work agents).
-  - **Skills are layered** (Foundation / Peru / Practice-sector) and versioned by
-      validity period; Pi ships the Foundation skills in `skills/`.
-  - **Models are provider-agnostic** — selected by capability, cost, and risk,
-      recorded as provenance, validated against schemas before entering the Core.
+- **Agents propose, never decide.** Each returns a known schema (evidence
+    manifest, exceptions and candidates, explained differences, candidate
+    journal entries, compliance findings, close plan); free text never replaces
+    structured values, references, hashes, or states. Pi ships the ten subagents
+    in `agents/` (seven Design 03 ecosystem roles + three Pi work agents).
+- **Skills are layered** (Foundation / Peru / Practice-sector) and versioned by
+    validity period; Pi ships the Foundation skills in `skills/`.
+- **Models are provider-agnostic** — selected by capability, cost, and risk,
+    recorded as provenance, validated against schemas before entering the Core.
 
-  ## Direction rules
+## Direction rules
 
 1. Drenyra Pi → Drenyra AI: consumed (pinned). One-way.
 2. Drenyra Pi → Drenyra Engram: memory reads/context. Memory **never authorizes**.
