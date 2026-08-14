@@ -1,0 +1,252 @@
+name: Release Verification (no publish)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Exact annotated release tag (for example, v0.0.1-prealpha.1)
+        required: true
+        type: string
+
+# Least privilege: read-only contents for the whole workflow; every unlisted
+# scope (checks, id-token, packages, ...) defaults to none. This gate never
+# publishes to a registry, never creates releases, never pushes tags, and never
+# reads registry credentials — so no write scope and no id-token are granted.
+permissions:
+  contents: read
+
+jobs:
+  verify-release:
+    # The gate is trusted only for this repository.
+    if: github.repository == 'arkelythex/drenyra-pi'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout dispatch commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: false
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.3.11"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Verify exact annotated release tag on protected main
+        id: release
+        shell: bash
+        env:
+          # The remote reads below interpolate GITHUB_TOKEN into the
+          # authenticated remote URL, so the ephemeral run token MUST be
+          # explicitly mapped from github.token into this step's environment.
+          # Without this mapping the remote reads are unauthenticated and
+          # fail closed in a private repository.
+          GITHUB_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          # The release gate is trusted only when dispatched from the protected
+          # default branch `main` — never from a tag, a release, or any other
+          # branch. GitHub Actions runs workflow_dispatch against the branch the
+          # caller selected, so the ref guard below is the enforcement point.
+          if [[
+            "${DEFAULT_BRANCH}" != "main" ||
+            "${GITHUB_REF}" != "refs/heads/main" ||
+            "${GITHUB_REF_TYPE}" != "branch"
+          ]]; then
+            echo "::error::The release verification workflow must be dispatched from protected default main."
+            exit 1
+          fi
+
+          tag="${RELEASE_TAG}"
+          # Exact strict vSemVer: no leading zeros, no free-form labels. This runs
+          # BEFORE any git command so the tag string can never act as a refspec.
+          node --input-type=module - "${tag}" <<'NODE'
+          const tag = process.argv[2];
+          const semverTag =
+            /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+          if (!semverTag.test(tag)) {
+            throw new Error(`Release tag is not exact vSemVer: ${tag}`);
+          }
+          NODE
+
+          # Private-repository authenticated read: the checkout action leaves no
+          # credentials behind (persist-credentials: false), so remote reads use
+          # the ephemeral GITHUB_TOKEN scoped to this run, explicitly mapped
+          # from github.token above. GITHUB_TOKEN carries only `contents: read`
+          # for this repository, is masked in logs, and is never written into
+          # the git configuration.
+          remote_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          remote_refs="$(git ls-remote "${remote_url}" \
+            "refs/heads/main" \
+            "refs/tags/${tag}" \
+            "refs/tags/${tag}^{}")"
+          remote_ref() {
+            local ref="$1"
+            local matches=()
+            mapfile -t matches < <(
+              printf '%s\n' "${remote_refs}" |
+                awk -v expected="${ref}" '$2 == expected { print $1 }'
+            )
+            if [[ "${#matches[@]}" -ne 1 ]]; then
+              echo "::error::Remote ref ${ref} must resolve exactly once." >&2
+              return 1
+            fi
+            printf '%s' "${matches[0]}"
+          }
+          remote_main="$(remote_ref "refs/heads/main")"
+          remote_tag_object="$(remote_ref "refs/tags/${tag}")"
+          remote_tag_commit="$(remote_ref "refs/tags/${tag}^{}")"
+
+          git fetch --atomic --no-tags "${remote_url}" \
+            "+refs/heads/main:refs/remotes/origin/release-main" \
+            "+refs/tags/${tag}:refs/release-verification/tag"
+
+          # An annotated tag resolves to a tag object; a lightweight tag resolves
+          # to a commit. Only an annotated tag satisfies the release contract.
+          if [[ "$(git cat-file -t refs/release-verification/tag)" != "tag" ]]; then
+            echo "::error::Release tag ${tag} must be annotated."
+            exit 1
+          fi
+
+          fetched_main="$(git rev-parse 'refs/remotes/origin/release-main^{commit}')"
+          fetched_tag_object="$(git rev-parse refs/release-verification/tag)"
+          tag_commit="$(git rev-parse 'refs/release-verification/tag^{commit}')"
+          event_commit="$(git rev-parse "${GITHUB_SHA}^{commit}")"
+          checkout_commit="$(git rev-parse 'HEAD^{commit}')"
+          if [[
+            "${fetched_main}" != "${remote_main}" ||
+            "${fetched_tag_object}" != "${remote_tag_object}" ||
+            "${tag_commit}" != "${remote_tag_commit}" ||
+            "${tag_commit}" != "${remote_main}" ||
+            "${event_commit}" != "${remote_main}" ||
+            "${checkout_commit}" != "${remote_main}"
+          ]]; then
+            echo "::error::Annotated tag, protected remote main, dispatch commit, and checkout must be identical."
+            exit 1
+          fi
+
+          # All verification below runs against the exact tagged tree.
+          git checkout --detach "${tag_commit}"
+          test "$(git rev-parse 'HEAD^{commit}')" = "${tag_commit}"
+
+          package_version="$(node --input-type=module -e \
+            "import packageJson from './package.json' with { type: 'json' }; process.stdout.write(packageJson.version)")"
+          if [[ "${tag}" != "v${package_version}" ]]; then
+            echo "::error::Release tag ${tag} does not match package.json version ${package_version}."
+            exit 1
+          fi
+
+          # The dist-tag a FUTURE publish step would derive for this version —
+          # informational only. Nothing is published and no dist-tag is set here.
+          if [[ "${package_version}" != *-* ]]; then
+            dist_tag="latest"
+          elif [[ "${package_version#*-}" == "beta" || "${package_version#*-}" == beta.* ]]; then
+            dist_tag="beta"
+          else
+            dist_tag="next"
+          fi
+          {
+            echo "tag=${tag}"
+            echo "tag_object=${remote_tag_object}"
+            echo "tag_commit=${tag_commit}"
+            echo "main_commit=${remote_main}"
+            echo "dist_tag=${dist_tag}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Verify package contents
+        run: bun run verify:package
+
+      - name: Packed-install proof
+        run: node scripts/verify-packed-install.mjs
+
+      - name: Recheck remote release authority
+        shell: bash
+        env:
+          # Same requirement as the initial validation step: this step also
+          # interpolates GITHUB_TOKEN into the authenticated remote URL, so the
+          # ephemeral run token must be explicitly mapped from github.token.
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          EXPECTED_TAG_OBJECT: ${{ steps.release.outputs.tag_object }}
+          EXPECTED_RELEASE_COMMIT: ${{ steps.release.outputs.tag_commit }}
+          EXPECTED_MAIN_COMMIT: ${{ steps.release.outputs.main_commit }}
+        run: |
+          set -euo pipefail
+
+          # Re-query the remote right now: if main advanced or the tag moved or
+          # vanished while the verification steps ran, the gate fails closed.
+          remote_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          remote_refs="$(git ls-remote "${remote_url}" \
+            "refs/heads/main" \
+            "refs/tags/${RELEASE_TAG}" \
+            "refs/tags/${RELEASE_TAG}^{}")"
+          remote_ref() {
+            local ref="$1"
+            local matches=()
+            mapfile -t matches < <(
+              printf '%s\n' "${remote_refs}" |
+                awk -v expected="${ref}" '$2 == expected { print $1 }'
+            )
+            if [[ "${#matches[@]}" -ne 1 ]]; then
+              echo "::error::Remote ref ${ref} must still resolve exactly once." >&2
+              return 1
+            fi
+            printf '%s' "${matches[0]}"
+          }
+          remote_main="$(remote_ref "refs/heads/main")"
+          remote_tag_object="$(remote_ref "refs/tags/${RELEASE_TAG}")"
+          remote_tag_commit="$(remote_ref "refs/tags/${RELEASE_TAG}^{}")"
+          package_version="$(node --input-type=module -e \
+            "import packageJson from './package.json' with { type: 'json' }; process.stdout.write(packageJson.version)")"
+          if [[
+            "${remote_main}" != "${EXPECTED_MAIN_COMMIT}" ||
+            "${remote_tag_object}" != "${EXPECTED_TAG_OBJECT}" ||
+            "${remote_tag_commit}" != "${EXPECTED_RELEASE_COMMIT}" ||
+            "$(git rev-parse 'HEAD^{commit}')" != "${EXPECTED_RELEASE_COMMIT}" ||
+            "$(git rev-parse "${GITHUB_SHA}^{commit}")" != "${EXPECTED_RELEASE_COMMIT}" ||
+            "${RELEASE_TAG}" != "v${package_version}"
+          ]]; then
+            echo "::error::Release authority changed during verification; release verification fails closed."
+            exit 1
+          fi
+
+      - name: Report no-publish completion
+        shell: bash
+        env:
+          VERIFIED_TAG: ${{ steps.release.outputs.tag }}
+          VERIFIED_TAG_OBJECT: ${{ steps.release.outputs.tag_object }}
+          VERIFIED_COMMIT: ${{ steps.release.outputs.tag_commit }}
+          VERIFIED_MAIN: ${{ steps.release.outputs.main_commit }}
+          FUTURE_DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+        run: |
+          set -euo pipefail
+          printf 'RELEASE VERIFICATION COMPLETE — NO PUBLISH PERFORMED\n'
+          printf '  verified tag:            %s\n' "${VERIFIED_TAG}"
+          printf '  verified tag object:     %s\n' "${VERIFIED_TAG_OBJECT}"
+          printf '  verified commit:         %s\n' "${VERIFIED_COMMIT}"
+          printf '  remote main:             %s\n' "${VERIFIED_MAIN}"
+          printf '  derived future dist-tag: %s (informational — no dist-tag is set)\n' "${FUTURE_DIST_TAG}"
+          printf '  next step:               manual human decision only — see RELEASING.md\n'
+          echo "::notice::Release verification passed for ${VERIFIED_TAG} at ${VERIFIED_COMMIT}; no publish performed. Derived future dist-tag: ${FUTURE_DIST_TAG}."
