@@ -1,6 +1,6 @@
 # Drenyra Pi — Architecture
 
-> **Last updated:** 2026-08-14.
+> **Last updated:** 2026-08-14 (Design 4 — persistence, security, and recovery).
 
 ## Position in the ecosystem
 
@@ -100,6 +100,35 @@ Drenyra · Pi · External hosts
     validity period; Pi ships the Foundation skills in `skills/`.
 - **Models are provider-agnostic** — selected by capability, cost, and risk,
     recorded as provenance, validated against schemas before entering the Core.
+
+## Design 04 — persistence, security, and recovery
+
+Approved in `drenyra-ai` (`docs/design/design-04-persistence-security-recovery.md`),
+Design 04 fixes where authoritative state lives and how the harness stays safe:
+
+- **Authoritative state lives in persisted events, evidence, and receipts** —
+    never in the conversation or the model's memory. The harness's file-backed
+    stores are dev/demo only; production state, transactions, concurrency, and
+    durable persistence belong to `drenyra-ai` (PostgreSQL, object storage,
+    append-only ledger, KMS, Policy Registry; Engram is non-authoritative memory).
+- **Scope is part of queries, mutations, unique constraints, idempotency keys,
+    and hashes** — filtering after reading is not enough.
+- **Documents are untrusted input**: a PDF, XML, or description can never
+    inject agent instructions, modify permissions, or request tools.
+- **Approvals bind to the exact candidate hash, scope, materiality, evidence,
+    approver, and policy** — a changed candidate stops being governed by the old
+    approval; R3 needs two distinct approvers.
+- **Idempotent, concurrent, unknown-safe**: idempotency keys derived from
+    `tenant + company + fiscalPeriod + intent + candidateIdentity`, optimistic
+    concurrency with fencing, inbox/outbox, retry deduplication, and external
+    confirmation before repeating mutations. Interrupted external calls are
+    UNKNOWN and reconciled before any retry — no blind retries, no silent
+    errors, no states converted into success.
+- **Security controls**: encryption in transit/at rest, secrets outside
+    prompts/logs/receipts, tools by capability and mission, limited egress,
+    read/propose/approve/execute separation, document sanitization, signature
+    verification, evidence access audit, configurable retention, connector and
+    key revocation, and Guardian Angel read-only over frozen candidates.
 
 ## Direction rules
 

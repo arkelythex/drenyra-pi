@@ -1,6 +1,6 @@
 # Trust Model — Drenyra Pi (Pi-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-01.
+> **Last updated:** 2026-08-11 (Design 4 — persistence, security, and recovery).
 
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -31,10 +31,28 @@
 - Drenyra Pi never invents authority. Missions, candidates, gates, and approvals run in Drenyra AI.
 - Explicit human approval is required for material actions (R2/R3 chains such as monthly close).
 
-### 5. Memory informs; it never authorizes
+  ### 5. Memory informs; it never authorizes
 
-- Drenyra Engram provides context and institutional knowledge.
-- No memory observation is ever treated as permission to act.
+  - Drenyra Engram provides context and institutional knowledge.
+  - No memory observation is ever treated as permission to act.
+
+  ### 6. Authoritative state is persisted, never conversational (Design 4)
+
+  - Authoritative state lives in persisted events, evidence, and receipts —
+      never in the conversation or the model's memory. The harness's file-backed
+      stores are dev/demo only; production transactions, concurrency, and durable
+      persistence belong to `drenyra-ai`.
+  - **Documents are untrusted input.** A PDF, XML, or description can never
+      inject agent instructions, modify permissions, or request additional tools;
+      document content is sanitized before it reaches any agent.
+  - Secrets never appear in prompts, logs, or public receipts; keys live in KMS
+      and connectors are revocable.
+  - Signatures are verified and signer trust is explicit; receipts are chained
+      in an append-only ledger that cannot be rewritten.
+  - The Guardian Angel reviews frozen candidates in read-only mode and never
+      approves.
+  - **The model may be compromised or wrong and still must not be able to skip a
+      gate, cross a tenant, forge an approval, or rewrite the ledger.**
 
 ## Fail-closed default
 
