@@ -58,9 +58,9 @@ function remoteReadStepBlocks(): string[] {
 
 /** Action uses must stay immutable SHA pins (dependabot rewrites them). */
 const SHA_PINS: Array<[string, string]> = [
-  ["actions/checkout", "11bd71901bbe5b1630ceea73d27597364c9af683"],
+  ["actions/checkout", "fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"],
   ["oven-sh/setup-bun", "0c5077e51419868618aeaa5fe8019c62421857d6"],
-  ["actions/setup-node", "49933ea5288caeca8642d1e84afbd3f7d6820020"],
+  ["actions/setup-node", "a0853c24544627f65ddf259abe73b1d18a591444"],
 ];
 
 /** Anything here would turn the gate into a publish/release path. */
