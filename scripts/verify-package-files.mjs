@@ -3,14 +3,31 @@
  * packaged manifest BEFORE the artifact is published. Fails (exit 1) on any
  * missing file or wrong manifest wiring, so a broken package never reaches npm.
  *
+ * Beyond existence, it cryptographically reconciles every shipped fiscal
+ * contract/schema (contracts/ + assets/schemas/) against the source-controlled
+ * content manifest (contracts/SHA256SUMS.json) and reconciles the vendored
+ * Drenyra AI artifact with the authoritative DEFAULT_PIN — content drift,
+ * unexpected additions, and pin mismatches all fail closed. After an
+ * intentional change, regenerate the manifest with:
+ *   node scripts/verify-package-files.mjs --update
+ *
  * Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents;
  * no float is ever used for money; version/checksum/exit codes are JSON integers
  * or hex strings, never floats.
  */
 
-import { accessSync, readFileSync } from "node:fs";
+import { accessSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+	buildManifest,
+	collectCoveredFiles,
+	MANIFEST_REL_PATH,
+	readManifest,
+	reconcileVendoredArtifact,
+	vendoredTarballFor,
+	verifyContentManifest,
+} from "./lib/package-verify.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const errors = [];
@@ -248,9 +265,60 @@ if (pkg.exports?.["./extensions"] !== "./dist/extensions/register.js") {
 	);
 }
 
+// --- Content integrity: cryptographically reconcile every shipped fiscal
+// contract/schema (contracts/ + assets/schemas/) against the source-controlled
+// manifest, and reconcile the vendored Drenyra AI artifact with the
+// authoritative DEFAULT_PIN. Both fail closed on mismatch. After an
+// intentional content change, regenerate the manifest with --update.
+const updateManifest = process.argv.includes("--update");
+
+let DEFAULT_PIN;
+try {
+	({ DEFAULT_PIN } = await import(
+		pathToFileURL(join(root, "dist", "runtime", "pin.js")).href,
+	));
+} catch {
+	errors.push(
+		"dist/runtime/pin.js is not built — run the build first (vendored artifact reconciliation needs DEFAULT_PIN)",
+	);
+}
+
+const covered = collectCoveredFiles(root);
+if (updateManifest) {
+	const manifest = await buildManifest({
+		root,
+		covered,
+		vendoredRel: DEFAULT_PIN ? vendoredTarballFor(DEFAULT_PIN) : undefined,
+	});
+	writeFileSync(
+		join(root, MANIFEST_REL_PATH),
+		`${JSON.stringify(manifest, null, 2)}\n`,
+	);
+	console.log(`verify-package-files: regenerated ${MANIFEST_REL_PATH}`);
+}
+
+let manifest;
+try {
+	manifest = readManifest(join(root, MANIFEST_REL_PATH));
+} catch (error) {
+	errors.push(error instanceof Error ? error.message : String(error));
+	manifest = undefined;
+}
+if (manifest !== undefined) {
+	errors.push(...(await verifyContentManifest({ root, manifest, covered })));
+}
+
+if (DEFAULT_PIN) {
+	const vendored = reconcileVendoredArtifact({ root, pin: DEFAULT_PIN });
+	console.log(`verify-package-files: ${vendored.summary}`);
+	errors.push(...vendored.errors);
+}
+
 if (errors.length > 0) {
   console.error("verify-package-files: FAILED");
   for (const e of errors) console.error(`  - ${e}`);
   process.exit(1);
 }
-console.log("verify-package-files: OK (dist tree + packaged files complete)");
+console.log(
+	"verify-package-files: OK (dist tree + packaged files + content hashes reconciled)",
+);

@@ -43,8 +43,11 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
   - `verify:package` + `verify-packed-install` (pack → install → extension factory loads under Node) + prepack/prepublishOnly gates + CI package job.
   - Placeholder asset dirs (assets/, prompts/, skills/, agents/, chains/, themes/) per the README layout.
 
-### Notes
+    ### Notes
 
-- The DEFAULT_PIN is in `pending-release` state until drenyra-ai publishes its first real artifact; the released-install path is fixture-tested.
-- Pre-alpha: nothing is production-ready; contracts are not frozen.
-- Version policy: `0.0.1-prealpha.x` until the first frozen contract, then `0.1.0`.
+    - The DEFAULT_PIN is **`released`**: `drenyra-ai@0.2.0` (git tag `v0.2.0`) is pinned with the
+      entry-artifact checksum `e4e81914…`, the vendored tarball ships in `vendored/`, and the
+      postinstall installs it package-local and verifies it with doctor (the GitHub Release URL
+      remains the fallback install source). The `pending-release` path is exercised only in tests.
+    - Pre-alpha: nothing is production-ready; contracts are not frozen.
+    - Version policy: `0.0.1-prealpha.x` until the first frozen contract, then `0.1.0`.
