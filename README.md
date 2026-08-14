@@ -1,3 +1,11 @@
+<div align="center">
+
+<img width="1200" alt="Drenyra Pi flow — operator → Pi harness → pinned Drenyra AI runtime → Engram/evidence → receipt → operator" src="assets/branding/drenyra-pi-flow-banner.svg" />
+
+<p><code>operator → Pi harness → pinned Drenyra AI runtime → Engram/evidence → receipt → operator</code></p>
+
+</div>
+
 # Drenyra Pi
 
 > **Private commercial product** — this repository is **private**; distribution is contractual, never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/drenyra-command-center/blob/main/docs/products/private-product-policy.md).
@@ -7,6 +15,16 @@
 > **Status: pre-alpha.** The harness is being extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
+
+## Operational flow
+
+<div align="center">
+
+<img width="1000" alt="" src="assets/branding/drenyra-pi-operational-flow.png" />
+
+</div>
+
+The visual flow is fully represented in text: **human start → fiscal scope (RUC and period) → mission routing → pinned, sealed runtime → Engram memory and append-only evidence → signed, verified cryptographic receipt → human approve or reject decision**.
 
 ## What it provides
 
