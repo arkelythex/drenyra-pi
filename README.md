@@ -126,6 +126,19 @@ Drenyra Pi uses an **exact, verified, package-local version of Drenyra AI** — 
 
 **Direction rule:** Drenyra Pi depends on Drenyra AI and Drenyra Engram. It never leaks into Drenyra AI's contracts, and Drenyra AI never knows Drenyra Pi exists.
 
+## National alignment
+
+Drenyra Pi is positioned for the Peruvian digital-government and data-protection context. This is **positioning and roadmap direction**, not an implemented compliance claim.
+
+| National reference | Position |
+| --- | --- |
+| [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030) | Approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm), derived from the Política Nacional de Transformación Digital 2030. Its 2030 vision — a trusted, innovative, secure digital ecosystem — and six action lines (data regulatory framework; data quality, management and privacy; open data and interoperability; infrastructure/platforms, talent/culture, ecosystem/collaboration) frame the governed-data direction. |
+| [PIDE interoperability](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad) | PIDE enables electronic data exchange among State entities and is used by more than 450 public entities. Drenyra Pi does **not** claim automatic PIDE access: integration would require applicable authorization, purpose, and agreements. |
+| [Reglamento de la Ley N.º 29733](https://www.gob.pe/institucion/anpd/normas-legales/6554453-16-2024-jus) | The new reglamento is DS N.º 016-2024-JUS — tracked as personal-data-protection context for security/privacy-by-design work. |
+| [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1) | Approved under RM N.° 152-2026-PCM. Its public-sector AI governance mechanisms (OIA, Catálogo IA Perú) are context only — not a private-sector legal classification of Drenyra's tax AI. |
+
+**Differentiators:** governed data, explicit provenance, evidence receipts, human authorization, interoperable adapters, security/privacy by design, and supervised AI. Internal Ed25519 integrity receipts verify harness state; they are **not** Peruvian legally-valid digital signatures.
+
 ## License
 
 Proprietary. © 2026 Arkelythex. All rights reserved. See [LICENSE](LICENSE).

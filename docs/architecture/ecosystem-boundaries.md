@@ -36,6 +36,15 @@ Drenyra Pi is **not**:
 - **A second copy of the runtime.** The engine is installed and pinned, never vendored or re-implemented.
 - **Product surfaces** (UI, tenants, documents, SUNAT flows) — those live in Drenyra.
 
+## National alignment (boundary statement)
+
+National alignment is positioning and roadmap direction, and it stays inside the ecosystem boundaries:
+
+- Drenyra Pi does **not** currently implement a full data catalog, a retention engine, an official digital signature, PIDE access, or a public-sector institutional edition.
+- The evidence-adapter line ("Adaptadores: gather evidence from ERP, banks, SUNAT and files") is the interoperable-adapter differentiator. Any State-entity exchange — for example [PIDE](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad), used by more than 450 public entities — requires applicable authorization, purpose, and agreements, never automatic access.
+- [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030) (approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm), derived from the Política Nacional de Transformación Digital 2030) frames the governed-data direction; [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1) (RM N.° 152-2026-PCM) public-sector governance (OIA, Catálogo IA Perú) is context, not a private-sector legal classification.
+- Internal Ed25519 integrity receipts are distinct from Peruvian legally-valid digital signatures; no receipt confers legal signature status.
+
 ## Ecosystem authority contract (Design 1 — approved boundary)
 
 ```mermaid
