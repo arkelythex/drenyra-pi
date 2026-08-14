@@ -451,7 +451,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
   });
   });
     describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", () => {
-      it("ships the seven agents and their asset mirrors in the package", () => {
+      it("ships the ten agents and their asset mirrors in the package", () => {
         const roles = [
           "accounting-scout",
           "evidence-builder",
@@ -460,6 +460,9 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
           "tax-controller-pe",
           "anomaly-refuter",
           "close-controller",
+          "invoice-sire-agent",
+          "journal-candidate-agent",
+          "guardian-angel",
         ];
         const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
           files?: string[];

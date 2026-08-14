@@ -10,6 +10,10 @@ Defines the packaged operating content for v0.1: 1–3 Drenyra skills, the perso
 
 The system MUST ship between 1 and 3 Drenyra skills with real instructional content (scope discipline, evidence citation, chain operation) and MUST NOT ship skill stubs.
 
+### Requirement: REQ-SKPT-001a — Design 03 layer model
+
+The system MUST document the Design 03 three-layer skill model (Foundation, Peru, Practice/sector) in skills/README.md, MUST declare the layer and jurisdiction of each shipped skill in its frontmatter metadata, and MUST document the required per-skill metadata fields (identifier, version, jurisdiction, validity period, normative sources, declared inputs/outputs, required permissions, maximum autonomy, tests and fixtures, contract compatibility, signature/checksum, replacement and retirement policy) without changing the shipped skill count in v0.1.
+
 ### Requirement: REQ-SKPT-002 — Prompts
 
 The system MUST ship a persona prompt and command prompts covering the 14 intended commands, and MUST keep prompts aligned with the command surface and authority doctrine.

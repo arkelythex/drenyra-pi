@@ -2,13 +2,13 @@
 
 ## Purpose
 
-Defines the seven Pi markdown accounting agents, the scope guard and evidence-citation rules every agent follows, the fail-closed authority posture, and the memory write-back contract that keeps accounting truth outside the transient chat context.
+Defines the ten Pi markdown accounting agents — the seven Design 03 ecosystem roles (Close Coordinator, Evidence Agent, Invoice/SIRE Agent, Reconciliation Agent, Journal Candidate Agent, Compliance Agent, Guardian Angel) plus three Pi work agents — the scope guard and evidence-citation rules every agent follows, the fail-closed authority posture, and the memory write-back contract that keeps accounting truth outside the transient chat context.
 
 ## Requirements
 
-### Requirement: REQ-AGENT-001 — Seven agent roles
+### Requirement: REQ-AGENT-001 — Ten agent roles
 
-The system MUST ship exactly seven accounting agent definitions: accounting-scout, evidence-builder, ledger-analyst, reconciliation-agent, tax-controller-pe, anomaly-refuter, and close-controller.
+The system MUST ship exactly ten accounting agent definitions: accounting-scout, evidence-builder, ledger-analyst, reconciliation-agent, tax-controller-pe, anomaly-refuter, close-controller, invoice-sire-agent, journal-candidate-agent, and guardian-angel — the seven Design 03 ecosystem roles plus three Pi work agents.
 
 ### Requirement: REQ-AGENT-002 — Parseable definitions
 
@@ -36,7 +36,7 @@ The system MUST require the anomaly-refuter to attempt refutation of every findi
 
 ### Requirement: REQ-AGENT-008 — Role-to-authority mapping
 
-The system MUST assign each agent a documented authority ceiling (scout, analyst, and refuter at ASK–ANALYZE; close-controller at PREPARE coordination only) and MUST enforce those ceilings in agent prompts and permissions.
+The system MUST assign each agent a documented authority ceiling (scout, analyst, and refuter at ASK–ANALYZE; close-controller and journal-candidate-agent at PREPARE candidate/coordination only) and MUST enforce those ceilings in agent prompts and permissions. The guardian-angel MUST stay at ANALYZE: it produces findings and never approval.
 
 ### Requirement: REQ-AGENT-009 — Asset conformance
 
@@ -46,9 +46,9 @@ The system MUST include the agent definitions in package verification (manifest 
 
 #### Scenario: SC-AGENT-001 — Definitions parse and permissions fail closed
 
-- GIVEN the seven agent definition files
+- GIVEN the ten agent definition files
 - WHEN they are parsed and their permissions inspected
-- THEN all seven parse, the mirrored assets match, and tool permissions are broad-deny with narrow allows
+- THEN all ten parse, the mirrored assets match, and tool permissions are broad-deny with narrow allows
 
 #### Scenario: SC-AGENT-002 — Out-of-scope operation fails closed
 
@@ -76,4 +76,4 @@ The system MUST include the agent definitions in package verification (manifest 
 
 ## Out of Scope
 
-More than the seven v0.1 roles, and any agent with EXECUTE-level mutation authority on its own.
+More than the ten v0.1 roles, and any agent with EXECUTE-level mutation authority on its own.

@@ -1,12 +1,13 @@
 /**
- * Seven-agent conformance tests (T-S6-001; REQ-AGENT-001..009).
+ * Ten-agent conformance tests (T-S6-001; REQ-AGENT-001..009).
  *
- * Asserts that exactly seven parseable Pi markdown agent definitions ship under
- * agents/, that each definition carries the common operating contract (scope
+ * Asserts that exactly ten parseable Pi markdown agent definitions ship under
+ * agents/ — the seven Design 03 ecosystem roles plus three Pi work agents —
+ * that each definition carries the common operating contract (scope
  * guard, evidence citation, broad-deny authority posture, persist-before-respond
- * memory contract), that role authority ceilings match design §12, that the
- * anomaly-refuter enforces refutation before elevation, and that assets/agents/
- * mirrors agents/ byte-for-byte (REQ-AGENT-002; SC-AGENT-001).
+ * memory contract), that role authority ceilings match the authority doctrine,
+ * that the anomaly-refuter enforces refutation before elevation, and that
+ * assets/agents/ mirrors agents/ byte-for-byte (REQ-AGENT-002; SC-AGENT-001).
  *
  * Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents;
  * no float is ever used for money; digests are lowercase hex sha-256.
@@ -21,7 +22,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const AGENTS_DIR = join(HERE, "..", "agents");
 const ASSETS_AGENTS_DIR = join(HERE, "..", "assets", "agents");
 
-/** The seven required roles (REQ-AGENT-001; design §12). */
+/** The ten required roles (REQ-AGENT-001): Design 03 ecosystem roles plus Pi work agents. */
 const REQUIRED_ROLES = [
   "accounting-scout",
   "evidence-builder",
@@ -30,9 +31,12 @@ const REQUIRED_ROLES = [
   "tax-controller-pe",
   "anomaly-refuter",
   "close-controller",
+  "invoice-sire-agent",
+  "journal-candidate-agent",
+  "guardian-angel",
 ] as const;
 
-/** Design §12 authority ceilings (REQ-AGENT-008). */
+/** Authority ceilings (REQ-AGENT-008). */
 const ROLE_CEILINGS: Record<string, string> = {
   "accounting-scout": "ANALYZE",
   "evidence-builder": "ANALYZE",
@@ -41,6 +45,9 @@ const ROLE_CEILINGS: Record<string, string> = {
   "tax-controller-pe": "ANALYZE",
   "anomaly-refuter": "ANALYZE",
   "close-controller": "PREPARE",
+  "invoice-sire-agent": "ANALYZE",
+  "journal-candidate-agent": "PREPARE",
+  "guardian-angel": "ANALYZE",
 };
 
 /** The modes an agent ceiling may take; EXECUTE is never an agent ceiling. */
@@ -108,11 +115,11 @@ function agentFiles(dir: string): string[] {
     .sort();
 }
 
-describe("T-S6-001 seven agent definitions (REQ-AGENT-001)", () => {
-  it("ships exactly the seven required roles under agents/", () => {
+describe("T-S6-001 ten agent definitions (REQ-AGENT-001)", () => {
+  it("ships exactly the ten required roles under agents/", () => {
     const files = agentFiles(AGENTS_DIR);
     expect(files).toEqual([...REQUIRED_ROLES].sort());
-    expect(files).toHaveLength(7);
+    expect(files).toHaveLength(10);
   });
 
   it("mirrors every definition byte-for-byte under assets/agents/ (REQ-AGENT-002; SC-AGENT-001)", () => {
