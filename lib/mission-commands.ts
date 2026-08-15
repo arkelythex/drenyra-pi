@@ -35,14 +35,17 @@ import {
   MissionEventType,
   MissionRuntime,
   waitReasonFor,
+  type AccountingException,
   type IntentHandler,
   type IntentRegistry,
   type MissionEvent,
   type MissionIntent,
   type MissionSnapshot,
-  type WaitReason,
+  WaitReason,
 } from "drenyra-ai/missions";
 import { computeEvidenceHash } from "drenyra-ai/receipts";
+import type { WorkStopReason, WorkUnit } from "drenyra-ai";
+import type { RoutingExecutionPorts } from "./routing/types.js";
 import {
   EDA_PHASE,
   EDA_PHASE_ORDER,
@@ -561,20 +564,189 @@ export async function findActiveEdaMission(
   return pickActiveMission(await stores.store.list(), binding);
 }
 
-/** The most recently updated non-terminal mission matching the binding's scope. */
-function pickActiveMission(
-  all: MissionSnapshot[],
-  binding: ScopeBinding,
-): MissionSnapshot | undefined {
-  const candidates = all.filter(
-    (mission) =>
-      mission.companyId === binding.scope.company &&
-      mission.fiscalPeriod === binding.scope.fiscalPeriod &&
-      !TERMINAL_STATUSES.has(mission.status),
-  );
-  if (candidates.length === 0) {
-    return undefined;
-  }
-  candidates.sort((a, b) => a.updatedAt.localeCompare(b.updatedAt));
-  return candidates[candidates.length - 1];
-}
+    /** The most recently updated non-terminal mission matching the binding's scope. */
+    function pickActiveMission(
+      all: MissionSnapshot[],
+      binding: ScopeBinding,
+    ): MissionSnapshot | undefined {
+      const candidates = all.filter(
+        (mission) =>
+          mission.companyId === binding.scope.company &&
+          mission.fiscalPeriod === binding.scope.fiscalPeriod &&
+          !TERMINAL_STATUSES.has(mission.status),
+      );
+      if (candidates.length === 0) {
+        return undefined;
+      }
+      candidates.sort((a, b) => a.updatedAt.localeCompare(b.updatedAt));
+      return candidates[candidates.length - 1];
+    }
+
+    /**
+     * The engine status a lifecycle EDA phase enters on completion (design §4.2;
+     * mirror of `genericIntentHandler`). Steady-state phases return undefined:
+     * they advance phase-only with no engine status change (design §4.1). Used
+     * ONLY to PROPOSE the next Core target to the routing executor; the injected
+     * Core validator remains the transition authority (REQ-BOUND-001).
+     */
+    function lifecycleStatusForPhase(
+      phase: EdaPhase,
+    ): AccountingMissionStatus | undefined {
+      switch (phase) {
+        case EDA_PHASE.INTAKE:
+          return AccountingMissionStatus.QUEUED;
+        case EDA_PHASE.BIND_SCOPE:
+          return AccountingMissionStatus.RUNNING;
+        case EDA_PHASE.INGEST:
+          return AccountingMissionStatus.WAITING_FOR_EVIDENCE;
+        case EDA_PHASE.APPROVE:
+          return AccountingMissionStatus.AWAITING_APPROVAL;
+        case EDA_PHASE.ARCHIVE:
+          return AccountingMissionStatus.COMPLETED;
+        default:
+          return undefined;
+      }
+    }
+
+    /** A typed adapter stop for a human-wait state (published kinds only). */
+    function waitStopFor(
+      unit: WorkUnit,
+      waitReason: WaitReason,
+    ): WorkStopReason {
+      switch (waitReason) {
+        case WaitReason.EVIDENCE: {
+          const hashes = unit.evidenceAllowed.map((ref) => ref.hash);
+          if (hashes.length > 0) {
+            return { kind: "MISSING_EVIDENCE", requiredHashes: hashes };
+          }
+          return { kind: "AMBIGUOUS_INPUT", fields: ["mission.status"] };
+        }
+        case WaitReason.APPROVAL:
+        case WaitReason.POLICY_GATE:
+          return { kind: "APPROVAL_REQUIRED", approvalType: "human" };
+        case WaitReason.EXTERNAL_SYSTEM:
+          return {
+            kind: "EXTERNAL_SYSTEM_UNAVAILABLE",
+            systemId: "durable-mission",
+          };
+        case WaitReason.MANUAL_INTERVENTION:
+          return {
+            kind: "APPROVAL_REQUIRED",
+            approvalType: "manual-intervention",
+          };
+      }
+    }
+
+    /** One well-formed seam accounting exception (never invented stop kinds). */
+    function seamException(
+      missionId: string,
+      code: string,
+      severity: string,
+      evidenceRefs: string[],
+      resolutionStatus: string,
+    ): AccountingException {
+      return {
+        id: `exc-${code.toLowerCase()}-${missionId}`,
+        missionId,
+        code,
+        severity,
+        subjectRef: missionId,
+        evidenceRefs,
+        resolutionStatus,
+      };
+    }
+
+    /**
+     * D5 — durable-mission routing seam (pi-sdd-030-routing-adapter; design D5
+     * §7). The ONE exported adapter function: it verifies the work-unit/mission
+     * binding, calls `coordinator.advance({ missionId })` EXACTLY ONCE, and maps
+     * the existing `AdvanceEdaMissionResult` into the executor port response
+     * WITHOUT changing the mission or re-routing the advance back through the
+     * adapter (no recursion). WAIT and authority denial are reported as typed
+     * adapter stops (published `WorkStopReason` kinds) plus unresolved
+     * exceptions; no synthetic tool provenance or candidate is ever emitted.
+     *
+     * Existing `start` / `advance` / `resumeAll` / recovery behavior is
+     * untouched; this seam is opt-in composition for routing execution.
+     */
+    export function createDurableMissionRoutingPort(
+      coordinator: EdaMissionCoordinator,
+    ): RoutingExecutionPorts["durable"] {
+      return async (input) => {
+        if (input.workUnit.missionId !== input.mission.id) {
+          throw new Error(
+            `durable routing port: work unit ${input.workUnit.id} is bound to mission ` +
+              `${input.workUnit.missionId}, presented mission ${input.mission.id} — no execution`,
+          );
+        }
+        const advance = await coordinator.advance({ missionId: input.mission.id });
+        const evidenceHashes = input.workUnit.evidenceAllowed.map((ref) => ref.hash);
+        const exceptions: AccountingException[] = [];
+        let stop: WorkStopReason | undefined;
+        let coreProposedTarget: AccountingMissionStatus | undefined;
+
+        if (advance.authorityDenied !== undefined) {
+          const policy = input.workUnit.policies[0];
+          stop =
+            policy === undefined
+              ? { kind: "AMBIGUOUS_INPUT", fields: ["workUnit.policies"] }
+              : { kind: "POLICY_BLOCKED", policy };
+          exceptions.push(
+            seamException(
+              input.mission.id,
+              "AUTHORITY_DENIED",
+              "ERROR",
+              evidenceHashes,
+              "BLOCKED_BY_BOUND_AUTHORITY",
+            ),
+          );
+        } else if (advance.mission.status === AccountingMissionStatus.UNKNOWN) {
+          stop = { kind: "AMBIGUOUS_INPUT", fields: ["mission.status"] };
+          exceptions.push(
+            seamException(
+              input.mission.id,
+              "MISSION_UNKNOWN",
+              "ERROR",
+              evidenceHashes,
+              "RECONCILIATION_OR_EXPLICIT_HUMAN_ACTION_REQUIRED",
+            ),
+          );
+        } else if (advance.waitReason !== undefined) {
+          stop = waitStopFor(input.workUnit, advance.waitReason);
+          exceptions.push(
+            seamException(
+              input.mission.id,
+              "WAIT_REQUIRED",
+              "WARNING",
+              evidenceHashes,
+              "HUMAN_INPUT_REQUIRED",
+            ),
+          );
+        } else if (advance.preparedStep !== null) {
+          coreProposedTarget = lifecycleStatusForPhase(advance.preparedStep.phase);
+        }
+
+        return {
+          missionBefore: input.mission,
+          missionAfter: advance.mission,
+          evidenceRefs: input.workUnit.evidenceAllowed,
+          candidates: [],
+          unresolvedExceptions: exceptions,
+          toolProvenance: [],
+          consumption: {
+            elapsedMs: 0,
+            tokens: 0,
+            costIncurredCents: 0n,
+            researchAttempts: 1,
+            correctionAttempts: 0,
+          },
+          ...(coreProposedTarget === undefined ? {} : { coreProposedTarget }),
+          ...(stop === undefined ? {} : { stop }),
+          ...(advance.preparedStep === null
+            ? {}
+            : {
+                explanation: `durable advance: ${advance.preparedStep.disposition} phase ${advance.preparedStep.phase}`,
+              }),
+        };
+      };
+    }
