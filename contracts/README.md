@@ -1,13 +1,13 @@
 # Drenyra Pi — Contracts
 
-> **Status: draft (pre-alpha).** These contracts define what Drenyra Pi provides and how it consumes the Drenyra AI runtime. Nothing is frozen until Phase 1 of the [ROADMAP](../ROADMAP.md) completes.
+> **Status: two local contracts frozen at v0.1 (2026-08-14).** `package-contract` and `runtime-dependency` are frozen v0.1 contracts; every frozen claim was checked against source and the existing conformance suite (claim matrix in `openspec/changes/pi-sdd-010-participation/apply-progress.md`). Other contract families remain draft until Phase 1 of the [ROADMAP](../ROADMAP.md) completes.
 
 ## Index
 
 | Contract                              | Version | Status | Governs                          |
 | ------------------------------------- | ------- | ------ | -------------------------------- |
-| [package-contract](package-contract.md) | 0.1-draft | Draft | Install surface and provided capabilities |
-| [runtime-dependency](runtime-dependency.md) | 0.1-draft | Draft | Pinned, verified Drenyra AI runtime |
+| [package-contract](package-contract.md) | 0.1 | Frozen | Install surface and provided capabilities |
+| [runtime-dependency](runtime-dependency.md) | 0.1 | Frozen | Pinned, verified Drenyra AI runtime |
 
 ## Contract requirements
 

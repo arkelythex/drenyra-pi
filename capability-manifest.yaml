@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "drenyra.capability-manifest.v1",
+  "repository": {
+    "name": "drenyra-pi",
+    "package": "drenyra-pi",
+    "role": "agentic-runtime",
+    "version": "0.0.1-prealpha.1"
+  },
+  "capabilities": {
+    "persona-startup-panel": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "extensions/startup-panel.ts"
+        ],
+        "tests": [
+          "__tests__/extension.test.ts"
+        ]
+      }
+    },
+    "drenyra-commands": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "extensions/register.ts"
+        ],
+        "tests": [
+          "__tests__/extension.test.ts"
+        ]
+      }
+    },
+    "pi-subagents": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "agents/accounting-scout.md",
+          "agents/anomaly-refuter.md",
+          "agents/close-controller.md",
+          "agents/evidence-builder.md",
+          "agents/guardian-angel.md",
+          "agents/invoice-sire-agent.md",
+          "agents/journal-candidate-agent.md",
+          "agents/ledger-analyst.md",
+          "agents/reconciliation-agent.md",
+          "agents/tax-controller-pe.md"
+        ],
+        "tests": [
+          "__tests__/agents.test.ts"
+        ]
+      }
+    },
+    "model-routing": {
+      "state": "partial",
+      "evidence": {
+        "sources": [
+          "extensions/register.ts",
+          "prompts/models.md"
+        ],
+        "tests": [
+          "__tests__/extension.test.ts"
+        ],
+        "limitation": "advisory registry exists; the installed Pi host slice exposes no model-routing API (G30) and model suggestions never grant authority"
+      }
+    },
+    "packaged-skills": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "skills/scope-discipline/SKILL.md"
+        ],
+        "tests": [
+          "__tests__/content.test.ts"
+        ]
+      }
+    },
+    "rda-chains": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "chains/monthly-close.ts"
+        ],
+        "tests": [
+          "chains/__tests__/monthly-close-flow.test.ts"
+        ]
+      }
+    },
+    "tool-safety-broad-deny": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "agents/accounting-scout.md"
+        ],
+        "tests": [
+          "__tests__/agents.test.ts"
+        ]
+      }
+    },
+    "engram-integration": {
+      "state": "partial",
+      "evidence": {
+        "sources": [
+          "runtime/context.ts"
+        ],
+        "tests": [
+          "__tests__/extension.test.ts"
+        ],
+        "limitation": "Pi reads Drenyra Engram context at the memory boundary and never authorizes operations, but no complete executable Engram integration is evidenced; context persistence is a development-grade local JSON store and canonical memory integration is a later concern (REQ-BOUND-001)"
+      }
+    },
+    "pinned-ai-runtime": {
+      "state": "implemented",
+      "evidence": {
+        "sources": [
+          "runtime/pin.ts"
+        ],
+        "tests": [
+          "__tests__/pin.test.ts"
+        ]
+      }
+    },
+    "configurator-install-doctor-sync": {
+      "state": "planned",
+      "evidence": {
+        "sources": [
+          "ROADMAP.md"
+        ],
+        "tests": [],
+        "plan": "Master SDD-020/Gate 0 plan only; no local implementation (REQ-BOUND-001)."
+      }
+    }
+  },
+  "testState": {
+    "command": "bun test",
+    "result": "passing",
+    "files": 37,
+    "total": 582,
+    "passed": 582,
+    "failed": 0,
+    "evidenceRef": "docs/architecture/program-lock-facts.json#/tests"
+  },
+  "generatedAt": "2026-08-14T00:00:00Z",
+  "derivedFrom": [
+    "arkelythex/drenyra-ai@4975f4f capability-matrix.yaml Pi row (read-only)",
+    "package.json version (drenyra-pi)",
+    "design \u00a75.2 state table (pi-sdd-010-participation)"
+  ]
+}

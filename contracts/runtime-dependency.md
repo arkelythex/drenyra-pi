@@ -1,6 +1,6 @@
 # Contract: runtime-dependency
 
-> Version: 0.1-draft · Status: draft · Applies to: Drenyra Pi ↔ Drenyra AI.
+> Version: v0.1 · Status: frozen · Applies to: Drenyra Pi ↔ Drenyra AI.
 
 This contract defines how Drenyra Pi consumes the Drenyra AI runtime. It follows the Gentle Pi ↔ Gentle AI pattern: **exact, verified, package-local** — never an ambient binary.
 
@@ -65,7 +65,7 @@ The first verifiable vertical of the pinned-runtime core lives in this package:
 
 | Contract rule | Implementation |
 | --- | --- |
-| Pinned exact version | `runtime/pin.ts` — `RuntimePin`, `createPin` (validates exact semver, hex checksum, state) and `DEFAULT_PIN` (package `drenyra-ai`, version `0.0.1-prealpha.1`, state `pending-release` until the first release fills the checksum) |
+| Pinned exact version | `runtime/pin.ts` — `RuntimePin`, `createPin` (validates exact semver, hex checksum, state) and `DEFAULT_PIN` (package `drenyra-ai`, version `0.2.0`, state `released`; `checksumSha256` `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047` — SHA-256 of the release entry artifact `dist/cmd/cli.js`, per `runtime/doctor.ts`) |
 | Package-local install / never PATH | `runtime/resolve.ts` — `resolvePackageLocal` consults only `<packageRoot>/runtime/<package>` then `<packageRoot>/node_modules/<package>`; never PATH, `which`, or env |
 | Checksum verification | `runtime/checksum.ts` — `sha256File` (lowercase hex sha256, streamed via `node:crypto`); `runtime/doctor.ts` checksums the resolved runtime's entry artifact |
 | Doctor fail-closed | `runtime/doctor.ts` — verdicts `verified`, `missing`, `pending-release`, `version-mismatch`, `checksum-mismatch`; a `pending-release` pin is never `verified` |

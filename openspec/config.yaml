@@ -3,19 +3,19 @@
 
 name: drenyra-pi
 description: >-
-  Pi-native Accounting Operations Harness — consumes a pinned, verified,
-  package-local Drenyra AI runtime. Zero runtime dependencies. Private commercial product.
+      Pi-native Accounting Operations Harness — consumes a pinned, verified,
+      package-local Drenyra AI runtime. Zero runtime dependencies. Public source, proprietary license (source-available).
 repository: git@github.com:arkelythex/drenyra-pi.git
 default_branch: main
 stack:
-  runtime: bun
-  language: typescript
-  module: esm # package.json "type": "module"
-  engines: { node: ">=22" }
-  test_runner: vitest
-  tsconfig: strict
-  package_kind: pi-extension # package.json "pi" field: extensions/prompts/skills/themes
-  runtime_dependency: drenyra-ai pinned via tgz (v0.2.0), devDependency
+      runtime: bun
+      language: typescript
+      module: esm # package.json "type": "module"
+      engines: { node: ">=22" }
+      test_runner: vitest
+      tsconfig: strict
+      package_kind: pi-extension # package.json "pi" field: extensions/prompts/skills/themes
+      runtime_dependency: drenyra-ai pinned via tgz (v0.2.0), devDependency
 
 status: active
 store_mode: hybrid # openspec files authoritative + engram best-effort
@@ -25,22 +25,28 @@ strict_tdd: true
 tdd_discipline: RED / GREEN / TRIANGULATE / REFACTOR — write failing test first, then minimal implementation, then triangulate edge cases, then refactor. Record evidence per step.
 
 conventions:
-  money: BigInt cents — never floats
-  checksums: lowercase hex sha256
-  error_codes: JSON integer codes
-  testing: vitest runner, fast suite (493 tests / ~1s), strict mode active
-    
+      money: BigInt cents — never floats
+      checksums: lowercase hex sha256
+      error_codes: JSON integer codes
+      testing: vitest runner, fast suite (582 tests / ~1s), strict mode active
+
 current_test_state:
-  files: 29
-  tests: 493
-  passing: true
-  command: bun test
+      files: 37
+      tests: 582
+      passing: true
+      failed: 0
+      command: bun test
+      candidate_identity: "dirty-sha256:00feca1fa832b2696c7484a532f4031f8c6eadd5c0573bf49a80e1264023dc01"
+      evidence_date: 2026-08-14
+      evidence: >-
+            pi-sdd-010-participation final-candidate verification; see
+            docs/architecture/program-lock-facts.json and the change verify report
 
 phases:
-  - proposal
-  - specs
-  - design
-  - tasks
-  - apply
-  - verify
-  - archive
+      - proposal
+      - specs
+      - design
+      - tasks
+      - apply
+      - verify
+      - archive
