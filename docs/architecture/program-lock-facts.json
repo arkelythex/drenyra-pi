@@ -3,7 +3,7 @@
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
   "headSha": "858c0df78aa49602ac81bf2d3de0ec98b1fc55d2",
-  "candidateIdentity": "dirty-sha256:99e257d23de80ac5191aba89773ca821d0c5fa64a5e619b20ea0833061e22e03",
+  "candidateIdentity": "dirty-sha256:f0abe87103fd286c227352d47dcba1dea22979d1c20c1bfb1271499f5eecb5a8",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -45,9 +45,9 @@
   },
   "tests": {
     "files": 44,
-    "passed": 687,
+    "passed": 689,
     "failed": 0,
-    "total": 687,
+    "total": 689,
     "command": "bun test"
   },
   "checksums": {
@@ -63,8 +63,7 @@
     "digestSha256": "a4c24edd2b265059e1211c2046d28ddce4da7a4d177be04f374c03eddc26dec3"
   },
   "activeChanges": [
-    "pi-program-status-reconciliation",
-    "pi-sdd-010-participation"
+    "pi-program-status-reconciliation"
   ],
   "evidenceDate": "2026-08-15",
   "derivationCommands": [
