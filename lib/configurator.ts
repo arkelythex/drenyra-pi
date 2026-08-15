@@ -27,7 +27,7 @@
 // `MANAGED_STATE_UNKNOWN`, the only honest code for "managed state could not
 // be established".
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   ASSET_FILENAMES,
@@ -88,7 +88,9 @@ export interface ConfiguratorDoctorFailed {
  * diagnostics (each diagnostic carries its own ok flag); `ok: false` only
  * when the Core threw — the wrapper never throws to the caller.
  */
-export type ConfiguratorDoctorReport = ConfiguratorDoctorOk | ConfiguratorDoctorFailed;
+export type ConfiguratorDoctorReport =
+  | ConfiguratorDoctorOk
+  | ConfiguratorDoctorFailed;
 
 export interface ConfiguratorTransitionOk {
   ok: true;
@@ -126,7 +128,10 @@ export function runConfiguratorDoctor(
   packagedVersion: string,
 ): ConfiguratorDoctorReport {
   try {
-    return { ok: true, diagnostics: runConfigDiagnostics(homeDir, packagedVersion) };
+    return {
+      ok: true,
+      diagnostics: runConfigDiagnostics(homeDir, packagedVersion),
+    };
   } catch (error) {
     return {
       ok: false,
@@ -234,10 +239,11 @@ function bootstrapDrenyraPiComposition(
     results.push({ host: "drenyra-pi", asset: "pin", action: "created" });
   }
 
-  const assets: ReadonlyArray<{ asset: "marker" | "skills"; content: string }> = [
-    { asset: "marker", content: markerContent },
-    { asset: "skills", content: skillsContent },
-  ];
+  const assets: ReadonlyArray<{ asset: "marker" | "skills"; content: string }> =
+    [
+      { asset: "marker", content: markerContent },
+      { asset: "skills", content: skillsContent },
+    ];
   for (const { asset, content } of assets) {
     const assetPath = join(configDir, ASSET_FILENAMES[asset]);
     if (existsSync(assetPath)) {
@@ -270,7 +276,13 @@ function bootstrapDrenyraPiComposition(
     },
   };
   const manifestPath = managedManifestPath(homeDir);
-  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  // Atomic fail-closed commit: write the manifest via a same-directory temp
+  // file + rename, so the composition authority is never published partially
+  // (mirrors commitTransition's atomicity contract — the candidate manifest is
+  // never left half-written, and a failed write never replaces a prior state).
+  const tempManifestPath = `${manifestPath}.tmp`;
+  writeFileSync(tempManifestPath, JSON.stringify(manifest, null, 2));
+  renameSync(tempManifestPath, manifestPath);
 
   return {
     ok: true,
