@@ -42,9 +42,9 @@ describe("createPin", () => {
   });
 
   it("rejects a malformed checksum", () => {
-    expect(() => createPin({ state: "released", checksumSha256: "abc" })).toThrow(
-      /checksum/,
-    );
+    expect(() =>
+      createPin({ state: "released", checksumSha256: "abc" }),
+    ).toThrow(/checksum/);
     expect(() =>
       createPin({ state: "released", checksumSha256: "ZZ".repeat(32) }),
     ).toThrow(/checksum/);
@@ -69,12 +69,12 @@ describe("createPin", () => {
   });
 });
 
-    describe("DEFAULT_PIN", () => {
-      it("is released at v0.3.0 with the real entry-artifact checksum", () => {
-        expect(DEFAULT_PIN.state).toBe("released");
-        expect(DEFAULT_PIN.checksumSha256).toBe(
-          "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
-        );
-        expect(DEFAULT_PIN.version).toBe("0.3.0");
-      });
-    });
+describe("DEFAULT_PIN", () => {
+  it("is released at v0.4.1 with the real entry-artifact checksum", () => {
+    expect(DEFAULT_PIN.state).toBe("released");
+    expect(DEFAULT_PIN.checksumSha256).toBe(
+      "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
+    );
+    expect(DEFAULT_PIN.version).toBe("0.4.1");
+  });
+});

@@ -27,10 +27,7 @@ import {
 } from "../lib/accounting-status.js";
 import { ACTION_FAMILY } from "../lib/authority-gates.js";
 import { AUTHORITY_MODE } from "../runtime/context.js";
-import {
-  makeMission,
-  makeScopeBinding,
-} from "./helpers/authority-fixtures.js";
+import { makeMission, makeScopeBinding } from "./helpers/authority-fixtures.js";
 
 /** The exact 15-member installed engine set (design §1; REQ-MISS-002). */
 const INSTALLED_STATES: readonly AccountingMissionStatus[] = [
@@ -53,7 +50,7 @@ const INSTALLED_STATES: readonly AccountingMissionStatus[] = [
 
 function runtimeStatus(): RuntimeStatus {
   return {
-    summary: "drenyra-ai@0.3.0: verified",
+    summary: "drenyra-ai@0.4.1: verified",
     human: "Runtime status: verified",
     machine: {
       pinState: "released",
@@ -84,16 +81,17 @@ describe("T-S2-004 installed engine states (design §1)", () => {
 
   it("classifies every installed state without a silent runnable default", async () => {
     for (const state of INSTALLED_STATES) {
-      const mission = makeMission({ status: state, steps: createEdaSteps("monthly-close") });
+      const mission = makeMission({
+        status: state,
+        steps: createEdaSteps("monthly-close"),
+      });
       const view = await buildAccountingStatus(statusInput(mission));
       const missionView = view.mission;
       expect(missionView, `state ${state}`).toBeDefined();
       expect(missionView?.status).toBe(state);
       // Engine predicates drive the classification — never chat inference.
       expect(missionView?.runnable).toBe(missionView?.runnable);
-      expect(missionView?.waitReason).toBe(
-        missionView?.waitReason,
-      );
+      expect(missionView?.waitReason).toBe(missionView?.waitReason);
     }
   });
 
@@ -123,7 +121,12 @@ describe("T-S2-004 installed engine states (design §1)", () => {
     ];
     for (const [state, reason] of cases) {
       const view = await buildAccountingStatus(
-        statusInput(makeMission({ status: state, steps: createEdaSteps("monthly-close") })),
+        statusInput(
+          makeMission({
+            status: state,
+            steps: createEdaSteps("monthly-close"),
+          }),
+        ),
       );
       expect(view.mission?.waitReason, `state ${state}`).toBe(reason);
       if (reason !== undefined) {
@@ -155,7 +158,9 @@ describe("T-S2-004 createEdaSteps (REQ-MISS-001; design §4.2/§4.3)", () => {
 
   it("matches the exported phase order constant", () => {
     expect(EDA_PHASE_ORDER).toHaveLength(13);
-    expect(EDA_PHASE_ORDER.map((phase) => phase)).toEqual(CANONICAL_PHASE_ORDER);
+    expect(EDA_PHASE_ORDER.map((phase) => phase)).toEqual(
+      CANONICAL_PHASE_ORDER,
+    );
   });
 
   it("returns all 13 phases in canonical order for all five intents", () => {
@@ -179,16 +184,31 @@ describe("T-S2-004 createEdaSteps (REQ-MISS-001; design §4.2/§4.3)", () => {
     for (const phase of EDA_PHASE_ORDER) {
       expect(monthly[phase], `monthly-close ${phase}`).toBe("required");
     }
-    expect(PHASE_APPLICABILITY.correction[EDA_PHASE.RECONCILE]).toBe("conditional");
-    expect(PHASE_APPLICABILITY.reconciliation[EDA_PHASE.PROPOSE]).toBe("conditional");
-    expect(PHASE_APPLICABILITY["invoice-review"][EDA_PHASE.RECONCILE]).toBe("conditional");
-    expect(PHASE_APPLICABILITY["invoice-review"][EDA_PHASE.PROPOSE]).toBe("conditional");
-    expect(PHASE_APPLICABILITY["compliance-check"][EDA_PHASE.RECONCILE]).toBe("conditional");
-    expect(PHASE_APPLICABILITY["compliance-check"][EDA_PHASE.PROPOSE]).toBe("conditional");
+    expect(PHASE_APPLICABILITY.correction[EDA_PHASE.RECONCILE]).toBe(
+      "conditional",
+    );
+    expect(PHASE_APPLICABILITY.reconciliation[EDA_PHASE.PROPOSE]).toBe(
+      "conditional",
+    );
+    expect(PHASE_APPLICABILITY["invoice-review"][EDA_PHASE.RECONCILE]).toBe(
+      "conditional",
+    );
+    expect(PHASE_APPLICABILITY["invoice-review"][EDA_PHASE.PROPOSE]).toBe(
+      "conditional",
+    );
+    expect(PHASE_APPLICABILITY["compliance-check"][EDA_PHASE.RECONCILE]).toBe(
+      "conditional",
+    );
+    expect(PHASE_APPLICABILITY["compliance-check"][EDA_PHASE.PROPOSE]).toBe(
+      "conditional",
+    );
     // All five intents expose every phase (skips remain visible in MissionStep[]).
     for (const intent of Object.keys(PHASE_APPLICABILITY) as MissionIntent[]) {
       for (const phase of EDA_PHASE_ORDER) {
-        expect(PHASE_APPLICABILITY[intent][phase], `${intent}/${phase}`).toBeDefined();
+        expect(
+          PHASE_APPLICABILITY[intent][phase],
+          `${intent}/${phase}`,
+        ).toBeDefined();
       }
     }
   });
@@ -251,22 +271,34 @@ describe("T-S2-004 derivePreparedStep (REQ-MISS-003/004)", () => {
   it("returns null for terminal, UNKNOWN, and unknown states", () => {
     expect(
       derivePreparedStep(
-        snapshotWithSteps(AccountingMissionStatus.COMPLETED, createEdaSteps("monthly-close")),
+        snapshotWithSteps(
+          AccountingMissionStatus.COMPLETED,
+          createEdaSteps("monthly-close"),
+        ),
       ),
     ).toBeNull();
     expect(
       derivePreparedStep(
-        snapshotWithSteps(AccountingMissionStatus.FAILED, createEdaSteps("monthly-close")),
+        snapshotWithSteps(
+          AccountingMissionStatus.FAILED,
+          createEdaSteps("monthly-close"),
+        ),
       ),
     ).toBeNull();
     expect(
       derivePreparedStep(
-        snapshotWithSteps(AccountingMissionStatus.UNKNOWN, createEdaSteps("monthly-close")),
+        snapshotWithSteps(
+          AccountingMissionStatus.UNKNOWN,
+          createEdaSteps("monthly-close"),
+        ),
       ),
     ).toBeNull();
     expect(
       derivePreparedStep(
-        snapshotWithSteps("NOT_A_REAL_STATE" as never, createEdaSteps("monthly-close")),
+        snapshotWithSteps(
+          "NOT_A_REAL_STATE" as never,
+          createEdaSteps("monthly-close"),
+        ),
       ),
     ).toBeNull();
   });
@@ -333,7 +365,10 @@ describe("T-S2-004 derivePreparedStep (REQ-MISS-003/004)", () => {
 describe("T-S2-004 nextAuthorizedAction (REQ-MISS-003)", () => {
   it("maps evidence wait to INVESTIGATE at ANALYZE", () => {
     const prepared = derivePreparedStep(
-      makeMission({ status: AccountingMissionStatus.WAITING_FOR_EVIDENCE, steps: createEdaSteps("monthly-close") }),
+      makeMission({
+        status: AccountingMissionStatus.WAITING_FOR_EVIDENCE,
+        steps: createEdaSteps("monthly-close"),
+      }),
     );
     const next = nextAuthorizedActionFor(prepared, WaitReason.EVIDENCE);
     expect(next?.actionFamily).toBe(ACTION_FAMILY.INVESTIGATE);
@@ -354,7 +389,10 @@ describe("T-S2-004 nextAuthorizedAction (REQ-MISS-003)", () => {
 
   it("derives the family from the prepared step when runnable", () => {
     const prepared = derivePreparedStep(
-      makeMission({ status: AccountingMissionStatus.RUNNING, steps: createEdaSteps("monthly-close") }),
+      makeMission({
+        status: AccountingMissionStatus.RUNNING,
+        steps: createEdaSteps("monthly-close"),
+      }),
     );
     expect(prepared?.phase).toBe(EDA_PHASE.INTAKE);
     const next = nextAuthorizedActionFor(prepared, null);
@@ -390,7 +428,11 @@ describe("T-S2-004 buildAccountingStatus (design §9)", () => {
   it("reports an incomplete scope without inventing readiness", async () => {
     const view = await buildAccountingStatus({
       ...statusInput(),
-      scopeReport: { scope: { company: "20123456786" }, missing: ["tenant"], complete: false },
+      scopeReport: {
+        scope: { company: "20123456786" },
+        missing: ["tenant"],
+        complete: false,
+      },
     });
     expect(view.scope.complete).toBe(false);
     expect(view.scope.missing).toContain("tenant");

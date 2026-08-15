@@ -16,7 +16,7 @@ import {
   type FakeRuntime,
 } from "./helpers/fixture-runtime.js";
 
-const EXACT_VERSION = "0.3.0";
+const EXACT_VERSION = "0.4.1";
 
 describe("status", () => {
   let fixture: FakeRuntime | undefined;
@@ -59,7 +59,10 @@ describe("status", () => {
 
   it("pending-release: summary and human both surface the fail-closed state", async () => {
     fixture = await createFakeRuntime({ version: EXACT_VERSION });
-    const result = await status({ pin: createPin(), packageRoot: fixture.root });
+    const result = await status({
+      pin: createPin(),
+      packageRoot: fixture.root,
+    });
 
     expect(result.summary).toContain("pending-release");
     expect(result.summary.split("\n")).toHaveLength(1);
@@ -71,7 +74,10 @@ describe("status", () => {
   it("missing: summary mentions the missing runtime", async () => {
     const emptyRoot = mkdtempSync(join(tmpdir(), "drenyra-pi-status-empty-"));
     try {
-      const pin = createPin({ state: "released", checksumSha256: "a".repeat(64) });
+      const pin = createPin({
+        state: "released",
+        checksumSha256: "a".repeat(64),
+      });
       const result = await status({ pin, packageRoot: emptyRoot });
 
       expect(result.summary).toContain("missing");
