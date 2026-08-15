@@ -21,7 +21,7 @@
     "contracts/mission/snapshot.schema.json": "46b3d8a47fa25974216f5452cb583bb7e954f97450858ef359bb45d90825c32c",
     "contracts/mission/status.schema.json": "92e7f787826ca837410ae8f9383bccfd4bd0298c823126799862374df530e320",
     "contracts/mission/step.schema.json": "12b6d78388d0f519c90d41e1b9757c8a98d4ea6365a24d36f30120357d9ca22a",
-    "contracts/package-contract.md": "d526f7a33ffa8ee87adbb440463fa36d8d9199cbb36fb6c1d1770c72abff51ca",
+    "contracts/package-contract.md": "559e01b84ed99e49c96e354e3f711371f8e9d32ce25733e8cd314a60577093f9",
     "contracts/receipts/receipt-binding.schema.json": "006bda9cc3124e2c9b4c6a83a86627b67ef084f35834f6f7c6547fa9e58de0ac",
     "contracts/receipts/receipt-content.schema.json": "b8268f174f756f2062edc043a22499dabfcc0e620558a1d9189afaf72e535d0d",
     "contracts/receipts/signed-receipt.schema.json": "c1689aa9e7a5e5ea3a2212ad20c6f1f2e0416ffea6d8b79bfcb8972f4c92c8c7",
