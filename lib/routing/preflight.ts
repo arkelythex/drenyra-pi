@@ -1,26 +1,50 @@
-/**
- * Seven-stage preflight (pi-sdd-030-routing-adapter; design D2 §4).
- *
- * `runRoutingPreflight(request)` evaluates the fixed stages in order — canonical
- * scope, permissions, evidence, materiality, reversibility, systems, approval —
- * and stops at the first failure, writing nothing. After stage 7, budgets are
- * normalized and the published `createWorkUnit` + `validateWorkUnit` helpers
- * build and revalidate the bounded `WorkUnit`.
- *
- * Authority boundary: materiality comes ONLY from `deriveRequiredMateriality`
- * (which delegates the tier to the kernel `deriveMateriality`); permission
- * sufficiency comes ONLY from `requiredModeFor` + `assertMonotonicAuthority`
- * and the bound authorization; evidence integrity comes ONLY from the
- * `EvidenceGraphStore`; approvals are never granted. The only emitted stop
- * kinds are the nine published `WorkStopReason` literals; an already-UNKNOWN
- * mission or a malformed identity is `AMBIGUOUS_INPUT` + a `MISSION_UNKNOWN`
- * exception at execution time, never an invented stop kind.
- *
- * Fiscal convention: monetary values are BigInt cents; digests are lowercase
- * hex sha-256; version/sequence numbers are JSON integers.
- */
+    /**
+     * Eight-stage preflight (pi-sdd-030-routing-adapter; design D2 §4, rebased to
+     * consume drenyra-ai@0.4.0 `routing/router.ts`).
+     *
+     * `runRoutingPreflight(request)` evaluates the fixed stages in order — canonical
+     * scope, permissions, evidence, materiality, reversibility, systems, approval —
+     * and stops at the first failure, writing nothing. After stage 7, budgets are
+     * normalized and the published `createWorkUnit` + `validateWorkUnit` helpers
+     * build and revalidate the bounded `WorkUnit`; stage 8 (`routing`) composes the
+     * `RouteRequest` from the validated preflight state and delegates the route
+     * DECISION to the Core `route()` router (`drenyra-ai` root re-export of
+     * `routing/router.ts`), attaching the returned `Route` to the ok result. Pi
+     * proposes/executes only; the route table lives in the Core (REQ-BOUND-001).
+     *
+     * Authority boundary: materiality comes ONLY from `deriveRequiredMateriality`
+     * (which delegates the tier to the kernel `deriveMateriality`); permission
+     * sufficiency comes ONLY from `requiredModeFor` + `assertMonotonicAuthority`
+     * and the bound authorization; evidence integrity comes ONLY from the
+     * `EvidenceGraphStore`; approvals are never granted; the route comes ONLY from
+     * the Core `route()`. The only emitted stop
+     * kinds are the nine published `WorkStopReason` literals; an already-UNKNOWN
+     * mission or a malformed identity is `AMBIGUOUS_INPUT` + a `MISSION_UNKNOWN`
+     * exception at execution time, never an invented stop kind.
+     *
+     * Fiscal convention: monetary values are BigInt cents; digests are lowercase
+     * hex sha-256; version/sequence numbers are JSON integers.
+     */
 
-import { createWorkUnit, parseSha256Hash, toJsonInteger, validateWorkUnit, type JsonInteger, type MissionIntent, type Sha256Hash, type VersionPin, type WorkBudgets, type WorkScope, type WorkUnitInput } from "drenyra-ai";
+    import {
+      createWorkUnit,
+      parseSha256Hash,
+      route,
+      toJsonInteger,
+      validateWorkUnit,
+      type JsonInteger,
+      type Materiality,
+      type MissionIntent,
+      type Reversibility,
+      type Route,
+      type RouteRequest,
+      type Sha256Hash,
+      type VersionPin,
+      type WorkBudgets,
+      type WorkScope,
+      type WorkUnit,
+      type WorkUnitInput,
+    } from "drenyra-ai";
 import {
   assertMonotonicAuthority,
   deriveRequiredMateriality,
@@ -64,6 +88,40 @@ const REVERSIBILITY_MAP: Readonly<
   "partially-reversible": "PARTIALLY_REVERSIBLE",
   irreversible: "IRREVERSIBLE",
 };
+
+/** Pi UPPERCASE reversibility → Core lowercase `Reversibility` union. */
+const REVERSIBILITY_TO_CORE: Readonly<
+  Record<RoutingReversibility, Reversibility>
+> = {
+  REVERSIBLE: "reversible",
+  PARTIALLY_REVERSIBLE: "partially-reversible",
+  IRREVERSIBLE: "irreversible",
+};
+
+/** Closed unions for the five Core routing axes (runtime membership guards). */
+const REQUESTED_EFFECTS: ReadonlySet<string> = new Set([
+  "read-only",
+  "proposes-change",
+  "core-governed-change",
+]);
+const EXTERNAL_EVIDENCE_VALUES: ReadonlySet<string> = new Set([
+  "none",
+  "bounded",
+  "material",
+]);
+const DURATION_AND_INTERRUPTIBILITY_VALUES: ReadonlySet<string> = new Set([
+  "immediate",
+  "bounded-interruptible",
+  "recoverable",
+]);
+const SEGREGATION_OF_DUTIES_VALUES: ReadonlySet<string> = new Set([
+  "not-required",
+  "required",
+]);
+const REGULATORY_OBLIGATIONS_VALUES: ReadonlySet<string> = new Set([
+  "none",
+  "applicable",
+]);
 
 /** Stage 1 — canonical scope: validation, recompute, mission, projection. */
 function stageScope(request: PreflightRequest): PreflightResult | undefined {
@@ -250,7 +308,7 @@ function stageMateriality(request: PreflightRequest): PreflightResult | undefine
       reason: { kind: "UNSUPPORTED_WORK", intent: intent as MissionIntent },
     };
   }
-  let tier: import("drenyra-ai").Materiality;
+  let tier: Materiality;
   try {
     tier = deriveRequiredMateriality(request.materiality as ExplicitMaterialityRequest);
   } catch {
@@ -486,10 +544,86 @@ function projectHelperIssues(
   return { ok: false, stage: "workunit", reason: { kind: "AMBIGUOUS_INPUT", fields: paths } };
 }
 
-/**
- * Run the seven-stage preflight in fixed order and produce a bounded,
- * helper-validated `WorkUnit` only when every stage passes. Writes nothing.
- */
+    /**
+     * Stage 8 — Core route decision (rebased: consumes `drenyra-ai` `route()`).
+     *
+     * Validates the five Core routing axes against their closed unions, requires
+     * at least one system, composes the `RouteRequest` from the validated
+     * preflight state, and delegates the route DECISION to the Core `route()`
+     * router. On success the Core `Route` is returned for the final assembly; Pi
+     * proposes/executes only. Core-side rejections are projected to the `routing`
+     * stage as `AMBIGUOUS_INPUT` naming the Core issue paths.
+     */
+    function stageRouting(
+      request: PreflightRequest,
+      workUnit: WorkUnit,
+      tier: Materiality,
+      reversibility: RoutingReversibility,
+    ): { ok: true; route: Route } | { ok: false; result: PreflightResult } {
+      const axes: { name: string; value: unknown; domain: ReadonlySet<string> }[] = [
+        { name: "requestedEffect", value: request.requestedEffect, domain: REQUESTED_EFFECTS },
+        { name: "externalEvidence", value: request.externalEvidence, domain: EXTERNAL_EVIDENCE_VALUES },
+        { name: "durationAndInterruptibility", value: request.durationAndInterruptibility, domain: DURATION_AND_INTERRUPTIBILITY_VALUES },
+        { name: "segregationOfDuties", value: request.segregationOfDuties, domain: SEGREGATION_OF_DUTIES_VALUES },
+        { name: "regulatoryObligations", value: request.regulatoryObligations, domain: REGULATORY_OBLIGATIONS_VALUES },
+      ];
+      const invalidAxes = axes
+        .filter((axis) => typeof axis.value !== "string" || !axis.domain.has(axis.value))
+        .map((axis) => axis.name);
+      if (invalidAxes.length > 0) {
+        return {
+          ok: false,
+          result: {
+            ok: false,
+            stage: "routing",
+            reason: { kind: "AMBIGUOUS_INPUT", fields: invalidAxes },
+          },
+        };
+      }
+      if (request.systems.length === 0) {
+        return {
+          ok: false,
+          result: {
+            ok: false,
+            stage: "routing",
+            reason: { kind: "AMBIGUOUS_INPUT", fields: ["systems"] },
+          },
+        };
+      }
+      const routeRequest: RouteRequest = {
+        scope: workUnit.scope,
+        requestedEffect: request.requestedEffect,
+        materiality: tier,
+        reversibility: REVERSIBILITY_TO_CORE[reversibility],
+        externalEvidence: request.externalEvidence,
+        durationAndInterruptibility: request.durationAndInterruptibility,
+        systemsInvolved: request.systems.map((system) => system.systemId) as [string, ...string[]],
+        segregationOfDuties: request.segregationOfDuties,
+        regulatoryObligations: request.regulatoryObligations,
+        approval: request.approval.required ? "required" : "not-required",
+      };
+      const decision = route(routeRequest);
+      if (!decision.ok) {
+        return {
+          ok: false,
+          result: {
+            ok: false,
+            stage: "routing",
+            reason: {
+              kind: "AMBIGUOUS_INPUT",
+              fields: decision.issues.map((issue) => issue.path),
+            },
+          },
+        };
+      }
+      return { ok: true, route: decision.value };
+    }
+
+    /**
+     * Run the eight-stage preflight in fixed order and produce a bounded,
+     * helper-validated `WorkUnit` plus the Core `route()` decision only when every
+     * stage passes. Writes nothing.
+     */
 export async function runRoutingPreflight(
   request: PreflightRequest,
 ): Promise<PreflightResult> {
@@ -548,6 +682,9 @@ export async function runRoutingPreflight(
     return projectHelperIssues(validated.issues, request.requiredEvidenceHashes as Sha256Hash[]);
   }
 
+  const routing = stageRouting(request, validated.value, tier, reversibility);
+  if (!routing.ok) return routing.result;
+
   return {
     ok: true,
     workUnit: validated.value,
@@ -556,5 +693,6 @@ export async function runRoutingPreflight(
     evidenceSufficiency: "SUFFICIENT",
     reversibility,
     approvalRequired: approval.approvalRequired,
+    route: routing.route,
   };
 }

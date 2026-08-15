@@ -18,6 +18,7 @@ import {
   createWorkUnit,
   validateWorkResult,
   type CanonicalTransitionValidator,
+  type Route,
   type WorkUnit,
   type WorkUnitInput,
 } from "drenyra-ai";
@@ -36,6 +37,7 @@ import type { ChainDefinition } from "../../lib/chain-pipeline.js";
 import { makeCanonicalScope, makeMission } from "../helpers/authority-fixtures.js";
 import {
   digest,
+  makeCoreRoute,
   makeRoutingCandidate,
   makeRoutingMaterialityBasis,
 } from "./fixtures.js";
@@ -186,19 +188,11 @@ function makeExecutionInput(
   harness: Harness,
   ports: RoutingExecutionPorts,
   validator?: CanonicalTransitionValidator,
-  route: "direct" | "delegated" | "durable" = "direct",
+  route: Route = makeCoreRoute("direct-analysis"),
 ): ExecuteRoutingWorkInput {
   return {
     workUnit: harness.workUnit,
-    selection: {
-      ok: true,
-      route,
-      basis: {
-        kernelRiskTier: "R0",
-        evidenceSufficiency: "SUFFICIENT",
-        reversibility: "REVERSIBLE",
-      },
-    },
+    route,
     binding: harness.binding,
     mission: harness.mission,
     ports,
@@ -214,7 +208,14 @@ function expectFailure(result: RouteExecutionResult): Extract<RouteExecutionResu
   return result as Extract<RouteExecutionResult, { ok: false }>;
 }
 
-describe("executeRoutingWork — bounded dispatch and validator authority", () => {
+    /** Core route kind → the Pi execution-port name it must dispatch through. */
+    const KIND_TO_PORT: Record<Route["kind"], "direct" | "delegated" | "durable"> = {
+      "direct-analysis": "direct",
+      "specialized-agent": "delegated",
+      "durable-mission": "durable",
+    };
+
+    describe("executeRoutingWork — bounded dispatch and validator authority", () => {
   it("happy path: one dispatch, validator-approved advance, validated WorkResult", async () => {
     const harness = makeHarness();
     const { ports, calls } = makePorts((_callsState) => async () =>
@@ -238,23 +239,60 @@ describe("executeRoutingWork — bounded dispatch and validator authority", () =
     }
   });
 
-  it("shared assertions hold across direct, delegated, and durable ports", async () => {
-    for (const route of ["direct", "delegated", "durable"] as const) {
+  it("shared assertions hold across every Core route kind", async () => {
+    for (const kind of ["direct-analysis", "specialized-agent", "durable-mission"] as Route["kind"][]) {
       const harness = makeHarness();
       const { ports, calls } = makePorts((_callsState) => async () =>
         makeSuccessResponse(harness.workUnit, harness.mission),
       );
       const result = await executeRoutingWork(
-        makeExecutionInput(harness, ports, validateTransition, route),
+        makeExecutionInput(harness, ports, validateTransition, makeCoreRoute(kind)),
       );
       expect(result.ok).toBe(true);
-      expect(calls[route]()).toBe(1);
+      expect(calls[KIND_TO_PORT[kind]]()).toBe(1);
       if (result.ok) {
         expect(result.result.workUnitId).toBe(harness.workUnit.id);
         expect(result.result.outcome.kind).toBe("SUCCEEDED");
         expect(result.result.nextTransition.to).toBe(AccountingMissionStatus.RUNNING);
       }
     }
+  });
+
+  it("kind→port mapping: durable-mission dispatches through the durable port only", async () => {
+    const harness = makeHarness();
+    const { ports, calls } = makePorts((_callsState) => async () =>
+      makeSuccessResponse(harness.workUnit, harness.mission),
+    );
+    const result = await executeRoutingWork(
+      makeExecutionInput(harness, ports, validateTransition, makeCoreRoute("durable-mission")),
+    );
+    expect(result.ok).toBe(true);
+    expect(calls.durable()).toBe(1);
+    expect(calls.direct()).toBe(0);
+    expect(calls.delegated()).toBe(0);
+  });
+
+  it("an unknown route kind fails closed with AMBIGUOUS_INPUT and zero port calls", async () => {
+    const harness = makeHarness();
+    const { ports, calls } = makePorts((_callsState) => async () =>
+      makeSuccessResponse(harness.workUnit, harness.mission),
+    );
+    const tampered = {
+      ...makeCoreRoute("direct-analysis"),
+      kind: "rogue-route",
+    } as unknown as Route;
+    const result = await executeRoutingWork(
+      makeExecutionInput(harness, ports, validateTransition, tampered),
+    );
+    const failure = expectFailure(result);
+    expect(failure.reason.kind).toBe("AMBIGUOUS_INPUT");
+    if (failure.reason.kind === "AMBIGUOUS_INPUT") {
+      expect(failure.reason.fields).toContain("route.kind");
+    }
+    expect(failure.portCalls).toBe(0);
+    expect(calls.direct()).toBe(0);
+    expect(calls.delegated()).toBe(0);
+    expect(calls.durable()).toBe(0);
   });
 
   it("validator denial: an injected validator rejecting the observed edge returns INVALID_TRANSITION and leaves the unit unchanged", async () => {

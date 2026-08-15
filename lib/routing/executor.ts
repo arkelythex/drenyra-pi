@@ -1,7 +1,8 @@
 /**
  * Bounded executor and structured result (pi-sdd-030-routing-adapter; design D4
- * §6). `executeRoutingWork` performs ONE bounded dispatch through the injected
- * route port, advances work ONLY through the injected canonical validator
+ * §6, rebased to consume the Core `route()` decision). `executeRoutingWork`
+ * performs ONE bounded dispatch through the injected
+ * route port, advancing work ONLY through the injected canonical validator
  * (`drenyra-ai/missions` `validateTransition`, constructor-injectable for
  * negative controls), enforces the per-work-unit `BudgetLedger` (research ≤ 3,
  * correction = 1, cost/time/token ceilings, no cross-unit or cross-route leak),
@@ -43,6 +44,7 @@ import {
   validateWorkResult,
   type CanonicalTransitionValidator,
   type ProposedCandidateRef,
+  type Route,
   type WorkOutcome,
   type WorkResult,
   type WorkResultInput,
@@ -54,10 +56,16 @@ import type {
   ExecuteRoutingWorkInput,
   RouteExecutionPortResponse,
   RouteExecutionResult,
+  RoutingRoute,
 } from "./types.js";
 
 const SHA256_HEX = /^[0-9a-f]{64}$/;
-const ROUTE_NAMES = new Set(["direct", "delegated", "durable"]);
+/** Core route kind → Pi execution-port name (Pi proposes/executes only). */
+const ROUTE_PORTS: Readonly<Record<Route["kind"], RoutingRoute>> = {
+  "direct-analysis": "direct",
+  "specialized-agent": "delegated",
+  "durable-mission": "durable",
+};
 const TERMINAL_STATUSES: ReadonlySet<AccountingMissionStatus> = new Set([
   AccountingMissionStatus.COMPLETED,
   AccountingMissionStatus.FAILED,
@@ -314,7 +322,7 @@ export async function executeRoutingWork(
 ): Promise<RouteExecutionResult> {
   const {
     workUnit,
-    selection,
+    route,
     binding,
     mission,
     ports,
@@ -398,21 +406,23 @@ export async function executeRoutingWork(
     }
   }
 
-  const route = selection.route;
-  if (!ROUTE_NAMES.has(route)) {
+  const routePort = (ROUTE_PORTS as Readonly<
+    Record<string, RoutingRoute | undefined>
+  >)[route.kind];
+  if (routePort === undefined) {
     return {
       ok: false,
-      reason: { kind: "AMBIGUOUS_INPUT", fields: ["selection.route"] },
+      reason: { kind: "AMBIGUOUS_INPUT", fields: ["route.kind"] },
       workUnit,
       portCalls: 0,
       unresolvedExceptions: [],
     };
   }
-  const port = ports[route];
+  const port = ports[routePort];
   if (typeof port !== "function") {
     return {
       ok: false,
-      reason: { kind: "AMBIGUOUS_INPUT", fields: [`ports.${route}`] },
+      reason: { kind: "AMBIGUOUS_INPUT", fields: [`ports.${routePort}`] },
       workUnit,
       portCalls: 0,
       unresolvedExceptions: [],
@@ -465,7 +475,7 @@ export async function executeRoutingWork(
   try {
     response = await port({
       workUnit,
-      route,
+      route: routePort,
       binding,
       mission,
       chain,
@@ -476,7 +486,7 @@ export async function executeRoutingWork(
     ledger.close();
     return {
       ok: false,
-      reason: { kind: "AMBIGUOUS_INPUT", fields: [`ports.${route}`] },
+      reason: { kind: "AMBIGUOUS_INPUT", fields: [`ports.${routePort}`] },
       workUnit,
       portCalls: 1,
       unresolvedExceptions: [],

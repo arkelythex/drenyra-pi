@@ -2,12 +2,12 @@
  * WU5 — end-to-end routing-adapter journey test (pi-sdd-030-routing-adapter;
  * REQ-EXEC-005 / SC-EXEC-007).
  *
- * Exercises the full pinned-runtime journey against the real drenyra-ai@0.3.0
+ * Exercises the full pinned-runtime journey against the real drenyra-ai@0.4.0
  * kernel:
  *
- *   preflight (7-stage) -> route selection (18-cell) -> execute (bounded
- *   dispatch through the injected port, advance ONLY via the injected
- *   validateTransition) -> validated WorkResult.
+ *   preflight (8-stage) -> Core route decision (drenyra-ai routing/router.ts)
+ *   -> execute (bounded dispatch through the injected port, advance ONLY via
+ *   the injected validateTransition) -> validated WorkResult.
  *
  * Negative controls prove fail-closed behavior: evidence-insufficient preflight
  * never produces a WorkUnit; budget exhaustion stops with a typed
@@ -29,7 +29,6 @@ import {
 } from "drenyra-ai";
 import { validateWorkResult } from "drenyra-ai";
 import { runRoutingPreflight } from "../../lib/routing/preflight.js";
-import { selectRoutingRoute } from "../../lib/routing/route-selector.js";
 import { executeRoutingWork } from "../../lib/routing/executor.js";
 import { BudgetLedger } from "../../lib/routing/types.js";
 import type {
@@ -40,7 +39,7 @@ import type {
 } from "../../lib/routing/types.js";
 import type { WorkUnit } from "drenyra-ai";
 import type { ChainDefinition } from "../../lib/chain-pipeline.js";
-import { digest, makeRoutingPreflightRequest } from "./fixtures.js";
+import { digest, makeCoreRoute, makeRoutingPreflightRequest } from "./fixtures.js";
 
 function makeStubChain(): ChainDefinition<unknown, unknown> {
 	return {
@@ -115,22 +114,16 @@ describe("routing-adapter journey (REQ-EXEC-005 / SC-EXEC-007)", () => {
 		const preflight = await runRoutingPreflight(request);
 		expect(preflight.ok).toBe(true);
 		if (!preflight.ok) return;
-
-		const selection = selectRoutingRoute({
-			kernelRiskTier: preflight.riskTier,
-			evidenceSufficiency: preflight.evidenceSufficiency,
-			reversibility: preflight.reversibility,
-			requiredEvidenceHashes: preflight.workUnit.evidenceAllowed.map((e) => e.hash),
-		});
-		expect(selection.ok).toBe(true);
-		if (!selection.ok) return;
+		// The route DECISION comes from the Core router (routing/router.ts): the
+		// fixture axes (R0, reversible, read-only, single system) route direct-analysis.
+		expect(preflight.route.kind).toBe("direct-analysis");
 
 		const { ports, calls } = makePorts((_state) => async ({ workUnit }) =>
 			makeSuccessResponse(workUnit, mission),
 		);
 		const input: ExecuteRoutingWorkInput = {
 			workUnit: preflight.workUnit,
-			selection,
+			route: preflight.route,
 			binding,
 			mission,
 			ports,
@@ -186,15 +179,7 @@ describe("routing-adapter journey (REQ-EXEC-005 / SC-EXEC-007)", () => {
 		exhausted.debit("research"); // at the ceiling of 3
 		const input: ExecuteRoutingWorkInput = {
 			workUnit: preflight.workUnit,
-			selection: {
-				ok: true,
-				route: "direct",
-				basis: {
-					kernelRiskTier: preflight.riskTier,
-					evidenceSufficiency: preflight.evidenceSufficiency,
-					reversibility: preflight.reversibility,
-				},
-			},
+			route: makeCoreRoute("direct-analysis"),
 			binding,
 			mission,
 			ports,
@@ -226,15 +211,7 @@ describe("routing-adapter journey (REQ-EXEC-005 / SC-EXEC-007)", () => {
 		);
 		const input: ExecuteRoutingWorkInput = {
 			workUnit: preflight.workUnit,
-			selection: {
-				ok: true,
-				route: "direct",
-				basis: {
-					kernelRiskTier: preflight.riskTier,
-					evidenceSufficiency: preflight.evidenceSufficiency,
-					reversibility: preflight.reversibility,
-				},
-			},
+			route: makeCoreRoute("direct-analysis"),
 			binding,
 			mission,
 			ports,
@@ -269,15 +246,7 @@ describe("routing-adapter journey (REQ-EXEC-005 / SC-EXEC-007)", () => {
 		);
 		const input: ExecuteRoutingWorkInput = {
 			workUnit: preflight.workUnit,
-			selection: {
-				ok: true,
-				route: "direct",
-				basis: {
-					kernelRiskTier: preflight.riskTier,
-					evidenceSufficiency: preflight.evidenceSufficiency,
-					reversibility: preflight.reversibility,
-				},
-			},
+			route: makeCoreRoute("direct-analysis"),
 			binding,
 			mission,
 			ports,

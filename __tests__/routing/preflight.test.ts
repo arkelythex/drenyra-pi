@@ -1,10 +1,12 @@
 /**
- * WU1 — seven-stage preflight tests (pi-sdd-030-routing-adapter).
+ * WU1 — eight-stage preflight tests (pi-sdd-030-routing-adapter).
  *
  * RED: every ordered stage fails closed with the exact published stop kind and
  * no store write; helper validation (createWorkUnit + validateWorkUnit) fails
  * closed on malformed input. GREEN: the happy path produces a helper-built and
- * helper-validated `WorkUnit` carrying the normalized budgets.
+ * helper-validated `WorkUnit` carrying the normalized budgets plus the Core
+ * `route()` decision (`routing/router.ts`); invalid routing axes, an empty
+ * systems list, and Core-side rejections fail closed at the `routing` stage.
  *
  * Fiscal convention: monetary values are BigInt cents; digests are lowercase
  * hex sha-256; version/sequence numbers are JSON integers.
@@ -20,7 +22,7 @@ import type {
   PreflightRequest,
   PreflightResult,
 } from "../../lib/routing/types.js";
-import { makeRoutingPreflightRequest, digest } from "./fixtures.js";
+import { makeRoutingPreflightRequest, makeSystemAvailability, digest } from "./fixtures.js";
 
 const SHA256_HEX = /^[0-9a-f]{64}$/;
 
@@ -44,7 +46,7 @@ function fieldsOf(
   return [];
 }
 
-describe("runRoutingPreflight — seven ordered stages fail closed", () => {
+describe("runRoutingPreflight — eight ordered stages fail closed", () => {
   it("stage 1 scope: a canonical-only element change is AMBIGUOUS_INPUT naming the field", async () => {
     const { request } = await makeRoutingPreflightRequest();
     const mutated: PreflightRequest = {
@@ -274,6 +276,9 @@ describe("runRoutingPreflight — seven ordered stages fail closed", () => {
     const { request } = await makeRoutingPreflightRequest();
     const mutated: PreflightRequest = {
       ...request,
+      // read-only + required approval is a Core contradiction; a change-proposing
+      // request keeps the approval stop while staying Core-valid.
+      requestedEffect: "proposes-change",
       approval: { required: true, approvalType: "human-approver", evidenceBound: true },
     };
     const result = await runRoutingPreflight(mutated);
@@ -288,6 +293,7 @@ describe("runRoutingPreflight — seven ordered stages fail closed", () => {
     const { request } = await makeRoutingPreflightRequest();
     const mutated: PreflightRequest = {
       ...request,
+      requestedEffect: "proposes-change",
       approval: { required: true, approvalType: "human-approver", evidenceBound: false },
     };
     const result = await runRoutingPreflight(mutated);
@@ -376,7 +382,7 @@ describe("runRoutingPreflight — seven ordered stages fail closed", () => {
     expect(readFileSync(path, "utf8")).toBe(before);
   });
 
-  it("happy path: all seven stages pass and a validated WorkUnit is produced", async () => {
+  it("happy path: all eight stages pass and a validated WorkUnit plus the Core route are produced", async () => {
     const { request } = await makeRoutingPreflightRequest();
     const result = await runRoutingPreflight(request);
     expect(result.ok).toBe(true);
@@ -395,6 +401,86 @@ describe("runRoutingPreflight — seven ordered stages fail closed", () => {
       expect(typeof result.workUnit.budgets.costLimitCents).toBe("bigint");
       for (const ref of result.workUnit.evidenceAllowed) {
         expect(SHA256_HEX.test(ref.hash)).toBe(true);
+      }
+      // The ok result carries the Core route decision: R0 + reversible + the
+      // fixture's read-only/immediate/single-system axes route direct-analysis.
+      expect(result.route.kind).toBe("direct-analysis");
+      expect(result.route.authorityCeiling).toBe("no-mutation");
+      expect(result.route.request.requestedEffect).toBe("read-only");
+      expect(result.route.request.reversibility).toBe("reversible");
+      expect(result.route.request.systemsInvolved).toEqual(["chain-pipeline"]);
+    }
+  });
+
+  it("routing stage: a durable signal (core-governed-change + irreversible) yields durable-mission", async () => {
+    const { request } = await makeRoutingPreflightRequest();
+    const mutated: PreflightRequest = {
+      ...request,
+      requestedEffect: "core-governed-change",
+      materiality: {
+        input: { value: 0n, reversibility: "irreversible", jurisdiction: "PE" },
+        minimum: undefined,
+      },
+      // irreversible derives R3 in the kernel; the declared tier must agree.
+      declaredRiskTier: "R3",
+    };
+    const result = await runRoutingPreflight(mutated);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.route.kind).toBe("durable-mission");
+      expect(result.route.authorityCeiling).toBe("through-core");
+      expect(result.route.request.requestedEffect).toBe("core-governed-change");
+      expect(result.route.request.reversibility).toBe("irreversible");
+    }
+  });
+
+  it("routing stage: an out-of-domain requestedEffect fails closed naming the axis", async () => {
+    const { request } = await makeRoutingPreflightRequest();
+    const mutated = {
+      ...request,
+      requestedEffect: "escalate",
+    } as unknown as PreflightRequest;
+    const result = await runRoutingPreflight(mutated);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.stage).toBe("routing");
+      expect(result.reason.kind).toBe("AMBIGUOUS_INPUT");
+      if (result.reason.kind === "AMBIGUOUS_INPUT") {
+        expect(result.reason.fields).toContain("requestedEffect");
+      }
+    }
+  });
+
+  it("routing stage: an empty systems list fails closed naming systems", async () => {
+    const { request } = await makeRoutingPreflightRequest();
+    const mutated: PreflightRequest = { ...request, systems: [] };
+    const result = await runRoutingPreflight(mutated);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.stage).toBe("routing");
+      expect(result.reason.kind).toBe("AMBIGUOUS_INPUT");
+      if (result.reason.kind === "AMBIGUOUS_INPUT") {
+        expect(result.reason.fields).toContain("systems");
+      }
+    }
+  });
+
+  it("routing stage: a Core systemsInvolved rejection propagates with its issue path", async () => {
+    const { request } = await makeRoutingPreflightRequest();
+    const mutated: PreflightRequest = {
+      ...request,
+      systems: [
+        makeSystemAvailability("chain-pipeline", true),
+        makeSystemAvailability("chain-pipeline", true),
+      ],
+    };
+    const result = await runRoutingPreflight(mutated);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.stage).toBe("routing");
+      expect(result.reason.kind).toBe("AMBIGUOUS_INPUT");
+      if (result.reason.kind === "AMBIGUOUS_INPUT") {
+        expect(result.reason.fields).toContain("systemsInvolved");
       }
     }
   });
