@@ -12,4 +12,3 @@
 export * from "./types.js";
 export * from "./preflight.js";
 export * from "./route-selector.js";
-export * from "./executor.js";
