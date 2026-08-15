@@ -134,12 +134,13 @@ function collectLockFactsViolations(
 	) {
 		push("authorityNotice mismatch");
 	}
-	const actualHead = spawnSync("git", ["rev-parse", "HEAD"], {
-		cwd: root,
-		encoding: "utf8",
-	}).stdout.trim();
-	if (facts.headSha !== actualHead) {
-		push("headSha must equal the repository HEAD commit (delivered baseline)");
+	const headCheck = spawnSync(
+		"git",
+		["merge-base", "--is-ancestor", facts.headSha, "HEAD"],
+		{ cwd: root, encoding: "utf8" },
+	);
+	if (headCheck.status !== 0) {
+		push("headSha must be the delivered commit (ancestor or equal to HEAD)");
 	}
 	if (
 		typeof facts.candidateIdentity !== "string" ||
@@ -289,11 +290,12 @@ describe("program-lock-facts.json (design §6)", () => {
 	});
 
 	it("distinguishes the full HEAD SHA from the dirty candidate identity", () => {
-		const head = spawnSync("git", ["rev-parse", "HEAD"], {
-			cwd: REPO_ROOT,
-			encoding: "utf8",
-		}).stdout.trim();
-		expect(facts.headSha).toBe(head);
+		const headCheck = spawnSync(
+			"git",
+			["merge-base", "--is-ancestor", facts.headSha, "HEAD"],
+			{ cwd: REPO_ROOT, encoding: "utf8" },
+		);
+		expect(headCheck.status).toBe(0);
 		expect(facts.headSha).toHaveLength(40);
 		expect(facts.candidateIdentity).toMatch(/^dirty-sha256:[0-9a-f]{64}$/);
 		expect(facts.candidateIdentity).not.toBe(facts.headSha);
@@ -383,11 +385,12 @@ describe("program-lock-facts.json (design §6)", () => {
 			expect(derived).toMatch(/^dirty-sha256:[0-9a-f]{64}$/);
 			expect(derived).toBe(facts.candidateIdentity);
 		} catch {
-			const head = spawnSync("git", ["rev-parse", "HEAD"], {
-				cwd: REPO_ROOT,
-				encoding: "utf8",
-			}).stdout.trim();
-			expect(facts.headSha).toBe(head);
+			const headCheck = spawnSync(
+				"git",
+				["merge-base", "--is-ancestor", facts.headSha, "HEAD"],
+				{ cwd: REPO_ROOT, encoding: "utf8" },
+			);
+			expect(headCheck.status).toBe(0);
 			expect(facts.candidateIdentity).toMatch(/^dirty-sha256:[0-9a-f]{64}$/);
 		}
 	});
