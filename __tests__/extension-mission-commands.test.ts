@@ -25,6 +25,7 @@ import {
   AccountingMissionStatus,
   type MissionIntent,
 } from "drenyra-ai/missions";
+import { createWorkUnit, type WorkUnit, type WorkUnitInput } from "drenyra-ai";
 import {
 	buildSignedReceipt,
 	generateReceiptKeyPair,
@@ -36,8 +37,12 @@ import {
   type PiExtensionApi,
 } from "../extensions/register.js";
 import { ScopeContextStore, AUTHORITY_MODE } from "../runtime/context.js";
-import { bindScope } from "../lib/canonicalization.js";
-import { EdaMissionCoordinator } from "../lib/mission-commands.js";
+    import { bindScope } from "../lib/canonicalization.js";
+    import {
+      EdaMissionCoordinator,
+      createDurableMissionRoutingPort,
+    } from "../lib/mission-commands.js";
+    import { BudgetLedger } from "../lib/routing/types.js";
 import {
 	ReceiptStore,
 	type ReceiptBinding,
@@ -790,11 +795,88 @@ describe("T-S4B-003 /drenyra:receipt (REQ-CMD-006; SC-CMD-004/005)", () => {
     expect(output).toContain("not found");
   });
 
-  it("verify: usage error when the subcommand lacks an id", async () => {
-    const ctx = makeHarness();
-    setupScope(ctx);
-    const command = findCommand(ctx, "drenyra:receipt");
-    const output = await runHandler(command.handler, "verify");
-    expect(output).toContain("usage");
-  });
-});
+      it("verify: usage error when the subcommand lacks an id", async () => {
+        const ctx = makeHarness();
+        setupScope(ctx);
+        const command = findCommand(ctx, "drenyra:receipt");
+        const output = await runHandler(command.handler, "verify");
+        expect(output).toContain("usage");
+      });
+    });
+
+    /**
+     * pi-sdd-030-routing-adapter — focused seam regression assertion (design D6
+     * §8.1). Proves the durable routing seam drives ONE advance without changing
+     * the existing `EdaMissionCoordinator` lifecycle: the mission advances exactly
+     * one phase through the seam, and a direct `coordinator.advance` afterwards
+     * still behaves exactly as before (one phase per call).
+     */
+    describe("durable routing seam regression (pi-sdd-030)", () => {
+      it("maps one advance without changing the existing coordinator lifecycle", async () => {
+        const root = mkdtempSync(join(tmpdir(), "pi-extension-seam-"));
+        const binding = bindScope(makeCanonicalScope());
+        const coordinator = new EdaMissionCoordinator(binding, { storesRoot: root });
+        const mission = await coordinator.start({
+          intent: "monthly-close",
+          sourceRefs: [],
+        });
+        const input: WorkUnitInput = {
+          id: `work-${mission.id}`,
+          objective: "seam regression objective",
+          scope: { tenantId: binding.scope.tenant, ruc: binding.scope.company },
+          evidenceAllowed: [{ algorithm: "sha256", hash: "a".repeat(64) as `x${string}` & { readonly __brand: "Sha256Hash" } }],
+          skills: [],
+          policies: [{ id: "policies.v1", version: "1.0.0" }],
+          authorizedTools: [{ id: "chain-pipeline", version: "0.3.0", operations: ["execute-step"] }],
+          authorizedDestinations: [{ kind: "EVIDENCE_STORE", id: "evidence" }],
+          outputSchema: {
+            id: "schema",
+            version: "1.0.0",
+            contentHash: "b".repeat(64) as `x${string}` & { readonly __brand: "Sha256Hash" },
+          },
+          budgets: {
+            timeLimitMs: 60_000 as never,
+            tokenLimit: 100_000 as never,
+            costLimitCents: 1_000_000n,
+            researchAttemptLimit: 3,
+            correctionAttemptLimit: 1,
+          },
+          successConditions: [{ kind: "EVIDENCE_HASHES_PRESENT", required: ["a".repeat(64) as `x${string}` & { readonly __brand: "Sha256Hash" }] }],
+          stopConditions: ["BUDGET_EXHAUSTED"],
+        };
+        const created = createWorkUnit(mission, input);
+        if (!created.ok) throw new Error(JSON.stringify(created.issues));
+        const workUnit: WorkUnit = created.value;
+        const ledger = BudgetLedger.create(workUnit);
+
+        const port = createDurableMissionRoutingPort(coordinator);
+        const response = await port({
+          workUnit,
+          route: "durable",
+          binding,
+          mission,
+          chain: {
+            name: "stub",
+            intent: "monthly-close",
+            requiredMode: "EXECUTE",
+            runStep: async () => ({ output: null }),
+          } as never,
+          chainRun: { binding, input: {} },
+          ledger,
+        });
+        // Exactly one phase advanced through the seam.
+        expect(response.missionAfter.status).toBe(AccountingMissionStatus.QUEUED);
+        const afterSeam = await coordinator.stores.store.findById(mission.id);
+        expect(
+          afterSeam?.steps.filter((step) => step.status === "COMPLETED"),
+        ).toHaveLength(1);
+
+        // Existing lifecycle unchanged: a direct advance still runs one phase.
+        const direct = await coordinator.advance({ missionId: mission.id });
+        expect(direct.mission.status).toBe(AccountingMissionStatus.RUNNING);
+        const afterDirect = await coordinator.stores.store.findById(mission.id);
+        expect(
+          afterDirect?.steps.filter((step) => step.status === "COMPLETED"),
+        ).toHaveLength(2);
+      });
+    });
