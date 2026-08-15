@@ -164,3 +164,21 @@ orchestrator's 4-PR chain, each PR carrying an independent rollback boundary.
   remaining unchecked lines are parent-owned delivery actions); no destructive
   canonical merge; allowed edit roots respected (all writes under
   `openspec/changes/`).
+
+---
+
+## Alignment note (2026-08-15, post-archive)
+
+The master delivered SDD-030 **slice C** (`routing/router.ts`, PR #49, suite
+915/915): the deterministic preflight router with escalation-only precedence
+(durable-mission → specialized-agent → direct-analysis) and inseparable
+authority ceilings, propose-only. Its documented follow-up is exactly the
+authorized-adapter execution integration this change implements.
+
+**Federated alignment:** Pi's `lib/routing/route-selector.ts` (18-cell table)
+is interim host-side policy that duplicates the Core route decision. When the
+slice-C router ships in a drenyra-ai release (post-0.3.0), Pi's adapter should
+be rebased to CONSUME `routing/router.ts`: Pi's preflight produces the
+`RouteRequest`, the Core router decides the `Route`, and Pi's executor remains
+the host-side adapter (execution via the injected validator). The route
+DECISION belongs to the Core; Pi proposes/executes only.
