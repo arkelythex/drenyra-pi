@@ -5,10 +5,10 @@
  * `renderStatusView` composes `buildAccountingStatus` — the read-only
  * projection — into a human summary plus machine-readable JSON carrying the
  * active company/period, mission state, next authorized action, linked
- * sources, pending reconciliations, material anomalies, and required
- * approvals (REQ-CMD-009). `renderCapabilitiesView` reports the engine
- * `getCapabilities()` plus harness capabilities: authority modes, registered
- * commands, and the 10 scope elements (REQ-CMD-010).
+ * sources, pending reconciliations, material anomalies, required approvals,
+ * and the evidence-graph projection (REQ-CMD-009). `renderCapabilitiesView`
+ * reports the engine `getCapabilities()` plus harness capabilities: authority
+ * modes, registered commands, and the 10 scope elements (REQ-CMD-010).
  *
  * These helpers are thin: they compose persisted projections and constants and
  * contain no accounting or fiscal logic (REQ-CMD-004).
@@ -22,6 +22,7 @@ import type { MissionSnapshot } from "drenyra-ai/missions";
 import {
   buildAccountingStatus,
   type AccountingStatusView,
+  type EvidenceStatusProjectionInput,
 } from "../lib/accounting-status.js";
 import type { CanonicalScopeReport } from "../runtime/context.js";
 import type { ScopeBinding } from "../lib/canonicalization.js";
@@ -51,6 +52,8 @@ export interface StatusViewInput {
   pendingReconciliations?: number;
   /** Extra pending-approval count reported by gate callers. */
   pendingApprovals?: number;
+  /** Evidence graph projection input (read-only, fail-closed; design §7/§9). */
+  evidence?: EvidenceStatusProjectionInput;
 }
 
 /** Render the read-only status view (REQ-CMD-009). */
@@ -63,6 +66,7 @@ export async function renderStatusView(input: StatusViewInput): Promise<CommandO
     pendingApprovals: input.pendingApprovals,
     linkedSources: input.linkedSources,
     pendingReconciliations: input.pendingReconciliations,
+    evidence: input.evidence,
   });
 
   const summary = summarizeStatus(view, input.company, input.period);
@@ -100,6 +104,11 @@ function summarizeStatus(view: AccountingStatusView, company?: string, period?: 
     `pending reconciliations: ${view.pendingReconciliations ?? 0}`,
     `material anomalies: ${view.authority.anomalies}`,
     `required approvals: ${view.authority.approvalsPending}`,
+    `evidence: ${
+      view.evidence.available
+        ? `verified (${view.evidence.nodeIds?.length ?? 0} graph node(s))`
+        : "unavailable"
+    }`,
   ].join("\n");
 }
 
