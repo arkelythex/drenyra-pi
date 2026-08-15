@@ -6,7 +6,7 @@
  * ANALYZE/PREPARE only (REQ-AUDIT-003), UNKNOWN yields zero blind retries
  * (REQ-AUDIT-010), local persistence alone cannot authorize approve or execute
  * (REQ-AUDIT-011), and every authoritative operation delegates to the public
- * pinned `drenyra-ai@0.3.0` entry points (REQ-AUDIT-012). No Pi-local fiscal
+ * pinned `drenyra-ai@0.4.0` entry points (REQ-AUDIT-012). No Pi-local fiscal
  * gate is added; the kernel remains the sole authority on tiers, transitions,
  * approvals, gate verdicts, and receipts.
  *
@@ -51,7 +51,10 @@ import {
 import { createDurableMissionStores } from "../lib/mission-store.js";
 import { AuthorityStore } from "../lib/authority-store.js";
 import { ReceiptStore } from "../lib/receipt-store.js";
-import { EvidenceGraphStore, EVIDENCE_NODE_KIND } from "../lib/evidence-graph.js";
+import {
+  EvidenceGraphStore,
+  EVIDENCE_NODE_KIND,
+} from "../lib/evidence-graph.js";
 import {
   makeApprovalReceipt,
   makeAuthorization,
@@ -63,14 +66,49 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, "..");
 
 /** A table spanning every kernel materiality outcome used by the tested path. */
-const TIER_TABLE: readonly { input: MaterialityInput; kernel: Materiality }[] = [
-  { input: { value: 0n, reversibility: "reversible", jurisdiction: "PE" }, kernel: "R0" },
-  { input: { value: 1_000_00n, reversibility: "reversible", jurisdiction: "PE" }, kernel: "R1" },
-  { input: { value: 10_000_00n, reversibility: "reversible", jurisdiction: "PE" }, kernel: "R2" },
-  { input: { value: 100_000_00n, reversibility: "reversible", jurisdiction: "PE" }, kernel: "R3" },
-  { input: { value: 1n, reversibility: "irreversible", jurisdiction: "PE" }, kernel: "R3" },
-  { input: { value: 1_000_00n, reversibility: "reversible", jurisdiction: "US" }, kernel: "R2" },
-];
+const TIER_TABLE: readonly { input: MaterialityInput; kernel: Materiality }[] =
+  [
+    {
+      input: { value: 0n, reversibility: "reversible", jurisdiction: "PE" },
+      kernel: "R0",
+    },
+    {
+      input: {
+        value: 1_000_00n,
+        reversibility: "reversible",
+        jurisdiction: "PE",
+      },
+      kernel: "R1",
+    },
+    {
+      input: {
+        value: 10_000_00n,
+        reversibility: "reversible",
+        jurisdiction: "PE",
+      },
+      kernel: "R2",
+    },
+    {
+      input: {
+        value: 100_000_00n,
+        reversibility: "reversible",
+        jurisdiction: "PE",
+      },
+      kernel: "R3",
+    },
+    {
+      input: { value: 1n, reversibility: "irreversible", jurisdiction: "PE" },
+      kernel: "R3",
+    },
+    {
+      input: {
+        value: 1_000_00n,
+        reversibility: "reversible",
+        jurisdiction: "US",
+      },
+      kernel: "R2",
+    },
+  ];
 
 /** The monthly-close R2 materiality used by the store and gate paths. */
 const R2_MATERIALITY: MaterialityInput = {
@@ -82,9 +120,14 @@ const R2_MATERIALITY: MaterialityInput = {
 /** Extract the exact body of a named function/arrow from source by brace depth. */
 function extractFunctionBody(source: string, signaturePrefix: string): string {
   const start = source.indexOf(signaturePrefix);
-  expect(start, `source must contain ${signaturePrefix}`).toBeGreaterThanOrEqual(0);
+  expect(
+    start,
+    `source must contain ${signaturePrefix}`,
+  ).toBeGreaterThanOrEqual(0);
   const open = source.indexOf("{", start);
-  expect(open, `${signaturePrefix} must have an opening brace`).toBeGreaterThan(start);
+  expect(open, `${signaturePrefix} must have an opening brace`).toBeGreaterThan(
+    start,
+  );
   let depth = 0;
   for (let index = open; index < source.length; index += 1) {
     const char = source[index];
@@ -131,12 +174,20 @@ describe("T-WU1-001 materiality ownership (REQ-AUDIT-004)", () => {
     //    never defaults to R0.
     expect(() =>
       deriveRequiredMateriality({
-        input: { value: undefined as unknown as bigint, reversibility: "reversible", jurisdiction: "PE" },
+        input: {
+          value: undefined as unknown as bigint,
+          reversibility: "reversible",
+          jurisdiction: "PE",
+        },
       }),
     ).toThrow(/value/i);
     expect(() =>
       deriveRequiredMateriality({
-        input: { value: 100n, reversibility: "partial" as never, jurisdiction: "PE" },
+        input: {
+          value: 100n,
+          reversibility: "partial" as never,
+          jurisdiction: "PE",
+        },
       }),
     ).toThrow(/reversibility/i);
     expect(() =>
@@ -151,7 +202,10 @@ describe("T-WU1-001 materiality ownership (REQ-AUDIT-004)", () => {
     // 4. Source-level ownership: lib/authority-gates.ts calls the kernel
     //    deriveMateriality(request.input) directly before any floor comparison
     //    and carries no Pi-local thresholds, jurisdiction table, or R0-R3 switch.
-    const gatesSource = readFileSync(join(REPO_ROOT, "lib", "authority-gates.ts"), "utf8");
+    const gatesSource = readFileSync(
+      join(REPO_ROOT, "lib", "authority-gates.ts"),
+      "utf8",
+    );
     const body = extractFunctionBody(
       gatesSource,
       "export function deriveRequiredMateriality(",
@@ -160,7 +214,9 @@ describe("T-WU1-001 materiality ownership (REQ-AUDIT-004)", () => {
     const floorReturn = "return request.minimum";
     expect(body).toContain(kernelCall);
     expect(body).toContain("orderOf(derived)");
-    expect(body.indexOf(kernelCall)).toBeLessThan(body.indexOf("orderOf(derived)"));
+    expect(body.indexOf(kernelCall)).toBeLessThan(
+      body.indexOf("orderOf(derived)"),
+    );
     expect(body.indexOf(kernelCall)).toBeLessThan(body.indexOf(floorReturn));
     // No Pi-local monetary thresholds (BigInt cents literals), no jurisdiction
     // escalation table, no local R0-R3 derivation switch inside the body.
@@ -171,12 +227,22 @@ describe("T-WU1-001 materiality ownership (REQ-AUDIT-004)", () => {
 
     // 5. chains/monthly-close.ts supplies CLOSE_MATERIALITY input + R2 floor and
     //    re-derives through the harness/kernel — it owns no tier threshold.
-    const closeSource = readFileSync(join(REPO_ROOT, "chains", "monthly-close.ts"), "utf8");
-    expect(closeSource).toMatch(/export const CLOSE_MATERIALITY:\s*ExplicitMaterialityRequest\s*=\s*\{/);
+    const closeSource = readFileSync(
+      join(REPO_ROOT, "chains", "monthly-close.ts"),
+      "utf8",
+    );
+    expect(closeSource).toMatch(
+      /export const CLOSE_MATERIALITY:\s*ExplicitMaterialityRequest\s*=\s*\{/,
+    );
     expect(closeSource).toMatch(/input:\s*\{/);
     expect(closeSource).toMatch(/minimum:\s*"R2"/);
-    const assertBody = extractFunctionBody(closeSource, "private assertMateriality(");
-    expect(assertBody).toContain("deriveRequiredMateriality({ input, minimum: \"R2\" })");
+    const assertBody = extractFunctionBody(
+      closeSource,
+      "private assertMateriality(",
+    );
+    expect(assertBody).toContain(
+      'deriveRequiredMateriality({ input, minimum: "R2" })',
+    );
     expect(assertBody).not.toMatch(/\bswitch\s*\(/);
   });
 });
@@ -184,7 +250,9 @@ describe("T-WU1-001 materiality ownership (REQ-AUDIT-004)", () => {
 describe("T-WU1-002 agent authority ceilings (REQ-AUDIT-003)", () => {
   const agentFiles = (): string[] =>
     readdirSync(join(REPO_ROOT, "agents"))
-      .filter((entry) => entry.endsWith(".md") && entry.toLowerCase() !== "readme.md")
+      .filter(
+        (entry) => entry.endsWith(".md") && entry.toLowerCase() !== "readme.md",
+      )
       .sort();
 
   it("every agents/*.md frontmatter ceiling is ANALYZE or PREPARE — never EXECUTE", () => {
@@ -195,7 +263,9 @@ describe("T-WU1-002 agent authority ceilings (REQ-AUDIT-003)", () => {
       const match = /^authority:\s*(.+)$/m.exec(text);
       expect(match, `${file} must declare an authority ceiling`).not.toBeNull();
       const ceiling = match![1]!.trim();
-      expect(["ANALYZE", "PREPARE"], `${file} ceiling is ${ceiling}`).toContain(ceiling);
+      expect(["ANALYZE", "PREPARE"], `${file} ceiling is ${ceiling}`).toContain(
+        ceiling,
+      );
     }
   });
 
@@ -229,14 +299,19 @@ describe("T-WU1-002 agent authority ceilings (REQ-AUDIT-003)", () => {
         }
       }
       // The prohibition itself must be present in every definition.
-      expect(lowered, `${file} must forbid EXECUTE work`).toMatch(/(never|no|not)[^.\n]*execute/);
+      expect(lowered, `${file} must forbid EXECUTE work`).toMatch(
+        /(never|no|not)[^.\n]*execute/,
+      );
     }
   });
 });
 
 describe("T-WU1-002 UNKNOWN zero blind retries (REQ-AUDIT-010)", () => {
   /** A continuation driver: advance prepared steps; stop when none is derived. */
-  function driveUntilStopped(snapshot: MissionSnapshot, maxSteps: number): string[] {
+  function driveUntilStopped(
+    snapshot: MissionSnapshot,
+    maxSteps: number,
+  ): string[] {
     const advanced: string[] = [];
     let current = snapshot;
     for (let index = 0; index < maxSteps; index += 1) {
@@ -263,7 +338,10 @@ describe("T-WU1-002 UNKNOWN zero blind retries (REQ-AUDIT-010)", () => {
 
   it("triangulates: the same driver advances a RUNNING mission, proving the zero is UNKNOWN-specific", () => {
     const running = makeMission(
-      { status: AccountingMissionStatus.RUNNING, currentStep: EDA_PHASE.INTAKE },
+      {
+        status: AccountingMissionStatus.RUNNING,
+        currentStep: EDA_PHASE.INTAKE,
+      },
       createEdaSteps("monthly-close"),
     );
     const prepared = derivePreparedStep(running);
@@ -288,7 +366,11 @@ describe("T-WU1-002 local stores are non-authoritative (REQ-AUDIT-011)", () => {
       const stores = createDurableMissionStores(root);
       await stores.store.save(mission);
       const forged = makeAuthorization(
-        { decision: "GRANTED", scopeHash: binding.scopeHash, missionId: mission.id },
+        {
+          decision: "GRANTED",
+          scopeHash: binding.scopeHash,
+          missionId: mission.id,
+        },
         binding,
       );
       await new AuthorityStore(root).appendAuthorization(forged);
@@ -329,7 +411,9 @@ describe("T-WU1-002 local stores are non-authoritative (REQ-AUDIT-011)", () => {
         approvalReceipt: undefined,
         trustedKeys: [],
       });
-      expect(results.map((result) => `${result.stage}:${result.verdict}`)).toEqual([
+      expect(
+        results.map((result) => `${result.stage}:${result.verdict}`),
+      ).toEqual([
         "scope:allowed",
         "mode:allowed",
         "materiality:allowed",
@@ -387,7 +471,11 @@ describe("T-WU1-002 local stores are non-authoritative (REQ-AUDIT-011)", () => {
         targetStatus: AccountingMissionStatus.APPROVED,
         materiality: { input: R2_MATERIALITY },
         approvals: [
-          { approverId: "alice", at: "2026-07-01T00:00:00.000Z", reason: "close" },
+          {
+            approverId: "alice",
+            at: "2026-07-01T00:00:00.000Z",
+            reason: "close",
+          },
         ],
         approvalReceipt: stored!.receipt,
         trustedKeys: [],
@@ -419,12 +507,15 @@ describe("T-WU1-002 delegation to the published pinned runtime (REQ-AUDIT-012)",
     const seen = new Set<string>();
     for (const file of audited) {
       const source = readFileSync(join(REPO_ROOT, file), "utf8");
-      const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]);
+      const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map(
+        (m) => m[1],
+      );
       for (const specifier of imports) {
         if (specifier.startsWith("drenyra-ai")) {
-          expect(allowed, `${file} imports ${specifier} outside the public kernel surface`).toContain(
-            specifier,
-          );
+          expect(
+            allowed,
+            `${file} imports ${specifier} outside the public kernel surface`,
+          ).toContain(specifier);
           seen.add(specifier);
         }
       }

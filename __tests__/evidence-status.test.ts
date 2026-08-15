@@ -15,7 +15,13 @@
  */
 
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { AccountingMissionStatus } from "drenyra-ai/missions";
@@ -41,7 +47,11 @@ import {
 } from "../extensions/register.js";
 import { ScopeContextStore } from "../runtime/context.js";
 import type { RuntimeStatus } from "../runtime/status.js";
-import { makeCanonicalScope, makeMission, makeScopeBinding } from "./helpers/authority-fixtures.js";
+import {
+  makeCanonicalScope,
+  makeMission,
+  makeScopeBinding,
+} from "./helpers/authority-fixtures.js";
 
 const TS = "2026-07-01T00:00:00.000Z";
 const MISSION = "mission-close-001";
@@ -51,22 +61,38 @@ const SOURCE_NODES = [
   {
     id: "src-balance",
     nodeKind: "source",
-    payload: { kind: "balance-snapshot", reference: "BAL-202507", amountCents: 1_000_000 },
+    payload: {
+      kind: "balance-snapshot",
+      reference: "BAL-202507",
+      amountCents: 1_000_000,
+    },
   },
   {
     id: "src-mayor",
     nodeKind: "source",
-    payload: { kind: "mayor-snapshot", reference: "MAY-202507", amountCents: 600_000 },
+    payload: {
+      kind: "mayor-snapshot",
+      reference: "MAY-202507",
+      amountCents: 600_000,
+    },
   },
   {
     id: "src-auxiliaries",
     nodeKind: "source",
-    payload: { kind: "auxiliaries-snapshot", reference: "AUX-202507", amountCents: 400_000 },
+    payload: {
+      kind: "auxiliaries-snapshot",
+      reference: "AUX-202507",
+      amountCents: 400_000,
+    },
   },
   {
     id: "src-bank",
     nodeKind: "source",
-    payload: { kind: "bank-movements", reference: "BNK-202507", amountCents: 250_000 },
+    payload: {
+      kind: "bank-movements",
+      reference: "BNK-202507",
+      amountCents: 250_000,
+    },
   },
 ];
 
@@ -141,7 +167,7 @@ function writeRawLog(root: string, missionId: string, content: string): void {
 
 function runtimeStatus(): RuntimeStatus {
   return {
-    summary: "drenyra-ai@0.3.0: verified",
+    summary: "drenyra-ai@0.4.0: verified",
     human: "Runtime status: verified",
     machine: {
       pinState: "released",
@@ -153,7 +179,9 @@ function runtimeStatus(): RuntimeStatus {
   };
 }
 
-function statusInput(evidence?: EvidenceStatusProjectionInput): AccountingStatusInput {
+function statusInput(
+  evidence?: EvidenceStatusProjectionInput,
+): AccountingStatusInput {
   return {
     runtime: runtimeStatus(),
     scopeReport: { scope: {}, missing: [], complete: true },
@@ -164,7 +192,9 @@ function statusInput(evidence?: EvidenceStatusProjectionInput): AccountingStatus
 }
 
 /** Append the canonical source→transformation→conclusion→action chain. */
-async function addFullChain(store: EvidenceGraphStore): Promise<EvidenceNode[]> {
+async function addFullChain(
+  store: EvidenceGraphStore,
+): Promise<EvidenceNode[]> {
   const s1 = await store.appendNode({
     id: "s1",
     missionId: MISSION,
@@ -233,7 +263,10 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
     const root = tempRoot();
     const store = new EvidenceGraphStore(root);
     await addFullChain(store);
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: MISSION });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: MISSION,
+    });
 
     const view = projectEvidenceStatus(input);
     expect(view.available).toBe(true);
@@ -256,7 +289,10 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
   it("reports a verified empty graph truthfully (0 nodes, no fabricated authority)", async () => {
     const root = tempRoot();
     writeRawLog(root, MISSION, "");
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: MISSION });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: MISSION,
+    });
 
     const view = projectEvidenceStatus(input);
     expect(view.available).toBe(true);
@@ -301,7 +337,10 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
       createdAt: TS,
     });
     tamperNodeHash(root, MISSION, "0".repeat(64));
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: MISSION });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: MISSION,
+    });
 
     const view = projectEvidenceStatus(input);
     expect(view.available).toBe(false);
@@ -323,7 +362,10 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
 describe("loadEvidenceStatus — read-only, fail-closed loader (design §7)", () => {
   it("reports a missing graph log as unavailable evidence", async () => {
     const root = tempRoot();
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: MISSION });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: MISSION,
+    });
     expect(input.missionId).toBe(MISSION);
     expect(input.graph).toBeUndefined();
     expect(input.validation).toBeUndefined();
@@ -333,14 +375,20 @@ describe("loadEvidenceStatus — read-only, fail-closed loader (design §7)", ()
   it("fails closed on a malformed (truncated) log line", async () => {
     const root = tempRoot();
     writeRawLog(root, MISSION, '{"schemaVersion":1,"recordKind":"node",\n');
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: MISSION });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: MISSION,
+    });
     expect(input.graph).toBeUndefined();
     expect(input.error).toMatch(/malformed|corrupt/i);
   });
 
   it("fails closed on an unsafe mission id (no path escape)", async () => {
     const root = tempRoot();
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: "../escape" });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: "../escape",
+    });
     expect(input.error).toBeDefined();
     expect(input.graph).toBeUndefined();
   });
@@ -349,7 +397,10 @@ describe("loadEvidenceStatus — read-only, fail-closed loader (design §7)", ()
     const root = tempRoot();
     const store = new EvidenceGraphStore(root);
     await addFullChain(store);
-    const input = await loadEvidenceStatus({ storesRoot: root, missionId: MISSION });
+    const input = await loadEvidenceStatus({
+      storesRoot: root,
+      missionId: MISSION,
+    });
     expect(input.graph).toBeDefined();
     expect(input.graph?.nodes).toHaveLength(4);
     expect(input.graph?.edges).toHaveLength(3);
@@ -363,7 +414,9 @@ describe("buildAccountingStatus + renderStatusView evidence projection (design �
     const store = new EvidenceGraphStore(root);
     await addFullChain(store);
     const view = await buildAccountingStatus(
-      statusInput(await loadEvidenceStatus({ storesRoot: root, missionId: MISSION })),
+      statusInput(
+        await loadEvidenceStatus({ storesRoot: root, missionId: MISSION }),
+      ),
     );
     expect(view.evidence.available).toBe(true);
     expect(view.evidence.integrity).toBe("verified");
@@ -392,7 +445,10 @@ describe("buildAccountingStatus + renderStatusView evidence projection (design �
       scopeReport: { scope: {}, missing: [], complete: true },
       binding: makeScopeBinding(),
       mission: makeMission({ status: AccountingMissionStatus.RUNNING }),
-      evidence: await loadEvidenceStatus({ storesRoot: root, missionId: MISSION }),
+      evidence: await loadEvidenceStatus({
+        storesRoot: root,
+        missionId: MISSION,
+      }),
     });
     const machine = output.machine as { evidence: EvidenceStatusView };
     expect(machine.evidence.available).toBe(true);
@@ -412,7 +468,9 @@ describe("buildAccountingStatus + renderStatusView evidence projection (design �
     });
     tamperNodeHash(root, MISSION, "1".repeat(64));
     const view = await buildAccountingStatus(
-      statusInput(await loadEvidenceStatus({ storesRoot: root, missionId: MISSION })),
+      statusInput(
+        await loadEvidenceStatus({ storesRoot: root, missionId: MISSION }),
+      ),
     );
     expect(view.evidence.available).toBe(false);
     expect(view.evidence.integrity).toBe("unavailable");
@@ -434,7 +492,10 @@ describe("drenyra:status command integration — evidence projection wiring (des
 
     // The close creates a mission that waits for evidence (REQ-MISS-009).
     const output = await runHandler(closeCmd!.handler, "contador-01");
-    const close = parseMachineOutput(output) as { missionId: string; status: string };
+    const close = parseMachineOutput(output) as {
+      missionId: string;
+      status: string;
+    };
     expect(close.status).toBe(AccountingMissionStatus.WAITING_FOR_EVIDENCE);
 
     // The active mission's graph log does not exist yet: evidence is

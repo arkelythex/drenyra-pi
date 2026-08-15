@@ -16,7 +16,7 @@ import {
   type FakeRuntime,
 } from "./helpers/fixture-runtime.js";
 
-const EXACT_VERSION = "0.3.0";
+const EXACT_VERSION = "0.4.0";
 
 describe("doctor — fail-closed matrix", () => {
   let fixture: FakeRuntime | undefined;
@@ -48,7 +48,10 @@ describe("doctor — fail-closed matrix", () => {
   it("missing: no package-local runtime → fail closed", async () => {
     const emptyRoot = mkdtempSync(join(tmpdir(), "drenyra-pi-doctor-empty-"));
     try {
-      const pin = createPin({ state: "released", checksumSha256: "a".repeat(64) });
+      const pin = createPin({
+        state: "released",
+        checksumSha256: "a".repeat(64),
+      });
       const report = await doctor({ pin, packageRoot: emptyRoot });
 
       expect(report.verdict).toBe("missing");
@@ -73,7 +76,9 @@ describe("doctor — fail-closed matrix", () => {
     expect(report.verdict).toBe("checksum-mismatch");
     expect(report.versionMatches).toBe(true);
     expect(report.checksumMatches).toBe(false);
-    expect(report.issues.some((issue) => issue.includes("Checksum mismatch"))).toBe(true);
+    expect(
+      report.issues.some((issue) => issue.includes("Checksum mismatch")),
+    ).toBe(true);
   });
 
   it("checksum-mismatch: tampered artifact content is detected", async () => {
@@ -100,7 +105,9 @@ describe("doctor — fail-closed matrix", () => {
     expect(report.verdict).toBe("version-mismatch");
     expect(report.version).toBe("0.2.0");
     expect(report.versionMatches).toBe(false);
-    expect(report.issues.some((issue) => issue.includes("version mismatch"))).toBe(true);
+    expect(
+      report.issues.some((issue) => issue.includes("version mismatch")),
+    ).toBe(true);
   });
 
   it("fail-closed ordering: version mismatch wins when both version and checksum mismatch", async () => {
@@ -116,14 +123,19 @@ describe("doctor — fail-closed matrix", () => {
 
   it("pending-release: NEVER verified, even with a perfect runtime installed", async () => {
     fixture = await createFakeRuntime({ version: EXACT_VERSION });
-    const report = await doctor({ pin: createPin(), packageRoot: fixture.root });
+    const report = await doctor({
+      pin: createPin(),
+      packageRoot: fixture.root,
+    });
 
     expect(report.verdict).toBe("pending-release");
     expect(report.pinState).toBe("pending-release");
     expect(report.resolvedPath).toBeUndefined();
     expect(report.versionMatches).toBe(false);
     expect(report.checksumMatches).toBe(false);
-    expect(report.issues.some((issue) => issue.includes("pending-release"))).toBe(true);
+    expect(
+      report.issues.some((issue) => issue.includes("pending-release")),
+    ).toBe(true);
   });
 
   it("missing: runtime dir exists but package.json is not readable → fail closed", async () => {
@@ -150,9 +162,9 @@ describe("doctor — fail-closed matrix", () => {
 
     expect(report.verdict).toBe("checksum-mismatch");
     expect(report.checksumMatches).toBe(false);
-    expect(report.issues.some((issue) => issue.includes("Could not read artifact"))).toBe(
-      true,
-    );
+    expect(
+      report.issues.some((issue) => issue.includes("Could not read artifact")),
+    ).toBe(true);
   });
 
   it("verified: runtime installed under the runtime/ override dir is resolved and verified", async () => {

@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "78d5e3b218f5300df27cc76267c2f01b79d033f5",
-  "candidateIdentity": "dirty-sha256:b73d5e0848a307719656490d20dab5f77c1da4a54fe9257f4b6328fbce06d03a",
+  "headSha": "42607035c42901eebadc1bf2879cb09a1416f3b5",
+  "candidateIdentity": "dirty-sha256:e4afd92be50c6a558c6a7750aa6fb4d32366d4d88a4dd17e0b9361dfb4b73dcb",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -44,17 +44,17 @@
     ]
   },
   "tests": {
-    "files": 39,
-    "passed": 623,
+    "files": 44,
+    "passed": 687,
     "failed": 0,
-    "total": 623,
+    "total": 687,
     "command": "bun test"
   },
   "checksums": {
     "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
     "contentManifest": {
       "path": "contracts/SHA256SUMS.json",
-      "sha256": "16a21c544e3730a713fbf7d5d3f7370a119ad3cb793347961c77b0a57baf7f4c"
+      "sha256": "4957e308e881d9e48af5dd146ff47d62f26b939a0701b42731898ab0f66f2efe"
     }
   },
   "capabilityStates": {
@@ -66,7 +66,7 @@
     "pi-program-status-reconciliation",
     "pi-sdd-010-participation"
   ],
-  "evidenceDate": "2026-08-14",
+  "evidenceDate": "2026-08-15",
   "derivationCommands": [
     "git rev-parse HEAD",
     "node scripts/compute-candidate-identity.mjs",

@@ -15,7 +15,13 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -138,7 +144,7 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:reconcile",
     ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
-    expect(drenyraPiExtension.runtime.version).toBe("0.3.0");
+    expect(drenyraPiExtension.runtime.version).toBe("0.4.0");
     expect(drenyraPiExtension.runtime.state).toBe("released");
   });
 });
@@ -182,9 +188,9 @@ describe("registerDrenyraPiExtension", () => {
 
 describe("entrypoint packaging (T-S4A-004)", () => {
   it("points pi.extensions at the exact compiled entry file (one entrypoint)", () => {
-		const pkg = JSON.parse(
-			readFileSync(join(process.cwd(), "package.json"), "utf8"),
-		) as {
+    const pkg = JSON.parse(
+      readFileSync(join(process.cwd(), "package.json"), "utf8"),
+    ) as {
       pi?: { extensions?: unknown };
       exports?: Record<string, unknown>;
     };
@@ -202,11 +208,11 @@ describe("entrypoint packaging (T-S4A-004)", () => {
     expect(output).toContain("capabilities");
     const machine = parseMachineOutput(output) as {
       engine?: { protocolVersion?: string };
-			harness?: {
-				commands?: string[];
-				authorityModes?: string[];
-				scopeElements?: string[];
-			};
+      harness?: {
+        commands?: string[];
+        authorityModes?: string[];
+        scopeElements?: string[];
+      };
     };
     expect(machine.engine?.protocolVersion).toBeDefined();
     expect(machine.harness?.commands).toContain("/drenyra:capabilities");
@@ -264,10 +270,10 @@ describe("entrypoint packaging (T-S4A-004)", () => {
     expect(command).toBeDefined();
     const output = await runHandler(command!.handler, "");
     expect(output).toContain("model-routing");
-		const machine = parseMachineOutput(output) as {
-			version?: string;
-			routing?: unknown[];
-		};
+    const machine = parseMachineOutput(output) as {
+      version?: string;
+      routing?: unknown[];
+    };
     expect(machine.version).toBe("drenyra.model-routing.v1");
     expect(machine.routing).toHaveLength(13);
     cleanupTempStore(store);
@@ -305,22 +311,35 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
   it("wires /drenyra:verify and /drenyra:evidence to their chains (REQ-CMD-004/008)", async () => {
     const VERIFY_MANIFEST = {
       ledger: [
-        { account: "101", reference: "B001", debitCents: 10_000, creditCents: 0 },
-        { account: "401", reference: "B001", debitCents: 0, creditCents: 10_000 },
+        {
+          account: "101",
+          reference: "B001",
+          debitCents: 10_000,
+          creditCents: 0,
+        },
+        {
+          account: "401",
+          reference: "B001",
+          debitCents: 0,
+          creditCents: 10_000,
+        },
       ],
       bank: [{ reference: "B001", amountCents: 10_000 }],
       bankAccount: "101",
-     };
+    };
 
     // /drenyra:verify — fail closed without scope, then runs the verify chain.
     {
-       const { pi, registered } = makeMockPi();
-       const store = makeTempStore();
-       registerDrenyraPiExtension(pi, { contextStore: store });
+      const { pi, registered } = makeMockPi();
+      const store = makeTempStore();
+      registerDrenyraPiExtension(pi, { contextStore: store });
       const command = registered.find((c) => c.name === "drenyra:verify");
       expect(command).toBeDefined();
-      const output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
-       expect(output).toContain("missing");
+      const output = await runHandler(
+        command!.handler,
+        JSON.stringify(VERIFY_MANIFEST),
+      );
+      expect(output).toContain("missing");
       cleanupTempStore(store);
     }
 
@@ -331,7 +350,10 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       try {
         const { pi, registered } = makeMockPi();
         const store = new ScopeContextStore(join(root, "context.json"));
-        registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+        registerDrenyraPiExtension(pi, {
+          contextStore: store,
+          storesRoot: root,
+        });
         store.setCanonicalScope(
           makeCanonicalScope({
             authorityLevel: "ANALYZE",
@@ -340,7 +362,10 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
         );
         const command = registered.find((c) => c.name === "drenyra:verify");
         expect(command).toBeDefined();
-        const output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
+        const output = await runHandler(
+          command!.handler,
+          JSON.stringify(VERIFY_MANIFEST),
+        );
         expect(output).toContain("drenyra:verify:");
         const machine = parseMachineOutput(output) as {
           command: string;
@@ -367,29 +392,38 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       try {
         const { pi, registered } = makeMockPi();
         const store = new ScopeContextStore(join(root, "context.json"));
-        registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
-        store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ANALYZE" }));
+        registerDrenyraPiExtension(pi, {
+          contextStore: store,
+          storesRoot: root,
+        });
+        store.setCanonicalScope(
+          makeCanonicalScope({ authorityLevel: "ANALYZE" }),
+        );
         const command = registered.find((c) => c.name === "drenyra:verify");
         expect(command).toBeDefined();
         let output = "";
         for (let index = 0; index < 8; index += 1) {
-          output = await runHandler(command!.handler, JSON.stringify(VERIFY_MANIFEST));
+          output = await runHandler(
+            command!.handler,
+            JSON.stringify(VERIFY_MANIFEST),
+          );
           if (output.includes("issues") || output.includes("blocked")) {
             break;
           }
         }
-         const machine = parseMachineOutput(output) as {
-           command: string;
-           status: string;
+        const machine = parseMachineOutput(output) as {
+          command: string;
+          status: string;
           verdict: string;
           checks: Array<{ check: string; verdict: string }>;
-         };
+        };
         expect(machine.command).toBe("verify");
         expect(machine.status).toBe("blocked");
         expect(machine.verdict).toBe("issues");
         expect(
           machine.checks.some(
-            (check) => check.check === "source-integrity" && check.verdict === "fail",
+            (check) =>
+              check.check === "source-integrity" && check.verdict === "fail",
           ),
         ).toBe(true);
       } finally {
@@ -406,8 +440,8 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       expect(command).toBeDefined();
       const output = await runHandler(command!.handler, "{}");
       expect(output).toContain("missing");
-       cleanupTempStore(store);
-     }
+      cleanupTempStore(store);
+    }
 
     // /drenyra:evidence — an add-node op appends the node with structured output.
     {
@@ -415,8 +449,13 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       try {
         const { pi, registered } = makeMockPi();
         const store = new ScopeContextStore(join(root, "context.json"));
-        registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
-        store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ANALYZE" }));
+        registerDrenyraPiExtension(pi, {
+          contextStore: store,
+          storesRoot: root,
+        });
+        store.setCanonicalScope(
+          makeCanonicalScope({ authorityLevel: "ANALYZE" }),
+        );
         const command = registered.find((c) => c.name === "drenyra:evidence");
         expect(command).toBeDefined();
         const output = await runHandler(
@@ -426,187 +465,207 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
             node: {
               id: "src-1",
               nodeKind: "source",
-              payload: { kind: "ledger-entry", reference: "B001", amountCents: 100 },
+              payload: {
+                kind: "ledger-entry",
+                reference: "B001",
+                amountCents: 100,
+              },
             },
           }),
         );
-            expect(output).toContain("drenyra:evidence:");
-            const machine = parseMachineOutput(output) as {
-              command: string;
-              chain: string;
-              missionId: string;
-              phase: string | null;
-              op: string;
-              nodeId: string | null;
-            };
-            expect(machine.command).toBe("evidence");
-            expect(machine.chain).toBe("evidence");
-            expect(machine.missionId.length).toBeGreaterThan(0);
-            expect(machine.op).toBe("add-node");
-            expect(machine.nodeId).toBe("src-1");
-          } finally {
-            rmSync(root, { recursive: true, force: true });
-          }
-        }
-  });
-  });
-    describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", () => {
-      it("ships the ten agents and their asset mirrors in the package", () => {
-        const roles = [
-          "accounting-scout",
-          "evidence-builder",
-          "ledger-analyst",
-          "reconciliation-agent",
-          "tax-controller-pe",
-          "anomaly-refuter",
-          "close-controller",
-          "invoice-sire-agent",
-          "journal-candidate-agent",
-          "guardian-angel",
-        ];
-        const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
-          files?: string[];
+        expect(output).toContain("drenyra:evidence:");
+        const machine = parseMachineOutput(output) as {
+          command: string;
+          chain: string;
+          missionId: string;
+          phase: string | null;
+          op: string;
+          nodeId: string | null;
         };
-        expect(pkg.files).toContain("agents");
-        expect(pkg.files).toContain("assets");
-        for (const role of roles) {
-          const source = readFileSync(join(process.cwd(), "agents", `${role}.md`), "utf8");
-          const mirror = readFileSync(
-            join(process.cwd(), "assets", "agents", `${role}.md`),
-            "utf8",
-          );
-          expect(mirror, `${role} mirror`).toBe(source);
-        }
-      });
+        expect(machine.command).toBe("evidence");
+        expect(machine.chain).toBe("evidence");
+        expect(machine.missionId.length).toBeGreaterThan(0);
+        expect(machine.op).toBe("add-node");
+        expect(machine.nodeId).toBe("src-1");
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+  });
+});
+describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", () => {
+  it("ships the ten agents and their asset mirrors in the package", () => {
+    const roles = [
+      "accounting-scout",
+      "evidence-builder",
+      "ledger-analyst",
+      "reconciliation-agent",
+      "tax-controller-pe",
+      "anomaly-refuter",
+      "close-controller",
+      "invoice-sire-agent",
+      "journal-candidate-agent",
+      "guardian-angel",
+    ];
+    const pkg = JSON.parse(
+      readFileSync(join(process.cwd(), "package.json"), "utf8"),
+    ) as {
+      files?: string[];
+    };
+    expect(pkg.files).toContain("agents");
+    expect(pkg.files).toContain("assets");
+    for (const role of roles) {
+      const source = readFileSync(
+        join(process.cwd(), "agents", `${role}.md`),
+        "utf8",
+      );
+      const mirror = readFileSync(
+        join(process.cwd(), "assets", "agents", `${role}.md`),
+        "utf8",
+      );
+      expect(mirror, `${role} mirror`).toBe(source);
+    }
+  });
 
-      it("ships prompts, skills, and themes that the pi manifest entries resolve", () => {
-        const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
-          pi?: { prompts?: string[]; skills?: string[]; themes?: string[] };
-        };
-        const dirs = ["prompts", "skills", "themes"] as const;
-        for (const key of dirs) {
-          const entries = pkg.pi?.[key] ?? [];
-          expect(entries.length, `pi.${key} must declare entries`).toBeGreaterThan(0);
-          for (const entry of entries) {
-            const resolved = join(process.cwd(), entry.replace(/^\.\//, ""));
-            expect(statSync(resolved).isDirectory(), `${entry} must resolve to a directory`).toBe(
-              true,
-            );
-          }
-        }
-        // Concrete content counts (REQ-SKPT-001/002/003).
+  it("ships prompts, skills, and themes that the pi manifest entries resolve", () => {
+    const pkg = JSON.parse(
+      readFileSync(join(process.cwd(), "package.json"), "utf8"),
+    ) as {
+      pi?: { prompts?: string[]; skills?: string[]; themes?: string[] };
+    };
+    const dirs = ["prompts", "skills", "themes"] as const;
+    for (const key of dirs) {
+      const entries = pkg.pi?.[key] ?? [];
+      expect(entries.length, `pi.${key} must declare entries`).toBeGreaterThan(
+        0,
+      );
+      for (const entry of entries) {
+        const resolved = join(process.cwd(), entry.replace(/^\.\//, ""));
         expect(
-              readdirSync(join(process.cwd(), "prompts")).filter(
-                (f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md",
-              ),
-            ).toHaveLength(15);
-            expect(
-              readdirSync(join(process.cwd(), "skills"))
-                .filter((entry) => entry.toLowerCase() !== "readme.md")
-                .sort(),
-            ).toEqual(["chain-operation", "evidence-citation", "scope-discipline"]);
-        const themeManifest = JSON.parse(
-          readFileSync(join(process.cwd(), "themes", "fiscal-operator", "manifest.json"), "utf8"),
-        ) as { variants?: Record<string, string> };
-        expect(Object.keys(themeManifest.variants ?? {})).toEqual(["light", "dark"]);
+          statSync(resolved).isDirectory(),
+          `${entry} must resolve to a directory`,
+        ).toBe(true);
+      }
+    }
+    // Concrete content counts (REQ-SKPT-001/002/003).
+    expect(
+      readdirSync(join(process.cwd(), "prompts")).filter(
+        (f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md",
+      ),
+    ).toHaveLength(15);
+    expect(
+      readdirSync(join(process.cwd(), "skills"))
+        .filter((entry) => entry.toLowerCase() !== "readme.md")
+        .sort(),
+    ).toEqual(["chain-operation", "evidence-citation", "scope-discipline"]);
+    const themeManifest = JSON.parse(
+      readFileSync(
+        join(process.cwd(), "themes", "fiscal-operator", "manifest.json"),
+        "utf8",
+      ),
+    ) as { variants?: Record<string, string> };
+    expect(Object.keys(themeManifest.variants ?? {})).toEqual([
+      "light",
+      "dark",
+    ]);
+  });
+});
+
+describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () => {
+  const RECONCILE_MANIFEST = JSON.stringify({
+    bank: [
+      { reference: "B001", amountCents: 10_000 },
+      { reference: "B002", amountCents: 2_500 },
+    ],
+    ledger: [
+      { reference: "B001", amountCents: 10_000 },
+      { reference: "B002", amountCents: 2_300 },
+    ],
+  });
+
+  it("fails closed without a complete canonical scope (SC-CMD-002)", async () => {
+    const { pi, registered } = makeMockPi();
+    const store = makeTempStore();
+    registerDrenyraPiExtension(pi, { contextStore: store });
+    const command = registered.find((c) => c.name === "drenyra:reconcile");
+    expect(command).toBeDefined();
+    const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
+    expect(output).toContain("missing");
+    cleanupTempStore(store);
+  });
+
+  it("denies detection below the ANALYZE authority minimum", async () => {
+    const { pi, registered } = makeMockPi();
+    const store = makeTempStore();
+    registerDrenyraPiExtension(pi, { contextStore: store });
+    store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ASK" }));
+    const command = registered.find((c) => c.name === "drenyra:reconcile");
+    expect(command).toBeDefined();
+    const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
+    expect(output).toContain("ANALYZE");
+    const machine = parseMachineOutput(output) as {
+      status: string;
+      reason: string;
+    };
+    expect(machine.status).toBe("denied");
+    expect(machine.reason).toMatch(/ANALYZE/);
+    cleanupTempStore(store);
+  });
+
+  it("runs the reconciliation chain with structured output under ANALYZE (detection)", async () => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-reconcile-cmd-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, {
+        contextStore: store,
+        storesRoot: root,
       });
-    });
+      store.setCanonicalScope(
+        makeCanonicalScope({ authorityLevel: "ANALYZE" }),
+      );
+      const command = registered.find((c) => c.name === "drenyra:reconcile");
+      expect(command).toBeDefined();
+      const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
+      expect(output).toContain("drenyra:reconcile:");
+      const machine = parseMachineOutput(output) as {
+        command: string;
+        chain: string;
+        missionId: string;
+        intent: string;
+        phase: string | null;
+        status: string;
+        version: number;
+      };
+      expect(machine.command).toBe("reconcile");
+      expect(machine.chain).toBe("reconcile");
+      expect(machine.missionId.length).toBeGreaterThan(0);
+      expect(machine.intent).toBe("reconciliation");
+      expect(machine.phase).toBe("intake");
+      expect(machine.version).toBeGreaterThanOrEqual(1);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 
-    describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () => {
-	const RECONCILE_MANIFEST = JSON.stringify({
-		bank: [
-			{ reference: "B001", amountCents: 10_000 },
-			{ reference: "B002", amountCents: 2_500 },
-		],
-		ledger: [
-			{ reference: "B001", amountCents: 10_000 },
-			{ reference: "B002", amountCents: 2_300 },
-		],
-	});
-
-	it("fails closed without a complete canonical scope (SC-CMD-002)", async () => {
-		const { pi, registered } = makeMockPi();
-		const store = makeTempStore();
-		registerDrenyraPiExtension(pi, { contextStore: store });
-		const command = registered.find((c) => c.name === "drenyra:reconcile");
-		expect(command).toBeDefined();
-		const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
-		expect(output).toContain("missing");
-		cleanupTempStore(store);
-	});
-
-	it("denies detection below the ANALYZE authority minimum", async () => {
-		const { pi, registered } = makeMockPi();
-		const store = makeTempStore();
-		registerDrenyraPiExtension(pi, { contextStore: store });
-		store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ASK" }));
-		const command = registered.find((c) => c.name === "drenyra:reconcile");
-		expect(command).toBeDefined();
-		const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
-		expect(output).toContain("ANALYZE");
-		const machine = parseMachineOutput(output) as {
-			status: string;
-			reason: string;
-		};
-		expect(machine.status).toBe("denied");
-		expect(machine.reason).toMatch(/ANALYZE/);
-		cleanupTempStore(store);
-	});
-
-	it("runs the reconciliation chain with structured output under ANALYZE (detection)", async () => {
-		const root = mkdtempSync(join(tmpdir(), "drenyra-reconcile-cmd-"));
-		try {
-			const { pi, registered } = makeMockPi();
-			const store = new ScopeContextStore(join(root, "context.json"));
-			registerDrenyraPiExtension(pi, {
-				contextStore: store,
-				storesRoot: root,
-			});
-			store.setCanonicalScope(
-				makeCanonicalScope({ authorityLevel: "ANALYZE" }),
-			);
-			const command = registered.find((c) => c.name === "drenyra:reconcile");
-			expect(command).toBeDefined();
-			const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
-			expect(output).toContain("drenyra:reconcile:");
-			const machine = parseMachineOutput(output) as {
-				command: string;
-				chain: string;
-				missionId: string;
-				intent: string;
-				phase: string | null;
-				status: string;
-				version: number;
-			};
-			expect(machine.command).toBe("reconcile");
-			expect(machine.chain).toBe("reconcile");
-			expect(machine.missionId.length).toBeGreaterThan(0);
-			expect(machine.intent).toBe("reconciliation");
-			expect(machine.phase).toBe("intake");
-			expect(machine.version).toBeGreaterThanOrEqual(1);
-		} finally {
-			rmSync(root, { recursive: true, force: true });
-		}
-	});
-
-	it("rejects a malformed manifest without running the chain", async () => {
-		const root = mkdtempSync(join(tmpdir(), "drenyra-reconcile-cmd-"));
-		try {
-			const { pi, registered } = makeMockPi();
-			const store = new ScopeContextStore(join(root, "context.json"));
-			registerDrenyraPiExtension(pi, {
-				contextStore: store,
-				storesRoot: root,
-			});
-			store.setCanonicalScope(
-				makeCanonicalScope({ authorityLevel: "ANALYZE" }),
-			);
-			const command = registered.find((c) => c.name === "drenyra:reconcile");
-			expect(command).toBeDefined();
-			const output = await runHandler(command!.handler, "{ not json");
-			expect(output).toContain("not valid JSON");
-		} finally {
-			rmSync(root, { recursive: true, force: true });
-		}
-	});
+  it("rejects a malformed manifest without running the chain", async () => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-reconcile-cmd-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, {
+        contextStore: store,
+        storesRoot: root,
+      });
+      store.setCanonicalScope(
+        makeCanonicalScope({ authorityLevel: "ANALYZE" }),
+      );
+      const command = registered.find((c) => c.name === "drenyra:reconcile");
+      expect(command).toBeDefined();
+      const output = await runHandler(command!.handler, "{ not json");
+      expect(output).toContain("not valid JSON");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });

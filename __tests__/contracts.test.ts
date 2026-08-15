@@ -3,7 +3,7 @@
  * families (mission, evidence, authority, receipts) every harness payload must
  * validate against (REQ-CONTRACTS-007).
  *
- * The schemas mirror the pinned drenyra-ai@0.3.0 types field-for-field and
+ * The schemas mirror the pinned drenyra-ai@0.4.0 types field-for-field and
  * follow the consumer-only discipline (REQ-CONTRACTS-006): the harness
  * references the engine contract, never deep-imports unexported surfaces.
  *
@@ -18,7 +18,10 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { buildSignedReceipt, generateReceiptKeyPair } from "drenyra-ai/receipts";
+import {
+  buildSignedReceipt,
+  generateReceiptKeyPair,
+} from "drenyra-ai/receipts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CONTRACTS_DIR = join(HERE, "..", "contracts");
@@ -55,12 +58,17 @@ function buildAjv(): Ajv {
 }
 
 /** Validate a document against a schema $id; return verdict + readable errors. */
-function validateWith($id: string, data: unknown): { valid: boolean; errors: string[] } {
+function validateWith(
+  $id: string,
+  data: unknown,
+): { valid: boolean; errors: string[] } {
   const ajv = buildAjv();
   const valid = ajv.validate($id, data);
   return {
     valid: valid === true,
-    errors: (ajv.errors ?? []).map((e) => `${e.instancePath} ${e.message}`.trim()),
+    errors: (ajv.errors ?? []).map((e) =>
+      `${e.instancePath} ${e.message}`.trim(),
+    ),
   };
 }
 
@@ -78,7 +86,7 @@ function expectInvalid($id: string, data: unknown): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// Fixtures (engine-shaped; pinned drenyra-ai@0.3.0 d.ts is the source of truth)
+// Fixtures (engine-shaped; pinned drenyra-ai@0.4.0 d.ts is the source of truth)
 // ---------------------------------------------------------------------------
 
 /** MissionSnapshot fixture mirroring node_modules/drenyra-ai/dist/missions/types.d.ts. */
@@ -184,8 +192,10 @@ function evidenceGraphFixture(): Record<string, unknown> {
 // ---------------------------------------------------------------------------
 
 describe("contracts: mission family (REQ-CONTRACTS-001)", () => {
-  const SNAPSHOT_ID = "https://drenyra.dev/harness/contracts/mission/snapshot.schema.json";
-  const EVENT_ID = "https://drenyra.dev/harness/contracts/mission/event.schema.json";
+  const SNAPSHOT_ID =
+    "https://drenyra.dev/harness/contracts/mission/snapshot.schema.json";
+  const EVENT_ID =
+    "https://drenyra.dev/harness/contracts/mission/event.schema.json";
 
   it("validates a representative mission snapshot with status, steps, and blockers (SC-CONTRACTS-001)", () => {
     expectValid(SNAPSHOT_ID, missionSnapshotFixture());
@@ -197,9 +207,7 @@ describe("contracts: mission family (REQ-CONTRACTS-001)", () => {
       id: "proposal-1",
       missionId: "mission-001",
       version: 1,
-      evidence: [
-        { id: "n-source-1", label: "general ledger", type: "source" },
-      ],
+      evidence: [{ id: "n-source-1", label: "general ledger", type: "source" }],
       evidenceHash: "c".repeat(64),
       summary: "proposed close for 202607",
       riskLevel: "LOW",
@@ -271,7 +279,8 @@ describe("contracts: mission family (REQ-CONTRACTS-001)", () => {
 // ---------------------------------------------------------------------------
 
 describe("contracts: evidence family (REQ-CONTRACTS-002)", () => {
-  const GRAPH_ID = "https://drenyra.dev/harness/contracts/evidence/graph.schema.json";
+  const GRAPH_ID =
+    "https://drenyra.dev/harness/contracts/evidence/graph.schema.json";
 
   it("validates an evidence graph document with nodes, edges, and payload hashes (SC-CONTRACTS-002)", () => {
     expectValid(GRAPH_ID, evidenceGraphFixture());
@@ -385,9 +394,12 @@ function trustedKeyRegistryFixture(): Record<string, unknown> {
 }
 
 describe("contracts: authority family (REQ-CONTRACTS-003)", () => {
-  const SCOPE_ID = "https://drenyra.dev/harness/contracts/authority/scope-binding.schema.json";
-  const MODE_ID = "https://drenyra.dev/harness/contracts/authority/authority-mode.schema.json";
-  const AUTH_ID = "https://drenyra.dev/harness/contracts/authority/authorization-record.schema.json";
+  const SCOPE_ID =
+    "https://drenyra.dev/harness/contracts/authority/scope-binding.schema.json";
+  const MODE_ID =
+    "https://drenyra.dev/harness/contracts/authority/authority-mode.schema.json";
+  const AUTH_ID =
+    "https://drenyra.dev/harness/contracts/authority/authorization-record.schema.json";
 
   it("validates an authority record with a 10-element scope binding and a mode (SC-CONTRACTS-003)", () => {
     expectValid(AUTH_ID, authorizationRecordFixture());
@@ -425,14 +437,17 @@ describe("contracts: authority family (REQ-CONTRACTS-003)", () => {
 
   it("rejects an unknown action family and a denied/unknown decision mismatch", () => {
     const badFamily = authorizationRecordFixture();
-    (badFamily.authorization as Record<string, unknown>).actionFamily = "DELETE";
+    (badFamily.authorization as Record<string, unknown>).actionFamily =
+      "DELETE";
     expectInvalid(AUTH_ID, badFamily);
   });
 });
 
 describe("contracts: receipts family (REQ-CONTRACTS-004)", () => {
-  const RECEIPT_ID = "https://drenyra.dev/harness/contracts/receipts/signed-receipt.schema.json";
-  const BINDING_ID = "https://drenyra.dev/harness/contracts/receipts/receipt-binding.schema.json";
+  const RECEIPT_ID =
+    "https://drenyra.dev/harness/contracts/receipts/signed-receipt.schema.json";
+  const BINDING_ID =
+    "https://drenyra.dev/harness/contracts/receipts/receipt-binding.schema.json";
 
   function engineSignedReceipt(receiptType: string): Record<string, unknown> {
     const keyPair = generateReceiptKeyPair("key-001");
@@ -452,7 +467,11 @@ describe("contracts: receipts family (REQ-CONTRACTS-004)", () => {
       content,
       keyPair,
       "1.0",
-      receiptType as "APPROVAL" | "EXECUTION" | "COMPLETION" | "EXTERNAL_SUBMISSION",
+      receiptType as
+        | "APPROVAL"
+        | "EXECUTION"
+        | "COMPLETION"
+        | "EXTERNAL_SUBMISSION",
     ) as unknown as Record<string, unknown>;
   }
 
@@ -531,8 +550,10 @@ describe("contracts: receipts family (REQ-CONTRACTS-004)", () => {
 });
 
 describe("contracts: trusted-key registry (REQ-CONTRACTS-005)", () => {
-  const REGISTRY_ID = "https://drenyra.dev/harness/contracts/receipts/trusted-key-registry.schema.json";
-  const KEY_ID = "https://drenyra.dev/harness/contracts/receipts/signing-key-info.schema.json";
+  const REGISTRY_ID =
+    "https://drenyra.dev/harness/contracts/receipts/trusted-key-registry.schema.json";
+  const KEY_ID =
+    "https://drenyra.dev/harness/contracts/receipts/signing-key-info.schema.json";
 
   it("validates a registry document whose entries match SigningKeyInfo (REQ-CONTRACTS-005)", () => {
     expectValid(REGISTRY_ID, trustedKeyRegistryFixture());
@@ -556,19 +577,26 @@ describe("contracts: trusted-key registry (REQ-CONTRACTS-005)", () => {
   it("rejects a malformed key entry: unknown property, missing publicKey, non-base64 key", () => {
     const unknownProperty = trustedKeyRegistryFixture();
     (unknownProperty.keys as Record<string, unknown>)["key-001"] = {
-      ...((unknownProperty.keys as Record<string, unknown>)["key-001"] as object),
+      ...((unknownProperty.keys as Record<string, unknown>)[
+        "key-001"
+      ] as object),
       privateKey: "should-never-be-stored",
     };
     const unknownErrors = expectInvalid(REGISTRY_ID, unknownProperty);
-    expect(unknownErrors.join(" ")).toMatch(/privateKey|additional properties/i);
+    expect(unknownErrors.join(" ")).toMatch(
+      /privateKey|additional properties/i,
+    );
 
     const missingKey = trustedKeyRegistryFixture();
-    delete (missingKey.keys as Record<string, Record<string, unknown>>)["key-001"].publicKey;
+    delete (missingKey.keys as Record<string, Record<string, unknown>>)[
+      "key-001"
+    ].publicKey;
     expectInvalid(REGISTRY_ID, missingKey);
 
     const badBase64 = trustedKeyRegistryFixture();
-    (badBase64.keys as Record<string, Record<string, unknown>>)["key-001"].publicKey =
-      "!!!not-base64!!!";
+    (badBase64.keys as Record<string, Record<string, unknown>>)[
+      "key-001"
+    ].publicKey = "!!!not-base64!!!";
     const base64Errors = expectInvalid(REGISTRY_ID, badBase64);
     expect(base64Errors.join(" ")).toMatch(/publicKey/i);
   });

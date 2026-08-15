@@ -4,7 +4,7 @@
  *
  * Runs one bounded monthly-close fixture through (a) Pi's chain pipeline
  * (`MonthlyCloseChain` over an isolated temporary stores root) and (b) an
- * independent substitute host that consumes ONLY public `drenyra-ai@0.3.0`
+ * independent substitute host that consumes ONLY public `drenyra-ai@0.4.0`
  * entry points (`/missions`, `/candidates`, `/gates`, `/receipts`) plus the
  * shared fixture. Both raw results are projected through the canonical
  * `drenyra.authority-projection.v1` schema and compared for exact plain-data
@@ -26,7 +26,10 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { AccountingMissionStatus, type MissionSnapshot } from "drenyra-ai/missions";
+import {
+  AccountingMissionStatus,
+  type MissionSnapshot,
+} from "drenyra-ai/missions";
 import {
   deriveMateriality,
   orderOf,
@@ -44,7 +47,10 @@ import {
   makeAuthorization,
   makeScopeBinding,
 } from "./helpers/authority-fixtures.js";
-import { EvidenceGraphStore, EVIDENCE_NODE_KIND } from "../lib/evidence-graph.js";
+import {
+  EvidenceGraphStore,
+  EVIDENCE_NODE_KIND,
+} from "../lib/evidence-graph.js";
 import { ReceiptStore } from "../lib/receipt-store.js";
 import { sha256Canonical } from "../lib/canonicalization.js";
 import {
@@ -365,7 +371,10 @@ export function compareProjections(
       return null;
     }
     if (typeof x === "object") {
-      const keys = new Set([...Object.keys(x as object), ...Object.keys(y as object)]);
+      const keys = new Set([
+        ...Object.keys(x as object),
+        ...Object.keys(y as object),
+      ]);
       for (const key of keys) {
         path.push(key);
         const diff = walk(
@@ -384,14 +393,40 @@ export function compareProjections(
 }
 
 /** The exact, enumerated normalization exclusions (design §4.5). */
-const NORMALIZED_RUNTIME_FIELDS: readonly { path: string; justification: string }[] = [
-  { path: "runtimeMetadata.missionId", justification: "generated mission id; mission identity is retained via the same-mission relationship token" },
-  { path: "runtimeMetadata.missionCreatedAt", justification: "runtime timestamp; cannot alter fiscal meaning" },
-  { path: "runtimeMetadata.missionUpdatedAt", justification: "runtime timestamp; cannot alter fiscal meaning" },
-  { path: "runtimeMetadata.receiptHash", justification: "generated receipt hash that includes the ephemeral signature" },
-  { path: "runtimeMetadata.signerKeyId", justification: "ephemeral signing material" },
-  { path: "runtimeMetadata.signature", justification: "ephemeral signing material" },
-  { path: "runtimeMetadata.issuedAt", justification: "runtime timestamp; cannot alter fiscal meaning" },
+const NORMALIZED_RUNTIME_FIELDS: readonly {
+  path: string;
+  justification: string;
+}[] = [
+  {
+    path: "runtimeMetadata.missionId",
+    justification:
+      "generated mission id; mission identity is retained via the same-mission relationship token",
+  },
+  {
+    path: "runtimeMetadata.missionCreatedAt",
+    justification: "runtime timestamp; cannot alter fiscal meaning",
+  },
+  {
+    path: "runtimeMetadata.missionUpdatedAt",
+    justification: "runtime timestamp; cannot alter fiscal meaning",
+  },
+  {
+    path: "runtimeMetadata.receiptHash",
+    justification:
+      "generated receipt hash that includes the ephemeral signature",
+  },
+  {
+    path: "runtimeMetadata.signerKeyId",
+    justification: "ephemeral signing material",
+  },
+  {
+    path: "runtimeMetadata.signature",
+    justification: "ephemeral signing material",
+  },
+  {
+    path: "runtimeMetadata.issuedAt",
+    justification: "runtime timestamp; cannot alter fiscal meaning",
+  },
   {
     path: "receipt.claims.payloadHash",
     justification:
@@ -404,15 +439,33 @@ function assertNoNormalizedFieldLeak(projection: unknown, at?: string): void {
   const current = at ?? "projection";
   expect(projection, `${current} must not be null`).not.toBeNull();
   if (Array.isArray(projection)) {
-    projection.forEach((item, index) => assertNoNormalizedFieldLeak(item, `${current}[${index}]`));
+    projection.forEach((item, index) =>
+      assertNoNormalizedFieldLeak(item, `${current}[${index}]`),
+    );
     return;
   }
   if (typeof projection === "object") {
-    for (const [key, value] of Object.entries(projection as Record<string, unknown>)) {
-      if (NORMALIZED_RUNTIME_FIELDS.some((field) => field.path.endsWith(`.${key}`) || field.path === key)) {
+    for (const [key, value] of Object.entries(
+      projection as Record<string, unknown>,
+    )) {
+      if (
+        NORMALIZED_RUNTIME_FIELDS.some(
+          (field) => field.path.endsWith(`.${key}`) || field.path === key,
+        )
+      ) {
         expect.fail(`normalized runtime field "${key}" leaked into ${current}`);
       }
-      if (["signature", "signerKeyId", "issuedAt", "receiptHash", "createdAt", "updatedAt", "payloadHash"].includes(key)) {
+      if (
+        [
+          "signature",
+          "signerKeyId",
+          "issuedAt",
+          "receiptHash",
+          "createdAt",
+          "updatedAt",
+          "payloadHash",
+        ].includes(key)
+      ) {
         expect.fail(`runtime-generated field "${key}" leaked into ${current}`);
       }
       assertNoNormalizedFieldLeak(value, `${current}.${key}`);
@@ -465,12 +518,17 @@ async function runPiBranch(
   // Drive the bounded 13-phase close; capture the APPROVED snapshot at the
   // approve phase for the authority checkpoint.
   let approvedMission: MissionSnapshot | undefined;
-  for (let index = 0; index < 16 && mission.status !== AccountingMissionStatus.COMPLETED; index += 1) {
+  for (
+    let index = 0;
+    index < 16 && mission.status !== AccountingMissionStatus.COMPLETED;
+    index += 1
+  ) {
     const step = await chain.advance({
       missionId: mission.id,
       approverId: fixture.humanApproval.approverId,
       reason: fixture.humanApproval.reason,
-      satisfyEvidence: mission.status === AccountingMissionStatus.WAITING_FOR_EVIDENCE,
+      satisfyEvidence:
+        mission.status === AccountingMissionStatus.WAITING_FOR_EVIDENCE,
     });
     mission = step.mission;
     if (step.phase === "approve") approvedMission = mission;
@@ -509,7 +567,9 @@ async function runPiBranch(
   const kernelTier = deriveMateriality(fixture.materiality.input);
   const declaredMinimum = fixture.materiality.minimum;
   const effectiveTier =
-    orderOf(kernelTier) >= orderOf(declaredMinimum) ? kernelTier : declaredMinimum;
+    orderOf(kernelTier) >= orderOf(declaredMinimum)
+      ? kernelTier
+      : declaredMinimum;
 
   // Pi's own authority pipeline at the closing checkpoint: the kernel gates
   // evaluate mission (APPROVED -> COMPLETED), approval, and receipt in order.
@@ -527,7 +587,10 @@ async function runPiBranch(
     action: ACTION_FAMILY.EXECUTE_TARGET,
     mission: approvedMission,
     targetStatus: AccountingMissionStatus.COMPLETED,
-    materiality: { input: fixture.materiality.input, minimum: fixture.materiality.minimum },
+    materiality: {
+      input: fixture.materiality.input,
+      minimum: fixture.materiality.minimum,
+    },
     approvals: [
       {
         approverId: fixture.humanApproval.approverId,
@@ -541,7 +604,9 @@ async function runPiBranch(
   const kernelStages: HostGateVerdictRecord[] = pipeline
     .filter(
       (result) =>
-        result.stage === "mission" || result.stage === "approval" || result.stage === "receipt",
+        result.stage === "mission" ||
+        result.stage === "approval" ||
+        result.stage === "receipt",
     )
     .map((result, index) => ({
       order: index + 1,
@@ -586,7 +651,12 @@ async function runPiBranch(
     },
     evidence: { items: evidenceItems, evidenceHash },
     policyVersion: binding.scope.policyVersion,
-    materiality: { input: fixture.materiality.input, declaredMinimum, kernelTier, effectiveTier },
+    materiality: {
+      input: fixture.materiality.input,
+      declaredMinimum,
+      kernelTier,
+      effectiveTier,
+    },
     gates: kernelStages,
     candidate: { targetHash, contentHash, content: candidateContent },
     approval: {
@@ -647,7 +717,9 @@ describe("T-WU2-001 anti-circularity import closure (REQ-HARNESS-002)", () => {
     expect(a.scope.company).toBe("20123456786");
     expect(a.scope.fiscalPeriod).toMatch(/^\d{4}(0[1-9]|1[0-2])$/);
     expect(a.materiality.minimum).toBe("R2");
-    expect(a.evidence.every((entry) => typeof entry.amountCents === "bigint")).toBe(true);
+    expect(
+      a.evidence.every((entry) => typeof entry.amountCents === "bigint"),
+    ).toBe(true);
     // No precomputed gate verdicts, materiality tier, or receipt.
     expect(a).not.toHaveProperty("gates");
     expect(a).not.toHaveProperty("receipt");
@@ -685,7 +757,9 @@ describe("T-WU2-003 canonical projection + normalization (REQ-HARNESS-003/004)",
       ...raw,
       receipt: { ...raw.receipt, missionId: "mission_somewhere_else" },
     };
-    expect(() => canonicalAuthorityProjection(mismatched)).toThrow(/mission id/);
+    expect(() => canonicalAuthorityProjection(mismatched)).toThrow(
+      /mission id/,
+    );
   });
 
   it("normalizes only generated ids/timestamps/signatures; authority-bearing fields never leak", async () => {
@@ -693,16 +767,24 @@ describe("T-WU2-003 canonical projection + normalization (REQ-HARNESS-003/004)",
     const rawB = await runSubstituteHost(createRdaReplacementFixture());
 
     // At least the documented generated id and ephemeral signing material differ.
-    expect(rawA.runtimeMetadata.missionId).not.toBe(rawB.runtimeMetadata.missionId);
-    expect(rawA.runtimeMetadata.signature).not.toBe(rawB.runtimeMetadata.signature);
+    expect(rawA.runtimeMetadata.missionId).not.toBe(
+      rawB.runtimeMetadata.missionId,
+    );
+    expect(rawA.runtimeMetadata.signature).not.toBe(
+      rawB.runtimeMetadata.signature,
+    );
 
     // The excluded receipt payload hash is runtime-generated (it covers the
     // generated authorization-record id), while the retained authority-bearing
     // binding fields stay exactly equal between runs (design §4.5).
-    expect(rawA.receipt.claims.payloadHash).not.toBe(rawB.receipt.claims.payloadHash);
+    expect(rawA.receipt.claims.payloadHash).not.toBe(
+      rawB.receipt.claims.payloadHash,
+    );
     expect(rawA.receipt.binding).toEqual(rawB.receipt.binding);
     expect(rawA.receipt.claims.company).toBe(rawB.receipt.claims.company);
-    expect(rawA.receipt.claims.previousStatus).toBe(rawB.receipt.claims.previousStatus);
+    expect(rawA.receipt.claims.previousStatus).toBe(
+      rawB.receipt.claims.previousStatus,
+    );
 
     const projectionA = canonicalAuthorityProjection(rawA);
     const projectionB = canonicalAuthorityProjection(rawB);
@@ -711,16 +793,18 @@ describe("T-WU2-003 canonical projection + normalization (REQ-HARNESS-003/004)",
     assertNoNormalizedFieldLeak(projectionB);
 
     // Every exclusion is documented and named (design §4.5).
-    expect(NORMALIZED_RUNTIME_FIELDS.map((field) => field.path).sort()).toEqual([
-      "receipt.claims.payloadHash",
-      "runtimeMetadata.issuedAt",
-      "runtimeMetadata.missionCreatedAt",
-      "runtimeMetadata.missionId",
-      "runtimeMetadata.missionUpdatedAt",
-      "runtimeMetadata.receiptHash",
-      "runtimeMetadata.signature",
-      "runtimeMetadata.signerKeyId",
-    ]);
+    expect(NORMALIZED_RUNTIME_FIELDS.map((field) => field.path).sort()).toEqual(
+      [
+        "receipt.claims.payloadHash",
+        "runtimeMetadata.issuedAt",
+        "runtimeMetadata.missionCreatedAt",
+        "runtimeMetadata.missionId",
+        "runtimeMetadata.missionUpdatedAt",
+        "runtimeMetadata.receiptHash",
+        "runtimeMetadata.signature",
+        "runtimeMetadata.signerKeyId",
+      ],
+    );
   });
 
   it("every retained authority-bearing category changes the projection when mutated", async () => {
@@ -731,27 +815,153 @@ describe("T-WU2-003 canonical projection + normalization (REQ-HARNESS-003/004)",
       mutate: (raw: RawHostAuthorityResult) => void;
       expected: string;
     }[] = [
-      { name: "scope element", mutate: (r) => { r.scope.elements.actor = "bob"; }, expected: "scope.elements.actor" },
-      { name: "scope hash", mutate: (r) => { r.scope.scopeHash = "c".repeat(64); }, expected: "scope.scopeHash" },
-      { name: "evidence hash", mutate: (r) => { r.evidence.evidenceHash = "d".repeat(64); }, expected: "binding.evidenceHash" },
-      { name: "policy version", mutate: (r) => { r.policyVersion = "policies.v2"; }, expected: "binding.policyVersion" },
-      { name: "kernel tier", mutate: (r) => { r.materiality.kernelTier = "R3"; }, expected: "materiality.kernelTier" },
-      { name: "declared minimum", mutate: (r) => { r.materiality.declaredMinimum = "R0"; }, expected: "materiality.declaredMinimum" },
-      { name: "effective tier", mutate: (r) => { r.materiality.effectiveTier = "R3"; }, expected: "materiality.effectiveTier" },
-      { name: "gate order", mutate: (r) => { r.gates[0].order = 9; }, expected: "gates.0.order" },
-      { name: "gate stage", mutate: (r) => { r.gates[1].stage = "receipt"; }, expected: "gates.1.stage" },
-      { name: "gate verdict", mutate: (r) => { r.gates[2].verdict = "blocked"; }, expected: "gates.2.verdict" },
-      { name: "candidate target hash", mutate: (r) => { r.candidate.targetHash = "e".repeat(64); }, expected: "candidate.targetHash" },
-      { name: "candidate content hash", mutate: (r) => { r.candidate.contentHash = "f".repeat(64); }, expected: "candidate.contentHash" },
-      { name: "candidate content", mutate: (r) => { r.candidate.content.operation = "correction"; }, expected: "candidate.content.operation" },
-      { name: "approver identity", mutate: (r) => { r.approval.humanApproverId = "contador-02"; }, expected: "approval.humanApproverId" },
-      { name: "approval candidate binding", mutate: (r) => { r.approval.candidateContentHash = "f".repeat(64); }, expected: "approval.candidateContentHash" },
-      { name: "receipt type", mutate: (r) => { r.receipt.type = "EXECUTION"; }, expected: "receipt.type" },
-      { name: "receipt binding", mutate: (r) => { r.receipt.binding.targetHash = "e".repeat(64); }, expected: "receipt.binding.targetHash" },
-      { name: "receipt claim", mutate: (r) => { r.receipt.claims.newStatus = "EXECUTED"; }, expected: "receipt.claims.newStatus" },
-      { name: "receipt verification", mutate: (r) => { r.receipt.verified = false; }, expected: "receipt.verified" },
-      { name: "UNKNOWN retry count", mutate: (r) => { r.unknownHandling.attemptsAfterUnknown = 1; }, expected: "unknownHandling.attemptsAfterUnknown" },
-      { name: "terminal status", mutate: (r) => { r.terminal.missionStatus = "FAILED"; }, expected: "terminal.missionStatus" },
+      {
+        name: "scope element",
+        mutate: (r) => {
+          r.scope.elements.actor = "bob";
+        },
+        expected: "scope.elements.actor",
+      },
+      {
+        name: "scope hash",
+        mutate: (r) => {
+          r.scope.scopeHash = "c".repeat(64);
+        },
+        expected: "scope.scopeHash",
+      },
+      {
+        name: "evidence hash",
+        mutate: (r) => {
+          r.evidence.evidenceHash = "d".repeat(64);
+        },
+        expected: "binding.evidenceHash",
+      },
+      {
+        name: "policy version",
+        mutate: (r) => {
+          r.policyVersion = "policies.v2";
+        },
+        expected: "binding.policyVersion",
+      },
+      {
+        name: "kernel tier",
+        mutate: (r) => {
+          r.materiality.kernelTier = "R3";
+        },
+        expected: "materiality.kernelTier",
+      },
+      {
+        name: "declared minimum",
+        mutate: (r) => {
+          r.materiality.declaredMinimum = "R0";
+        },
+        expected: "materiality.declaredMinimum",
+      },
+      {
+        name: "effective tier",
+        mutate: (r) => {
+          r.materiality.effectiveTier = "R3";
+        },
+        expected: "materiality.effectiveTier",
+      },
+      {
+        name: "gate order",
+        mutate: (r) => {
+          r.gates[0].order = 9;
+        },
+        expected: "gates.0.order",
+      },
+      {
+        name: "gate stage",
+        mutate: (r) => {
+          r.gates[1].stage = "receipt";
+        },
+        expected: "gates.1.stage",
+      },
+      {
+        name: "gate verdict",
+        mutate: (r) => {
+          r.gates[2].verdict = "blocked";
+        },
+        expected: "gates.2.verdict",
+      },
+      {
+        name: "candidate target hash",
+        mutate: (r) => {
+          r.candidate.targetHash = "e".repeat(64);
+        },
+        expected: "candidate.targetHash",
+      },
+      {
+        name: "candidate content hash",
+        mutate: (r) => {
+          r.candidate.contentHash = "f".repeat(64);
+        },
+        expected: "candidate.contentHash",
+      },
+      {
+        name: "candidate content",
+        mutate: (r) => {
+          r.candidate.content.operation = "correction";
+        },
+        expected: "candidate.content.operation",
+      },
+      {
+        name: "approver identity",
+        mutate: (r) => {
+          r.approval.humanApproverId = "contador-02";
+        },
+        expected: "approval.humanApproverId",
+      },
+      {
+        name: "approval candidate binding",
+        mutate: (r) => {
+          r.approval.candidateContentHash = "f".repeat(64);
+        },
+        expected: "approval.candidateContentHash",
+      },
+      {
+        name: "receipt type",
+        mutate: (r) => {
+          r.receipt.type = "EXECUTION";
+        },
+        expected: "receipt.type",
+      },
+      {
+        name: "receipt binding",
+        mutate: (r) => {
+          r.receipt.binding.targetHash = "e".repeat(64);
+        },
+        expected: "receipt.binding.targetHash",
+      },
+      {
+        name: "receipt claim",
+        mutate: (r) => {
+          r.receipt.claims.newStatus = "EXECUTED";
+        },
+        expected: "receipt.claims.newStatus",
+      },
+      {
+        name: "receipt verification",
+        mutate: (r) => {
+          r.receipt.verified = false;
+        },
+        expected: "receipt.verified",
+      },
+      {
+        name: "UNKNOWN retry count",
+        mutate: (r) => {
+          r.unknownHandling.attemptsAfterUnknown = 1;
+        },
+        expected: "unknownHandling.attemptsAfterUnknown",
+      },
+      {
+        name: "terminal status",
+        mutate: (r) => {
+          r.terminal.missionStatus = "FAILED";
+        },
+        expected: "terminal.missionStatus",
+      },
     ];
     for (const mutation of mutations) {
       const mutated = structuredClone(base) as RawHostAuthorityResult;
@@ -774,17 +984,18 @@ describe("T-WU2-004 two-host equivalence baseline (REQ-HARNESS-001/003)", () => 
       const projectionPi = canonicalAuthorityProjection(rawPi);
       const projectionSub = canonicalAuthorityProjection(rawSub);
       const result = compareProjections(projectionPi, projectionSub);
-      expect(result.equal, `projections differ at ${result.mismatch ?? "?"}`).toBe(true);
+      expect(
+        result.equal,
+        `projections differ at ${result.mismatch ?? "?"}`,
+      ).toBe(true);
 
       // Concrete values prove REAL kernel execution, not mock coincidence.
       expect(projectionPi.materiality.kernelTier).toBe("R1");
       expect(projectionPi.materiality.declaredMinimum).toBe("R2");
       expect(projectionPi.materiality.effectiveTier).toBe("R2");
-      expect(projectionPi.gates.map((gate) => `${gate.stage}:${gate.verdict}`)).toEqual([
-        "mission:allowed",
-        "approval:allowed",
-        "receipt:allowed",
-      ]);
+      expect(
+        projectionPi.gates.map((gate) => `${gate.stage}:${gate.verdict}`),
+      ).toEqual(["mission:allowed", "approval:allowed", "receipt:allowed"]);
       expect(projectionPi.approval.humanApproverId).toBe("contador-01");
       expect(projectionPi.receipt.verified).toBe(true);
       expect(projectionPi.receipt.claims.newStatus).toBe("COMPLETED");
@@ -804,13 +1015,18 @@ describe("T-WU2-005 five negative controls (REQ-HARNESS-005)", () => {
     const root = mkdtempSync(join(tmpdir(), "drenyra-replacement-controls-"));
     try {
       const rawPi = await runPiBranch(createRdaReplacementFixture(), root);
-      const baselineSub = await runSubstituteHost(createRdaReplacementFixture());
+      const baselineSub = await runSubstituteHost(
+        createRdaReplacementFixture(),
+      );
       const baselinePi = canonicalAuthorityProjection(rawPi);
       const baseline = canonicalAuthorityProjection(baselineSub);
 
       // Sanity: the baseline itself is equivalent.
       const baselineResult = compareProjections(baselinePi, baseline);
-      expect(baselineResult.equal, `baseline must be equivalent (${baselineResult.mismatch ?? "?"})`).toBe(true);
+      expect(
+        baselineResult.equal,
+        `baseline must be equivalent (${baselineResult.mismatch ?? "?"})`,
+      ).toBe(true);
 
       const controls: readonly {
         name: string;
@@ -819,27 +1035,37 @@ describe("T-WU2-005 five negative controls (REQ-HARNESS-005)", () => {
       }[] = [
         {
           name: "1. override a Core decision (materiality.effectiveTier)",
-          mutate: (r) => { r.materiality.effectiveTier = "R3"; },
+          mutate: (r) => {
+            r.materiality.effectiveTier = "R3";
+          },
           expected: /^materiality\.effectiveTier$/,
         },
         {
           name: "2. change a bound input (scope.sourceSnapshot on one side)",
-          mutate: (r) => { r.scope.elements.sourceSnapshot = "b".repeat(64); },
+          mutate: (r) => {
+            r.scope.elements.sourceSnapshot = "b".repeat(64);
+          },
           expected: /^scope\.elements\.sourceSnapshot$/,
         },
         {
           name: "3. reorder/substitute a gate (approval <-> receipt)",
-          mutate: (r) => { [r.gates[1], r.gates[2]] = [r.gates[2], r.gates[1]]; },
+          mutate: (r) => {
+            [r.gates[1], r.gates[2]] = [r.gates[2], r.gates[1]];
+          },
           expected: /^gates/,
         },
         {
           name: "4. upgrade a receipt claim (COMPLETION -> EXECUTION)",
-          mutate: (r) => { r.receipt.type = "EXECUTION"; },
+          mutate: (r) => {
+            r.receipt.type = "EXECUTION";
+          },
           expected: /^receipt\.type$/,
         },
         {
           name: "5. retry UNKNOWN blindly (attemptsAfterUnknown -> 1)",
-          mutate: (r) => { r.unknownHandling.attemptsAfterUnknown = 1; },
+          mutate: (r) => {
+            r.unknownHandling.attemptsAfterUnknown = 1;
+          },
           expected: /^unknownHandling\.attemptsAfterUnknown$/,
         },
       ];
@@ -849,7 +1075,9 @@ describe("T-WU2-005 five negative controls (REQ-HARNESS-005)", () => {
         control.mutate(mutated);
         const projection = canonicalAuthorityProjection(mutated);
         const result = compareProjections(baselinePi, projection);
-        expect(result.equal, `${control.name} must break equivalence`).toBe(false);
+        expect(result.equal, `${control.name} must break equivalence`).toBe(
+          false,
+        );
         expect(result.mismatch, control.name).toMatch(control.expected);
       }
     } finally {

@@ -15,7 +15,7 @@ stack:
       test_runner: vitest
       tsconfig: strict
       package_kind: pi-extension # package.json "pi" field: extensions/prompts/skills/themes
-      runtime_dependency: drenyra-ai pinned via tgz (v0.3.0), devDependency
+      runtime_dependency: drenyra-ai pinned via tgz (v0.4.0), devDependency
 
 status: active
 store_mode: hybrid # openspec files authoritative + engram best-effort
