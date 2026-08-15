@@ -3,7 +3,7 @@
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
   "headSha": "858c0df78aa49602ac81bf2d3de0ec98b1fc55d2",
-  "candidateIdentity": "dirty-sha256:1f158e42fae864b7f8d64258e7bd2e41631b7f0e60314e85fc548a3db0754c5c",
+  "candidateIdentity": "dirty-sha256:99e257d23de80ac5191aba89773ca821d0c5fa64a5e619b20ea0833061e22e03",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -54,7 +54,7 @@
     "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
     "contentManifest": {
       "path": "contracts/SHA256SUMS.json",
-      "sha256": "c02858b09436fa501f1d3e3079ca76baef3265fbdfea94ecea53a8d728cd771a"
+      "sha256": "f2cea66e14687e52e4f38450958449900339ef01115ca083275a1202517f788a"
     }
   },
   "capabilityStates": {
