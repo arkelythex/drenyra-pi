@@ -182,3 +182,15 @@ be rebased to CONSUME `routing/router.ts`: Pi's preflight produces the
 `RouteRequest`, the Core router decides the `Route`, and Pi's executor remains
 the host-side adapter (execution via the injected validator). The route
 DECISION belongs to the Core; Pi proposes/executes only.
+
+**Rebase complete (2026-08-15, drenyra-ai@0.4.0):** the adapter now CONSUMES
+`routing/router.ts`. `lib/routing/route-selector.ts` (the 18-cell table) and
+its test file were deleted; `lib/routing/preflight.ts` gained an eighth
+`routing` stage that validates the five Core routing axes and composes the
+`RouteRequest` from validated preflight state, delegating the decision to the
+Core `route()` and attaching the returned `Route` to the ok `PreflightResult`;
+`lib/routing/executor.ts` maps the Core route kind to the Pi execution port
+(`direct-analysis` → direct, `specialized-agent` → delegated,
+`durable-mission` → durable) and dispatches exactly one port. Pi's preflight
+produces the `RouteRequest`, the Core decides the `Route`, and Pi's executor
+remains the host-side adapter.
