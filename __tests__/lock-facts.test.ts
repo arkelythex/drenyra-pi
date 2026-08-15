@@ -234,12 +234,12 @@ function collectLockFactsViolations(
 		stateCounts[state] = (stateCounts[state] ?? 0) + 1;
 	}
 	if (
-		stateCounts.implemented !== 7 ||
+		stateCounts.implemented !== 8 ||
 		stateCounts.partial !== 2 ||
-		stateCounts.planned !== 1
+		(stateCounts.planned ?? 0) !== 0
 	) {
 		push(
-			"capability state counts must agree with the manifest (7 implemented / 2 partial / 1 planned)",
+			"capability state counts must agree with the manifest (8 implemented / 2 partial / 0 planned)",
 		);
 	}
 

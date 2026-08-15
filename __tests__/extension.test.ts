@@ -142,6 +142,8 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:evidence",
       "/drenyra:verify",
       "/drenyra:reconcile",
+      "/drenyra:install",
+      "/drenyra:sync",
     ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
     expect(drenyraPiExtension.runtime.version).toBe("0.4.1");
@@ -170,6 +172,8 @@ describe("registerDrenyraPiExtension", () => {
       "drenyra:evidence",
       "drenyra:verify",
       "drenyra:reconcile",
+      "drenyra:install",
+      "drenyra:sync",
     ]);
     for (const command of registered) {
       expect(command.description.length).toBeGreaterThan(0);
@@ -293,7 +297,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
 });
 
 describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () => {
-  it("registers the 14 intended commands plus company and context (16 total)", () => {
+  it("registers the 14 intended commands plus company, context, install and sync (18 total)", () => {
     const { pi, registered } = makeMockPi();
     registerDrenyraPiExtension(pi);
     const names = registered.map((c) => c.name);
@@ -302,9 +306,9 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     }
     expect(names).toContain("drenyra:company");
     expect(names).toContain("drenyra:context");
-    expect(registered).toHaveLength(16);
+    expect(registered).toHaveLength(18);
     // Descriptor mirrors the registered surface (SC-CMD-001 conformance).
-    expect(drenyraPiExtension.commands).toHaveLength(16);
+    expect(drenyraPiExtension.commands).toHaveLength(18);
     expect(drenyraPiExtension.provides).toHaveLength(13);
   });
 

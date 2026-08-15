@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "42607035c42901eebadc1bf2879cb09a1416f3b5",
-  "candidateIdentity": "dirty-sha256:43d413222a40556cb7288af4b11c47afaaf3725d7eea98b5ab507facf266fb07",
+  "headSha": "858c0df78aa49602ac81bf2d3de0ec98b1fc55d2",
+  "candidateIdentity": "dirty-sha256:1f158e42fae864b7f8d64258e7bd2e41631b7f0e60314e85fc548a3db0754c5c",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -60,7 +60,7 @@
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "bc29f24a241febd6ecdb163702c45fdca13e6ed49b535737f899dcdefc75f47f"
+    "digestSha256": "a4c24edd2b265059e1211c2046d28ddce4da7a4d177be04f374c03eddc26dec3"
   },
   "activeChanges": [
     "pi-program-status-reconciliation",

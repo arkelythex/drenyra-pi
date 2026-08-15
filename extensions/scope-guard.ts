@@ -37,6 +37,8 @@ const REQUIRES_SCOPE = "requires-scope" as const;
 export const COMMAND_SCOPE_POLICY: Readonly<Record<string, CommandScopePolicy>> = {
   "drenyra:status": PRE_SCOPE,
   "drenyra:doctor": PRE_SCOPE,
+  "drenyra:install": PRE_SCOPE,
+  "drenyra:sync": PRE_SCOPE,
   "drenyra:capabilities": PRE_SCOPE,
   "drenyra:scope": PRE_SCOPE,
   "drenyra:company": PRE_SCOPE,

@@ -119,13 +119,17 @@
       }
     },
     "configurator-install-doctor-sync": {
-      "state": "planned",
+      "state": "implemented",
       "evidence": {
         "sources": [
-          "ROADMAP.md"
+          "lib/configurator.ts",
+          "extensions/register.ts",
+          "__tests__/configurator.test.ts"
         ],
-        "tests": [],
-        "plan": "Master SDD-020/Gate 0 plan only; no local implementation (REQ-BOUND-001)."
+        "tests": [
+          "__tests__/configurator.test.ts"
+        ],
+        "note": "Pi consumes the drenyra-ai@0.4.1 public configurator: doctor reports managed-composition diagnostics incl. pinned-ai-runtime; install/sync render the drenyra-pi managed composition + pin asset under ~/.drenyra."
       }
     }
   },
