@@ -27,7 +27,7 @@ import {
   type WorkUnit,
 } from "drenyra-ai";
 import { digest } from "./fixtures.js";
-    
+
 function input(overrides: Partial<RouteSelectionInput> = {}): RouteSelectionInput {
   return {
     kernelRiskTier: "R0",

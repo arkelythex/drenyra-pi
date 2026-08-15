@@ -64,7 +64,7 @@ const REVERSIBILITY_MAP: Readonly<
   "partially-reversible": "PARTIALLY_REVERSIBLE",
   irreversible: "IRREVERSIBLE",
 };
-    
+
 /** Stage 1 — canonical scope: validation, recompute, mission, projection. */
 function stageScope(request: PreflightRequest): PreflightResult | undefined {
   const { binding, mission } = request;

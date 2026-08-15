@@ -8,7 +8,7 @@
  * approvals, and fiscal authority (REQ-BOUND-001). No local transition matrix
  * exists anywhere in this module.
  */
-    
+
 export * from "./types.js";
 export * from "./preflight.js";
 export * from "./route-selector.js";
