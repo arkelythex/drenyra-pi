@@ -32,6 +32,7 @@ import {
   renderModelsRegistry,
   renderStatusView,
 } from "./mission-status.js";
+import { loadEvidenceStatus } from "../lib/evidence-status.js";
 import { showStartupPanel, type StartupPanelDeps } from "./startup-panel.js";
 import {
   renderContinueResult,
@@ -57,6 +58,11 @@ import {
   evidenceChain,
   type EvidenceChainInput,
 } from "../chains/evidence.js";
+import {
+  CLOSE_MATERIALITY,
+  MonthlyCloseChain,
+  MonthlyCloseWaitError,
+} from "../chains/monthly-close.js";
 
 /**
  * Drenyra Pi package version. Keep in sync with package.json — the pin's
@@ -237,6 +243,13 @@ export function registerDrenyraPiExtension(
     ) {
       mission = await findActiveEdaMission(outcome.binding, storesRoot);
     }
+    // Evidence status projects read-only from the active mission's evidence
+    // graph (design §7/§9): a missing, malformed, or integrity-invalid graph
+    // fails closed to unavailable and is never implied valid (REQ-EVID-008).
+    const evidence =
+      mission === undefined
+        ? undefined
+        : await loadEvidenceStatus({ storesRoot, missionId: mission.id });
     const output = await renderStatusView({
       company: scope.company?.ruc,
       period: scope.period?.period,
@@ -244,6 +257,7 @@ export function registerDrenyraPiExtension(
       scopeReport: outcome.report,
       binding: outcome.binding,
       mission,
+      ...(evidence === undefined ? {} : { evidence }),
     });
     console.log(output.summary);
     console.log(JSON.stringify(output.machine, null, 2));
@@ -430,23 +444,100 @@ export function registerDrenyraPiExtension(
 		args: string,
 		_ctx: PiCommandContext,
 	): Promise<void> {
-    const approverId = args.trim();
-    if (approverId.length === 0) {
+		const approverId = args.trim();
+		if (approverId.length === 0) {
 			console.log(
-				"drenyra:close: usage: /drenyra:close <approverId> (R2: explicit approval)",
+				"drenyra:close: usage: /drenyra:close <approverId> (R2: explicit human approval required)",
 			);
-      return;
-    }
-    const outcome = scopeGuard.evaluate("drenyra:close");
-    if (!outcome.ok) {
-      console.log(`drenyra:close: ${outcome.error}`);
-      return;
-    }
-        console.log(
-          "drenyra:close: the monthly-close chain requires explicit materiality — " +
-            "the command body lands with the PR #5 scope-guard (S4a).",
-        );
-      }
+			return;
+		}
+		const outcome = scopeGuard.evaluate("drenyra:close");
+		if (!outcome.ok) {
+			console.log(`drenyra:close: ${outcome.error}`);
+			return;
+		}
+		const binding = outcome.binding;
+		if (binding === undefined) {
+			console.log(
+				"drenyra:close: canonical scope present but invalid — re-bind via /drenyra:scope",
+			);
+			return;
+		}
+		try {
+			// The chain enforces the fail-closed gates (REQ-AUTH-004/005): complete
+			// explicit materiality floored at R2 (never defaulted to R0) and an
+			// explicit human approver; a denied gate stops at BLOCKED_BY_GATE with
+			// no phase advance and a completion receipt never self-authorizes.
+			const chain = new MonthlyCloseChain(binding, { storesRoot });
+			const result = await chain.run({
+				approverId,
+				sourceRefs: [],
+				materiality: CLOSE_MATERIALITY.input,
+			});
+			const mission = result.mission;
+			console.log(
+				`drenyra:close: mission ${mission.id} COMPLETED — signed close receipt ` +
+					`${result.receipt.receiptHash}; approved by ${result.approval.approverId}`,
+			);
+			console.log(
+				JSON.stringify(
+					{
+						command: "close",
+						chain: "monthly-close",
+						missionId: mission.id,
+						status: mission.status,
+						version: mission.version,
+						phase: "close",
+						progress: mission.progress,
+						waitReason: null,
+						approverId,
+						receiptHash: result.receipt.receiptHash,
+						approval: {
+							approverId: result.approval.approverId,
+							at: result.approval.at,
+							reason: result.approval.reason,
+						},
+					},
+					null,
+					2,
+				),
+			);
+		} catch (error) {
+			if (error instanceof MonthlyCloseWaitError) {
+				// Fail-closed wait (evidence/approval/policy gate): report the mission
+				// and its wait reason; no phase advanced (REQ-MISS-009 — never
+				// auto-advance a WAIT state).
+				const mission = error.mission;
+				console.log(
+					`drenyra:close: mission ${mission.id} waits on ${error.waitReason} — ` +
+						"no phase advanced (wait states never auto-advance; REQ-MISS-009)",
+				);
+				console.log(
+					JSON.stringify(
+						{
+							command: "close",
+							chain: "monthly-close",
+							missionId: mission.id,
+							status: mission.status,
+							version: mission.version,
+							phase: null,
+							progress: mission.progress,
+							waitReason: error.waitReason,
+							approverId,
+							receiptHash: null,
+							approval: null,
+						},
+						null,
+						2,
+					),
+				);
+				return;
+			}
+			console.log(
+				`drenyra:close: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
+	}
     
       const MISSION_USAGE =
         "drenyra:mission: usage — /drenyra:mission <intent> " +

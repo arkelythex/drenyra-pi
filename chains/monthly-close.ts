@@ -60,7 +60,11 @@ import {
   type SignedReceipt,
 } from "drenyra-ai/receipts";
 import type { MaterialityInput } from "drenyra-ai/candidates";
-import { MaterialityInputError, deriveRequiredMateriality } from "../lib/authority-gates.js";
+    import {
+      MaterialityInputError,
+      deriveRequiredMateriality,
+      type ExplicitMaterialityRequest,
+    } from "../lib/authority-gates.js";
 import {
   EDA_PHASE,
   EDA_PHASE_ORDER,
@@ -128,6 +132,21 @@ export interface MonthlyCloseResult {
   receipt: SignedReceipt;
   approval: ApprovalRecord;
 }
+
+/**
+ * Explicit materiality for monthly-close runs: the R2 floor is always applied
+ * (REQ-AUTH-004/005) — the chain never defaults missing materiality to R0.
+ * The input is complete; `minimum: "R2"` documents the floor the chain's
+ * `assertMateriality` re-derives on every run.
+ */
+export const CLOSE_MATERIALITY: ExplicitMaterialityRequest = {
+  input: {
+    value: 10_000_00n,
+    reversibility: "partially-reversible",
+    jurisdiction: "PE",
+  },
+  minimum: "R2",
+};
 
 /**
  * Thrown by `run()` when the close reaches a human-wait state (evidence

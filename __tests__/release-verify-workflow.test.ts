@@ -33,7 +33,12 @@ import { describe, expect, it } from "vitest";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, "..");
 
-const WORKFLOW_PATH = join(REPO_ROOT, ".github", "workflows", "release-verify.yml");
+const WORKFLOW_PATH = join(
+	REPO_ROOT,
+	".github",
+	"workflows",
+	"release-verify.yml",
+);
 const RELEASING_PATH = join(REPO_ROOT, "RELEASING.md");
 
 const workflow = readFileSync(WORKFLOW_PATH, "utf8");
@@ -48,7 +53,10 @@ const releasing = readFileSync(RELEASING_PATH, "utf8");
 function remoteReadStepBlocks(): string[] {
 	const stepsStart = workflow.indexOf("steps:");
 	const stepsEnd = workflow.indexOf("jobs:", stepsStart + 1);
-	const stepsText = workflow.slice(stepsStart, stepsEnd === -1 ? undefined : stepsEnd);
+	const stepsText = workflow.slice(
+		stepsStart,
+		stepsEnd === -1 ? undefined : stepsEnd,
+	);
 	return stepsText
 		.split(/\n {6}- name: /)
 		.slice(1)
@@ -58,22 +66,22 @@ function remoteReadStepBlocks(): string[] {
 
 /** Action uses must stay immutable SHA pins (dependabot rewrites them). */
 const SHA_PINS: Array<[string, string]> = [
-  ["actions/checkout", "fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"],
-  ["oven-sh/setup-bun", "0c5077e51419868618aeaa5fe8019c62421857d6"],
-  ["actions/setup-node", "a0853c24544627f65ddf259abe73b1d18a591444"],
+	["actions/checkout", "fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"],
+	["oven-sh/setup-bun", "0c5077e51419868618aeaa5fe8019c62421857d6"],
+	["actions/setup-node", "a0853c24544627f65ddf259abe73b1d18a591444"],
 ];
 
 /** Anything here would turn the gate into a publish/release path. */
 const FORBIDDEN_COMMANDS = [
-  "npm publish",
-  "npm unpublish",
-  "npm dist-tag",
-  "gh release",
-  "git push",
-  "NODE_AUTH_TOKEN",
-  "registry-url",
-  "id-token: write",
-  "--provenance",
+	"npm publish",
+	"npm unpublish",
+	"npm dist-tag",
+	"gh release",
+	"git push",
+	"NODE_AUTH_TOKEN",
+	"registry-url",
+	"id-token: write",
+	"--provenance",
 ];
 
 describe("release-verify workflow: no-publish gate", () => {
@@ -93,12 +101,14 @@ describe("release-verify workflow: no-publish gate", () => {
 		expect(onEnd).toBeGreaterThan(onStart);
 		const onBlock = workflow.slice(onStart + 1, onEnd);
 		expect(onBlock).toContain("workflow_dispatch:");
-		expect(onBlock).not.toMatch(/\b(push|pull_request|schedule|release|workflow_call):/);
+		expect(onBlock).not.toMatch(
+			/\b(push|pull_request|schedule|release|workflow_call):/,
+		);
 
 		const inputs = workflow.match(/inputs:\n((?:[ \t]+.*\n)+)/);
 		expect(inputs, "workflow_dispatch must declare inputs:").not.toBeNull();
 		const inputNames = [
-			...(inputs![1].matchAll(/^[ \t]{6}([a-zA-Z0-9_-]+):/gm)),
+			...inputs![1].matchAll(/^[ \t]{6}([a-zA-Z0-9_-]+):/gm),
 		].map((m) => m[1]);
 		expect(inputNames).toEqual(["tag"]);
 		expect(inputs![1]).toContain("required: true");
@@ -158,7 +168,9 @@ describe("release-verify workflow: no-publish gate", () => {
 	it("applies the repo supply-chain posture", () => {
 		// Workflow-level and job-level least privilege.
 		expect(workflow).toMatch(/permissions:\n\s+contents: read/);
-		expect((workflow.match(/contents: read/g) ?? []).length).toBeGreaterThanOrEqual(2);
+		expect(
+			(workflow.match(/contents: read/g) ?? []).length,
+		).toBeGreaterThanOrEqual(2);
 		// No write scope anywhere.
 		expect(workflow).not.toMatch(/permissions:\n\s+(?!contents: read)[a-z_-]+:/);
 		// Immutable SHA pins with tag comments.
@@ -186,11 +198,11 @@ describe("release-verify workflow: no-publish gate", () => {
 	});
 });
 
-describe("RELEASING.md: private-repository release state", () => {
-	it("documents the verification-only release gate and the private state", () => {
+describe("RELEASING.md: public-repository release state", () => {
+	it("documents the verification-only release gate and the public state", () => {
 		expect(releasing).toContain("release-verify.yml");
 		expect(releasing).toMatch(/no publish|verification-only|does not publish/i);
-		expect(releasing).toContain("private");
+		expect(releasing).toContain("public");
 	});
 
 	it("documents conditions for a future publish step without instructing publication today", () => {

@@ -1,6 +1,6 @@
 # Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-11 (Design 4 — persistence, security, and recovery; Design 3 — agents, skills, and integrations; Design 1 — boundary & authority contract).
+> **Last updated:** 2026-08-14 (Design 4 — persistence, security, and recovery; Design 3 — agents, skills, and integrations; Design 1 — boundary & authority contract; 2026-08-14 state reconciliation).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -238,8 +238,16 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
 
 ## Current state and maturity
 
-- Pre-alpha: contracts only (`package-contract`, `runtime-dependency`); no implementation yet.
-- Slices will land as vertical PRs on released, pinned versions of `drenyra-ai` — never a checkout.
+- **Implemented on `main`:** a wired harness — 16 registered `/drenyra:*` commands
+  (`extensions/register.ts`), 4 chains (`chains/monthly-close.ts`,
+  `chains/reconcile.ts`, `chains/verify.ts`, `chains/evidence.ts`), 7 accounting
+  agents (`agents/`, mirrored in `assets/agents/`), and the pinned,
+  checksum-verified runtime bootstrap at `drenyra-ai@0.2.0` (released pin).
+- **Still open (draft):** the two product contracts — `package-contract` and
+  `runtime-dependency` remain `0.1-draft`; the contract freeze is ROADMAP
+  Phase 1. Release cadence is pre-alpha (`drenyra-pi@0.0.1-prealpha.1`).
+- Future slices continue to land as vertical PRs on released, pinned versions of
+  `drenyra-ai` — never a checkout.
 
 ## Ownership and accountability
 

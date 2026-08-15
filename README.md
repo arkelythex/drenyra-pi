@@ -42,6 +42,8 @@ Drenyra Pi is a participant in the [Drenyra Dominion Program](https://github.com
 | [SDD-030 — Organic Accounting Work Routing](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-030-routing) | Direct / delegated / durable-mission routing from evidence and risk |
 | [SDD-040 — Receipt-Driven Accounting v2](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-040-rda-v2) | Frozen candidate, proportional review, bounded correction, reusable receipt (RDA v2 chains) |
 
+The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates. Pi's served [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) is **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. **No Pi-local implementation of SDD-020 proceeds until the master promotes readiness.**
+
 Drenyra Pi executes agents and tools with pinned versions and **never authorizes fiscal operations** — fiscal authority remains in `drenyra-ai`.
 
 ## Install

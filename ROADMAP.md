@@ -1,6 +1,6 @@
 # Drenyra Pi — Roadmap
 
-> **Last updated:** 2026-08-01. Status: pre-alpha.
+> **Last updated:** 2026-08-14. Status: pre-alpha (public repository policy decided 2026-08-14; source-available under the proprietary license).
 
 ## Program alignment
 
@@ -12,19 +12,26 @@ Drenyra Pi participates in the [Drenyra Dominion Program](https://github.com/ark
 | Phase 2 — Vertical slices | Wave 1 (Universal runtime: SDD-020 configurator, SDD-030 routing, SDD-040 RDA) |
 | Phase 3 — Ecosystem maturity | Waves 2–3 (Fiscal intelligence and flagship product) |
 
+**Gate note (reference-only, 2026-08-14):** SDD-020 — the configurator capability
+Drenyra Pi serves — is **planned** in the master and gated by master [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md)
+(**in progress**) / Wave 1 readiness. **No Pi-local implementation of SDD-020
+proceeds until the master promotes readiness.** The master owns the full SDD
+catalog (SDD-000/010/050/060/070/080/090/100/110); Drenyra Pi references these,
+never duplicates them.
+
 ## Phase 0 — Identity (current)
 
 - [x] Repository created with identity scaffolding (README, LICENSE, SECURITY, CONTRIBUTING, CODEOWNERS)
 - [x] Contract index drafted (`contracts/`)
 - [ ] Contract review and freeze: package-contract, runtime-dependency
-- [ ] Public roadmap and architecture published
+- [x] Public roadmap and architecture published (`docs/architecture.md`, `docs/architecture/`, `RELEASING.md` committed; public visibility decided 2026-08-14)
 
 ## Phase 1 — Contracts (v0.1)
 
-- [ ] Freeze `package-contract` v0.1 (install surface, provided capabilities, versioning)
-- [ ] Freeze `runtime-dependency` v0.1 (pin strategy, verification, package-locality)
-- [ ] Command contract: `/drenyra:*` surface and expected outputs
-- [ ] Conformance tests for install/doctor/pin verification
+- [x] Freeze `package-contract` v0.1 (install surface, provided capabilities, versioning)
+- [x] Freeze `runtime-dependency` v0.1 (pin strategy, verification, package-locality)
+- [x] Command contract: `/drenyra:*` surface and expected outputs
+- [x] Conformance tests for install/doctor/pin verification
 
 ## Phase 2 — Vertical slices from Drenyra
 

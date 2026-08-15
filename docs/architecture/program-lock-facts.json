@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "drenyra.program-lock-facts.v1",
+  "participantCheckpoint": true,
+  "authorityNotice": "Pi-local input; does not modify or promote the program master",
+  "headSha": "78d5e3b218f5300df27cc76267c2f01b79d033f5",
+  "candidateIdentity": "dirty-sha256:00feca1fa832b2696c7484a532f4031f8c6eadd5c0573bf49a80e1264023dc01",
+  "packageVersion": "0.0.1-prealpha.1",
+  "contracts": {
+    "consumed": [
+      {
+        "name": "mission-protocol",
+        "version": "0.1"
+      },
+      {
+        "name": "candidate",
+        "version": "0.1"
+      },
+      {
+        "name": "receipt",
+        "version": "0.1"
+      },
+      {
+        "name": "gate",
+        "version": "0.1"
+      },
+      {
+        "name": "ledger",
+        "version": "0.1"
+      },
+      {
+        "name": "recovery",
+        "version": "0.1"
+      }
+    ],
+    "produced": [
+      {
+        "name": "package-contract",
+        "version": "0.1"
+      },
+      {
+        "name": "runtime-dependency",
+        "version": "0.1"
+      }
+    ]
+  },
+  "tests": {
+    "files": 37,
+    "passed": 606,
+    "failed": 0,
+    "total": 606,
+    "command": "bun test"
+  },
+  "checksums": {
+    "pinEntrySha256": "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
+    "contentManifest": {
+      "path": "contracts/SHA256SUMS.json",
+      "sha256": "f6ea3da8bee12f4e9775dd77662c1d5fa3fb88191c61eafa50f944ab231c0946"
+    }
+  },
+  "capabilityStates": {
+    "manifest": "capability-manifest.yaml",
+    "schemaVersion": "drenyra.capability-manifest.v1",
+    "digestSha256": "bc29f24a241febd6ecdb163702c45fdca13e6ed49b535737f899dcdefc75f47f"
+  },
+  "activeChanges": [
+    "pi-program-status-reconciliation",
+    "pi-sdd-010-participation"
+  ],
+  "evidenceDate": "2026-08-14",
+  "derivationCommands": [
+    "git rev-parse HEAD",
+    "node scripts/compute-candidate-identity.mjs",
+    "bun test",
+    "bun run typecheck",
+    "node scripts/verify-package-files.mjs",
+    "bun run verify:style",
+    "bun run verify:capability",
+    "sha256sum capability-manifest.yaml contracts/SHA256SUMS.json"
+  ]
+}

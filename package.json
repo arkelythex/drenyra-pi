@@ -44,6 +44,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "verify:package": "node scripts/build.mjs && bun run test && node scripts/verify-package-files.mjs",
+    "verify:capability": "node scripts/verify-capability-manifest.mjs",
+    "verify:style": "node scripts/verify-style.mjs",
     "prepack": "bun run verify:package",
     "prepublishOnly": "bun run typecheck && bun run verify:package && node scripts/verify-packed-install.mjs"
   },

@@ -38,6 +38,12 @@ import {
   type ActionFamily,
 } from "./authority-gates.js";
 import type { ScopeBinding } from "./canonicalization.js";
+import {
+  EVIDENCE_NODE_KIND,
+  type EvidenceGraph,
+  type EvidenceGraphValidation,
+  type EvidenceNodeKind,
+} from "./evidence-graph.js";
 
 /** The 13 canonical EDA phases (REQ-MISS-001; design §4.2). */
 export const EDA_PHASE = {
@@ -469,10 +475,45 @@ export interface MissionStatusView {
   preparedStep: PreparedStep | null;
 }
 
-/** Evidence summary; the graph projection lands with PR #4. */
+/** Evidence status inside the projection (design §9). `available` is true only
+ * for an integrity-verified graph; a missing, malformed, or integrity-invalid
+ * graph fails closed to unavailable and is never implied valid (REQ-EVID-008;
+ * SC-EVID-003). Verified views carry every evidence node id so displayed
+ * conclusions and actions retain their citations (REQ-EVID-002/007). */
 export interface EvidenceStatusView {
   available: boolean;
   summary: string;
+  /** Fail-closed integrity state of the projected graph (design §7.2). */
+  integrity: "verified" | "unavailable";
+  /** The mission whose graph was projected, when known. */
+  missionId?: string;
+  /** Every evidence-graph node id for the mission, when verified. */
+  nodeIds?: readonly string[];
+  /** Node counts per kind, when verified. */
+  nodeCounts?: Readonly<Record<EvidenceNodeKind, number>>;
+  /** Node ids of every displayed conclusion, when verified (REQ-EVID-002). */
+  conclusionIds?: readonly string[];
+  /** Node ids of every displayed action, when verified (REQ-EVID-007). */
+  actionIds?: readonly string[];
+  /** Fail-closed reason when the graph is missing, malformed, or invalid. */
+  reason?: string;
+}
+
+/**
+ * Read-only evidence projection input (design §7/§9): the loaded graph plus
+ * its integrity validation. Every field is optional so callers without an
+ * active mission (or without graph access) still receive a truthful
+ * fail-closed view instead of implied validity.
+ */
+export interface EvidenceStatusProjectionInput {
+  /** The mission whose graph is projected. */
+  missionId?: string;
+  /** The loaded graph document (absent when the log is missing/malformed). */
+  graph?: EvidenceGraph;
+  /** The store's integrity validation (REQ-EVID-008). */
+  validation?: EvidenceGraphValidation;
+  /** A load failure reason — the graph is unavailable for authority use. */
+  error?: string;
 }
 
 /** Authority posture inside the projection (design §9). */
@@ -503,12 +544,89 @@ export interface AccountingStatusInput {
   scopeReport: CanonicalScopeReport;
   binding?: ScopeBinding;
   mission?: MissionSnapshot;
+  /** Evidence graph projection input (read-only, fail-closed; design §7). */
+  evidence?: EvidenceStatusProjectionInput;
   /** Extra pending-approval count reported by callers that ran the gates. */
   pendingApprovals?: number;
   /** Linked source references supplied from chain/session state (REQ-CMD-009). */
   linkedSources?: readonly string[];
   /** Pending reconciliation count supplied from persisted state (REQ-CMD-009). */
   pendingReconciliations?: number;
+}
+
+/**
+ * Project the evidence status view (design §7/§9). Fail-closed: the graph is
+ * `available` only when it loaded and passed full integrity validation; a
+ * missing, malformed, or integrity-invalid graph is reported unavailable and
+ * is never implied valid (REQ-EVID-008; SC-EVID-003). Verified views carry
+ * every evidence node id so displayed conclusions/actions retain their
+ * citations — no authority conclusion is fabricated from graph data.
+ */
+export function projectEvidenceStatus(
+  input: EvidenceStatusProjectionInput,
+): EvidenceStatusView {
+  const { missionId, graph, validation, error } = input;
+  if (error !== undefined) {
+    return {
+      available: false,
+      integrity: "unavailable",
+      summary: error,
+      ...(missionId === undefined ? {} : { missionId }),
+      reason: error,
+    };
+  }
+  if (graph === undefined || validation === undefined) {
+    return {
+      available: false,
+      integrity: "unavailable",
+      summary:
+        "no evidence graph supplied — evidence unavailable (no active mission graph to project)",
+      ...(missionId === undefined ? {} : { missionId }),
+      reason: "evidence graph not supplied",
+    };
+  }
+  if (!validation.valid) {
+    return {
+      available: false,
+      integrity: "unavailable",
+      summary:
+        `evidence graph for mission ${missionId ?? "?"} failed integrity validation — ` +
+        "evidence unavailable until repaired",
+      ...(missionId === undefined ? {} : { missionId }),
+      reason: validation.errors.join("; ") || "integrity validation failed",
+    };
+  }
+
+  const nodeCounts: Record<EvidenceNodeKind, number> = {
+    [EVIDENCE_NODE_KIND.SOURCE]: 0,
+    [EVIDENCE_NODE_KIND.TRANSFORMATION]: 0,
+    [EVIDENCE_NODE_KIND.CONCLUSION]: 0,
+    [EVIDENCE_NODE_KIND.ACTION]: 0,
+  };
+  const conclusionIds: string[] = [];
+  const actionIds: string[] = [];
+  for (const node of graph.nodes) {
+    nodeCounts[node.nodeKind] += 1;
+    if (node.nodeKind === EVIDENCE_NODE_KIND.CONCLUSION) {
+      conclusionIds.push(node.id);
+    }
+    if (node.nodeKind === EVIDENCE_NODE_KIND.ACTION) {
+      actionIds.push(node.id);
+    }
+  }
+  return {
+    available: true,
+    integrity: "verified",
+    summary:
+      `evidence graph for mission ${missionId ?? "?"}: ${graph.nodes.length} node(s) ` +
+      `verified (${graph.edges.length} edge(s)) — ${conclusionIds.length} conclusion(s), ` +
+      `${actionIds.length} action(s)`,
+    ...(missionId === undefined ? {} : { missionId }),
+    nodeIds: graph.nodes.map((node) => node.id),
+    nodeCounts,
+    conclusionIds,
+    actionIds,
+  };
 }
 
 /**
@@ -577,10 +695,7 @@ export async function buildAccountingStatus(
       scopeHash: binding?.scopeHash,
     },
     mission: missionView,
-    evidence: {
-      available: false,
-      summary: "evidence graph projection lands with PR #4 (S3b)",
-    },
+    evidence: projectEvidenceStatus(input.evidence ?? {}),
     authority,
     nextAuthorizedAction,
     ...(linkedSources === undefined ? {} : { linkedSources }),
