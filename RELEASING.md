@@ -1,6 +1,6 @@
 # Releasing — Drenyra Pi
 
-> **Last updated:** 2026-08-14.
+> **Last updated:** 2026-08-15.
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -47,6 +47,59 @@ Every release must pass, in order:
 4. **Package build + pack verification** — build and verify the packed artifact contains exactly the intended files.
 5. **Packed-install test** — install the packed tarball in a clean Pi, run `drenyra-pi` install + doctor, and verify the pinned Drenyra AI runtime installs, verifies, and answers a smoke command.
 6. **Release gate** — the `release-verify` workflow (verification only) passes against the exact annotated tag on protected `main`, with remote authority rechecked after verification (see "Current state" above).
+
+## Runtime pin bump procedure (reference)
+
+The following procedure was executed for 0.3.0 → 0.4.0 → 0.4.1 (2026-08-15);
+follow it in order for every runtime pin change.
+
+1. **Download and verify the artifact.** `gh release download v<version>` for
+   `drenyra-ai-<version>.tgz` and `checksums.txt`; extract the tgz; run
+   `sha256sum -c checksums.txt` from inside the extracted `package/dist`
+   directory (the manifest paths are relative to it). Require **zero** failures.
+2. **Vendor.** `cp` the tgz into `vendored/`, remove the previous vendored tgz,
+   and record the tgz's own sha256 (`sha256sum vendored/drenyra-ai-<v>.tgz`) for
+   the `vendored/drenyra-ai-<v>.tgz` entry in `contracts/SHA256SUMS.json`.
+3. **Update the pin identity.** `runtime/pin.ts`: `RUNTIME_VERSION`, the
+   `DEFAULT_PIN` doc comment, and `checksumSha256`. The checksum is the sha256 of
+   the release's **entry artifact** `dist/cmd/cli.js` (from `checksums.txt`) —
+   it may be **identical across versions** (cli.js was byte-identical across
+   0.3.0 → 0.4.0 → 0.4.1); confirm, never assume.
+4. **Update the manifest and references.** `package.json` devDependency
+   (`file:./vendored/drenyra-ai-<v>.tgz`), `bun.lock` (via install), then sed the
+   exact version across the pin-asserting tests (`pin`, `installer`, `doctor`,
+   `status`, `extension`, `package-verify`, `contracts`, `evidence-status`,
+   `accounting-status`, adapter-boundary audit/replacement) and the docs
+   (`contracts/runtime-dependency.md`, `openspec/config.yaml`). Fixture tool
+   versions that merely coincidentally match the runtime version are left alone.
+5. **Rebuild dist BEFORE `bun install`.** The postinstall hook runs
+   `dist/scripts/install-drenyra-ai.js`, which is a stale build artifact: if it
+   still embeds the old pin, it will re-install the OLD runtime over the freshly
+   linked one. Always `node scripts/build.mjs` first, then `bun install`.
+6. **Reconcile content hashes.** If any covered contract bytes changed (e.g.
+   `contracts/runtime-dependency.md`), run `node scripts/verify-package-files.mjs
+   --update` — never hand-edit the manifest.
+7. **Regenerate the program lock-facts.**
+   `docs/architecture/program-lock-facts.json`: `headSha` = the delivery base
+   commit, `candidateIdentity` = `node scripts/compute-candidate-identity.mjs`
+   (last line), `checksums.contentManifest.sha256` = sha256 of the current
+   `contracts/SHA256SUMS.json` bytes, `capabilityStates.digestSha256` = sha256 of
+   the current `capability-manifest.yaml` bytes.
+8. **Gates.** `bun run typecheck`, `bun run test`, `bun run verify:style`,
+   `bun run verify:capability`, `bun run verify:package` — all green.
+9. **Delivery.** Conventional commit + PR chain. The lock-facts `headSha` must
+   be an **ancestor** of any CI branch: stack dependent PRs (or point `headSha`
+   at the PR base) so the `lock-facts.test.ts` ancestor check passes.
+
+Gotchas that cost time in the 0.4.0/0.4.1 bumps:
+
+- The stale-`dist` postinstall clobber (step 5) silently replaces the correct
+  runtime — always rebuild first.
+- The entry-artifact hash not changing (step 3) is expected when the CLI
+  entrypoint is untouched; do not "fix" it.
+- With the gentle-ai harness, `git commit`/`git push`/`gh pr create` must be
+  single direct commands: any compound (prefix `cd ... &&`, trailing `| pipe`,
+  `;`) fails closed as an ambiguous wrapped lifecycle command.
 
 ## Commit and release discipline
 
