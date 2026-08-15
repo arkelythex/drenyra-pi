@@ -15,7 +15,7 @@ stack:
       test_runner: vitest
       tsconfig: strict
       package_kind: pi-extension # package.json "pi" field: extensions/prompts/skills/themes
-      runtime_dependency: drenyra-ai pinned via tgz (v0.2.0), devDependency
+      runtime_dependency: drenyra-ai pinned via tgz (v0.3.0), devDependency
 
 status: active
 store_mode: hybrid # openspec files authoritative + engram best-effort
@@ -36,7 +36,7 @@ current_test_state:
       passing: true
       failed: 0
       command: bun test
-      candidate_identity: "dirty-sha256:00feca1fa832b2696c7484a532f4031f8c6eadd5c0573bf49a80e1264023dc01"
+      candidate_identity: "dirty-sha256:b73d5e0848a307719656490d20dab5f77c1da4a54fe9257f4b6328fbce06d03a"
       evidence_date: 2026-08-14
       evidence: >-
             pi-sdd-010-participation final-candidate verification; see

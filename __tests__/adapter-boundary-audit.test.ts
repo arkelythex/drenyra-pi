@@ -6,7 +6,7 @@
  * ANALYZE/PREPARE only (REQ-AUDIT-003), UNKNOWN yields zero blind retries
  * (REQ-AUDIT-010), local persistence alone cannot authorize approve or execute
  * (REQ-AUDIT-011), and every authoritative operation delegates to the public
- * pinned `drenyra-ai@0.2.0` entry points (REQ-AUDIT-012). No Pi-local fiscal
+ * pinned `drenyra-ai@0.3.0` entry points (REQ-AUDIT-012). No Pi-local fiscal
  * gate is added; the kernel remains the sole authority on tiers, transitions,
  * approvals, gate verdicts, and receipts.
  *

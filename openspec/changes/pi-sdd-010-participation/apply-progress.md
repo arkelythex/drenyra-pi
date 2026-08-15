@@ -128,7 +128,7 @@ Out-of-scope untracked paths (must remain untouched, never staged/cleaned): `.co
 
 ## Work unit 3 — Candidate identity and lock facts (strict TDD)
 
-**Candidate identity:** dirty-sha256:00feca1fa832b2696c7484a532f4031f8c6eadd5c0573bf49a80e1264023dc01
+**Candidate identity:** dirty-sha256:b73d5e0848a307719656490d20dab5f77c1da4a54fe9257f4b6328fbce06d03a
 
 ### T3.1 — RED: lock-facts shape/cross-artifact/re-derivation tests
 
@@ -270,7 +270,7 @@ Rollback boundary: remove/restore only the matrix section in `apply-progress.md`
 
 ### Final identity
 
-**Candidate identity:** dirty-sha256:00feca1fa832b2696c7484a532f4031f8c6eadd5c0573bf49a80e1264023dc01
+**Candidate identity:** dirty-sha256:b73d5e0848a307719656490d20dab5f77c1da4a54fe9257f4b6328fbce06d03a
 
 ### Final verification results (exact final candidate)
 

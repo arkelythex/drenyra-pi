@@ -3,7 +3,7 @@
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
   "headSha": "78d5e3b218f5300df27cc76267c2f01b79d033f5",
-  "candidateIdentity": "dirty-sha256:00feca1fa832b2696c7484a532f4031f8c6eadd5c0573bf49a80e1264023dc01",
+  "candidateIdentity": "dirty-sha256:b73d5e0848a307719656490d20dab5f77c1da4a54fe9257f4b6328fbce06d03a",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -44,17 +44,17 @@
     ]
   },
   "tests": {
-    "files": 37,
-    "passed": 606,
+    "files": 39,
+    "passed": 623,
     "failed": 0,
-    "total": 606,
+    "total": 623,
     "command": "bun test"
   },
   "checksums": {
-    "pinEntrySha256": "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
+    "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
     "contentManifest": {
       "path": "contracts/SHA256SUMS.json",
-      "sha256": "f6ea3da8bee12f4e9775dd77662c1d5fa3fb88191c61eafa50f944ab231c0946"
+      "sha256": "16a21c544e3730a713fbf7d5d3f7370a119ad3cb793347961c77b0a57baf7f4c"
     }
   },
   "capabilityStates": {

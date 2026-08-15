@@ -65,7 +65,7 @@ The first verifiable vertical of the pinned-runtime core lives in this package:
 
 | Contract rule | Implementation |
 | --- | --- |
-| Pinned exact version | `runtime/pin.ts` — `RuntimePin`, `createPin` (validates exact semver, hex checksum, state) and `DEFAULT_PIN` (package `drenyra-ai`, version `0.2.0`, state `released`; `checksumSha256` `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047` — SHA-256 of the release entry artifact `dist/cmd/cli.js`, per `runtime/doctor.ts`) |
+| Pinned exact version | `runtime/pin.ts` — `RuntimePin`, `createPin` (validates exact semver, hex checksum, state) and `DEFAULT_PIN` (package `drenyra-ai`, version `0.3.0`, state `released`; `checksumSha256` `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600` — SHA-256 of the release entry artifact `dist/cmd/cli.js`, per `runtime/doctor.ts`; v0.3.0 MINOR addition: configurator + routing) |
 | Package-local install / never PATH | `runtime/resolve.ts` — `resolvePackageLocal` consults only `<packageRoot>/runtime/<package>` then `<packageRoot>/node_modules/<package>`; never PATH, `which`, or env |
 | Checksum verification | `runtime/checksum.ts` — `sha256File` (lowercase hex sha256, streamed via `node:crypto`); `runtime/doctor.ts` checksums the resolved runtime's entry artifact |
 | Doctor fail-closed | `runtime/doctor.ts` — verdicts `verified`, `missing`, `pending-release`, `version-mismatch`, `checksum-mismatch`; a `pending-release` pin is never `verified` |

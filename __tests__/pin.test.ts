@@ -70,11 +70,11 @@ describe("createPin", () => {
 });
 
     describe("DEFAULT_PIN", () => {
-      it("is released at v0.1.0 with the real entry-artifact checksum", () => {
+      it("is released at v0.3.0 with the real entry-artifact checksum", () => {
         expect(DEFAULT_PIN.state).toBe("released");
         expect(DEFAULT_PIN.checksumSha256).toBe(
-          "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
+          "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
         );
-        expect(DEFAULT_PIN.version).toBe("0.2.0");
+        expect(DEFAULT_PIN.version).toBe("0.3.0");
       });
     });
