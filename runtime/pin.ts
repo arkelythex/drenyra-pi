@@ -13,7 +13,7 @@
  */
 
 export const RUNTIME_PACKAGE = "drenyra-ai";
-export const RUNTIME_VERSION = "0.3.0";
+export const RUNTIME_VERSION = "0.4.1";
 
 /**
  * Checksum placeholder while the pinned runtime has not been published yet.
@@ -27,66 +27,69 @@ export const PENDING_CHECKSUM = "pending";
  * Released pins install from this URL; pending-release pins have no artifact.
  */
 export function installUrlFor(pin: RuntimePin): string {
-  if (pin.state !== "released") {
-    throw new Error(
-      `installUrlFor: pin for ${pin.package}@${pin.version} is "${pin.state}", not released`,
-    );
-  }
-  return `https://github.com/arkelythex/${pin.package}/releases/download/v${pin.version}/${pin.package}-${pin.version}.tgz`;
+ if (pin.state !== "released") {
+  throw new Error(
+   `installUrlFor: pin for ${pin.package}@${pin.version} is "${pin.state}", not released`,
+  );
+ }
+ return `https://github.com/arkelythex/${pin.package}/releases/download/v${pin.version}/${pin.package}-${pin.version}.tgz`;
 }
 
 export type PinState = "released" | "pending-release";
 
 export interface RuntimePin {
-  /** npm package name of the pinned runtime. */
-  package: string;
-  /** Exact semver version; range pins are never allowed for fiscal operations. */
-  version: string;
-  /**
-   * lowercase hex sha256 (64 chars) of the published artifact,
-   * or the literal "pending" while the first release is outstanding.
-   */
-  checksumSha256: string;
-  /**
-   * "pending-release" until drenyra-ai publishes a real artifact;
-   * "released" once checksumSha256 holds the published value.
-   */
-  state: PinState;
+ /** npm package name of the pinned runtime. */
+ package: string;
+ /** Exact semver version; range pins are never allowed for fiscal operations. */
+ version: string;
+ /**
+  * lowercase hex sha256 (64 chars) of the published artifact,
+  * or the literal "pending" while the first release is outstanding.
+  */
+ checksumSha256: string;
+ /**
+  * "pending-release" until drenyra-ai publishes a real artifact;
+  * "released" once checksumSha256 holds the published value.
+  */
+ state: PinState;
 }
 
 const SEMVER_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const HEX_SHA256_RE = /^[0-9a-f]{64}$/;
 
 function assertValidShape(pin: RuntimePin): void {
-  if (pin.package.trim().length === 0) {
-    throw new Error("createPin: package must be a non-empty string");
-  }
-  if (!SEMVER_RE.test(pin.version)) {
-    throw new Error(
-      `createPin: version must be an exact semver string, got "${pin.version}"`,
-    );
-  }
-  if (pin.state !== "released" && pin.state !== "pending-release") {
-    throw new Error(`createPin: unknown pin state "${pin.state}"`);
-  }
-  if (
-    pin.checksumSha256 !== PENDING_CHECKSUM &&
-    !HEX_SHA256_RE.test(pin.checksumSha256)
-  ) {
-    throw new Error(
-      `createPin: checksumSha256 must be 64 lowercase hex chars or "${PENDING_CHECKSUM}"`,
-    );
-  }
-  if (pin.state === "released" && pin.checksumSha256 === PENDING_CHECKSUM) {
-    throw new Error(
-      "createPin: a released pin requires a real checksum, not \"pending\"",
-    );
-  }
-  if (pin.state === "pending-release" && pin.checksumSha256 !== PENDING_CHECKSUM) {
-    throw new Error(
-      'createPin: a pending-release pin must use checksumSha256 "pending"',
-    );
-  }
+ if (pin.package.trim().length === 0) {
+  throw new Error("createPin: package must be a non-empty string");
+ }
+ if (!SEMVER_RE.test(pin.version)) {
+  throw new Error(
+   `createPin: version must be an exact semver string, got "${pin.version}"`,
+  );
+ }
+ if (pin.state !== "released" && pin.state !== "pending-release") {
+  throw new Error(`createPin: unknown pin state "${pin.state}"`);
+ }
+ if (
+  pin.checksumSha256 !== PENDING_CHECKSUM &&
+  !HEX_SHA256_RE.test(pin.checksumSha256)
+ ) {
+  throw new Error(
+   `createPin: checksumSha256 must be 64 lowercase hex chars or "${PENDING_CHECKSUM}"`,
+  );
+ }
+ if (pin.state === "released" && pin.checksumSha256 === PENDING_CHECKSUM) {
+  throw new Error(
+   'createPin: a released pin requires a real checksum, not "pending"',
+  );
+ }
+ if (
+  pin.state === "pending-release" &&
+  pin.checksumSha256 !== PENDING_CHECKSUM
+ ) {
+  throw new Error(
+   'createPin: a pending-release pin must use checksumSha256 "pending"',
+  );
+ }
 }
 
 /**
@@ -94,36 +97,37 @@ function assertValidShape(pin: RuntimePin): void {
  * throws instead of being silently coerced.
  */
 export function createPin(overrides: Partial<RuntimePin> = {}): RuntimePin {
-  const pin: RuntimePin = {
-    package: RUNTIME_PACKAGE,
-    version: RUNTIME_VERSION,
-    checksumSha256: PENDING_CHECKSUM,
-    state: "pending-release",
-    ...overrides,
-  };
-  assertValidShape(pin);
-  return pin;
+ const pin: RuntimePin = {
+  package: RUNTIME_PACKAGE,
+  version: RUNTIME_VERSION,
+  checksumSha256: PENDING_CHECKSUM,
+  state: "pending-release",
+  ...overrides,
+ };
+ assertValidShape(pin);
+ return pin;
 }
 
-    /**
-     * The pinned Drenyra AI runtime for this package.
-     *
-     * Released at v0.3.0 (github:arkelythex/drenyra-ai#v0.3.0,
-     * 2026-08-15). checksumSha256 is the SHA-256 of the release's entry artifact
-     * dist/cmd/cli.js (the artifact doctor() checksums for a package-local
-     * install); the release tarball hash lives in the GitHub Release SHA256SUMS.
-     *
-     * v0.3.0 is a MINOR backward-compatible addition: configurator
-     * (managed-config.ts, upgrade/rollback, doctor depth) and routing
-     * (WorkUnit/WorkResult) land here; the fiscal-authority kernel surface is
-     * unchanged.
-     *
-     * Upgrading the pin is itself a release of Drenyra Pi (see
-     * contracts/runtime-dependency.md, "Upgrade is explicit").
-     */
-    export const DEFAULT_PIN: RuntimePin = createPin({
-      version: RUNTIME_VERSION,
-      checksumSha256:
-        "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
-      state: "released",
-    });
+/**
+ * The pinned Drenyra AI runtime for this package.
+ *
+ * Released at v0.4.1 (github:arkelythex/drenyra-ai#v0.4.1,
+ * 2026-08-15). checksumSha256 is the SHA-256 of the release's entry artifact
+ * dist/cmd/cli.js (the artifact doctor() checksums for a package-local
+ * install); the release tarball hash lives in the GitHub Release SHA256SUMS.
+ *
+ * v0.4.1 is a MINOR backward-compatible addition: configurator host
+ * integration (PinnedComposition, PINNED_AI_COMPOSITION, drenyra-pi as the
+ * fourth managed host) and the routing preflight router (routing/router.ts,
+ * deterministic route() over the eight §5 axes) land here; the
+ * fiscal-authority kernel surface is unchanged.
+ *
+ * Upgrading the pin is itself a release of Drenyra Pi (see
+ * contracts/runtime-dependency.md, "Upgrade is explicit").
+ */
+export const DEFAULT_PIN: RuntimePin = createPin({
+ version: RUNTIME_VERSION,
+ checksumSha256:
+  "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
+ state: "released",
+});

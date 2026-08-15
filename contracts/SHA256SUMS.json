@@ -27,7 +27,7 @@
     "contracts/receipts/signed-receipt.schema.json": "c1689aa9e7a5e5ea3a2212ad20c6f1f2e0416ffea6d8b79bfcb8972f4c92c8c7",
     "contracts/receipts/signing-key-info.schema.json": "3266edb9077de6c15f268399da3c15c1c6b09f3e65615ab5e3d3edf21d1d5e44",
     "contracts/receipts/trusted-key-registry.schema.json": "330c16593b52912d1cf23111a47522693fbd5e888bf89cd1ebfc94363278d418",
-    "contracts/runtime-dependency.md": "f397280adb9ef4e7d940f8f908d01785a86db83ceadffb192a24ee16250d0b26",
-    "vendored/drenyra-ai-0.3.0.tgz": "3dbe5da1891c02569f401a8afccbbef6012f603239fe425e273813523a2b1312"
+    "contracts/runtime-dependency.md": "0cd0737cdb79965f2804923fae5d67c17e0196d9373f81cef52c2ee537d0d7db",
+    "vendored/drenyra-ai-0.4.1.tgz": "ae96d8441ab5b52f1e5bdfcc5e18de89c2435e6cf9ddadc80adfe8b39b128be7"
   }
 }

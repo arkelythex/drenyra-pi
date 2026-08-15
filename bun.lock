@@ -8,7 +8,7 @@
         "@types/node": "^26.1.2",
         "ajv": "^8.17.1",
         "ajv-formats": "^3.0.1",
-        "drenyra-ai": "file:./vendored/drenyra-ai-0.3.0.tgz",
+        "drenyra-ai": "file:./vendored/drenyra-ai-0.4.1.tgz",
         "typescript": "^7.0.2",
         "vitest": "^4.1.10",
       },
@@ -131,7 +131,7 @@
 
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
-    "drenyra-ai": ["drenyra-ai@./vendored/drenyra-ai-0.3.0.tgz", { "dependencies": { "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "pg": "^8.13.1" }, "bin": { "drenyra-ai": "./dist/cmd/cli.js" } }, "sha512-tRrr38j35WDtnJfHNHryw4TEtDpZUbTY9oSevJER2b6NVgDesa/NPkYinyAMC1bytuwhdjHQghivJqwSYRORPA=="],
+    "drenyra-ai": ["drenyra-ai@./vendored/drenyra-ai-0.4.1.tgz", { "dependencies": { "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "pg": "^8.13.1" }, "bin": { "drenyra-ai": "./dist/cmd/cli.js" } }, "sha512-wBxj4rEdYHKUVsrf8gQw5NHwpVGvedoL+4vUk6tTqP9nQXEWRkmJih2CPZyrAdjXYR39IpfqEfI6+BINFVnFxg=="],
 
     "es-module-lexer": ["es-module-lexer@2.3.1", "", {}, "sha512-shc1dbU90Yl/xq1QrC7QRtfcwURZuVRfPhZbDoldJ1cn1gzDvBaBWlv0eFolj5+0znnPJz5TXLxsN77X/12KTA=="],
 
