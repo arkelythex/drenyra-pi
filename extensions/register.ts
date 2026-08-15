@@ -26,6 +26,12 @@ import {
 import { ReceiptStore } from "../lib/receipt-store.js";
 import { TrustedKeyRegistry } from "../lib/trusted-key-registry.js";
 import { verifyHarnessReceipt } from "../lib/receipt-verification.js";
+import {
+  homeFromArgs,
+  runConfiguratorDoctor,
+  runConfiguratorInstall,
+  runConfiguratorSync,
+} from "../lib/configurator.js";
 import { ScopeGuard } from "./scope-guard.js";
 import {
   renderCapabilitiesView,
@@ -193,6 +199,8 @@ export const drenyraPiExtension = {
     "/drenyra:evidence",
     "/drenyra:verify",
     "/drenyra:reconcile",
+    "/drenyra:install",
+    "/drenyra:sync",
   ] as const,
   runtime: {
     package: DEFAULT_PIN.package,
@@ -264,16 +272,90 @@ export function registerDrenyraPiExtension(
   }
 
 	async function doctorHandler(
-		_args: string,
+		args: string,
 		_ctx: PiCommandContext,
 	): Promise<void> {
 		const report = await doctor({
 			pin: DEFAULT_PIN,
 			packageRoot: PACKAGE_ROOT,
 		});
-    console.log(report.verdict);
-    console.log(JSON.stringify(report, null, 2));
-  }
+		console.log(report.verdict);
+		console.log(JSON.stringify(report, null, 2));
+		// Configurator dimension (SDD-020): managed composition + per-host pin
+		// diagnostics — SEPARATE from the runtime doctor above and strictly
+		// read-only (runConfigDiagnostics never writes; no fiscal authority).
+		const home = homeFromArgs(args.split(/\s+/));
+		console.log(`drenyra:doctor (configurator): home ${home}`);
+		const configurator = runConfiguratorDoctor(home, DRENYRA_PI_VERSION);
+		if (!configurator.ok) {
+			console.log(
+				`drenyra:doctor (configurator): FAILED — ${configurator.reason.kind}: ${configurator.reason.message}`,
+			);
+			return;
+		}
+		for (const diagnostic of configurator.diagnostics) {
+			if (diagnostic.name === "pinned-ai-runtime") {
+				const hosts =
+					diagnostic.hosts.length === 0
+						? "no hosts"
+						: diagnostic.hosts
+								.map((host) => `${host.host}:${host.state}`)
+								.join(", ");
+				console.log(
+					`drenyra:doctor (configurator): pinned-ai-runtime: ${diagnostic.ok ? "ok" : "FAIL"} ` +
+						`(${diagnostic.applicability}; hosts: ${hosts})`,
+				);
+			} else {
+				console.log(
+					`drenyra:doctor (configurator): ${diagnostic.name}: ${diagnostic.ok ? "ok" : "FAIL"}`,
+				);
+			}
+		}
+	}
+
+	async function installHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
+		const home = homeFromArgs(args.split(/\s+/));
+		const outcome = runConfiguratorInstall(home, DRENYRA_PI_VERSION);
+		if (!outcome.ok) {
+			console.log(
+				`drenyra:install: FAILED — ${outcome.reason.kind}: ${outcome.reason.message}`,
+			);
+			return;
+		}
+		console.log(
+			`drenyra:install: ${outcome.status} — ${outcome.from} → ${outcome.to} ` +
+				`(${outcome.results.length} assets; manifest ${outcome.manifestPath})`,
+		);
+		for (const result of outcome.results) {
+			console.log(
+				`drenyra:install: ${result.host}:${result.asset}: ${result.action}`,
+			);
+		}
+	}
+
+	async function syncHandler(
+		args: string,
+		_ctx: PiCommandContext,
+	): Promise<void> {
+		const home = homeFromArgs(args.split(/\s+/));
+		const outcome = runConfiguratorSync(home, DRENYRA_PI_VERSION);
+		if (!outcome.ok) {
+			console.log(
+				`drenyra:sync: FAILED — ${outcome.reason.kind}: ${outcome.reason.message}`,
+			);
+			return;
+		}
+		console.log(
+			`drenyra:sync: ${outcome.status} — ${outcome.from} → ${outcome.to} ` +
+				`(${outcome.results.length} assets; manifest ${outcome.manifestPath})`,
+		);
+		for (const result of outcome.results) {
+			console.log(`drenyra:sync: ${result.host}:${result.asset}: ${result.action}`);
+		}
+	}
 
 	async function companyHandler(
 		args: string,
@@ -1119,6 +1201,16 @@ export function registerDrenyraPiExtension(
 			"bank-vs-ledger discrepancies as evidence-cited anomalies, wait for evidence, " +
 			"and raise an evidence-cited proposal (ANALYZE minimum; PREPARE for proposals).",
 		handler: reconcileHandler,
+  });
+  pi.registerCommand("drenyra:install", {
+    description:
+      "Render the drenyra-pi managed composition + pin asset under ~/.drenyra (configurator).",
+    handler: installHandler,
+  });
+  pi.registerCommand("drenyra:sync", {
+    description:
+      "Synchronize the drenyra-pi managed composition with the packaged version (configurator; idempotent).",
+    handler: syncHandler,
   });
 }
 
