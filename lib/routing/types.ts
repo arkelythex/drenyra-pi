@@ -1,11 +1,17 @@
 /**
  * Pi-owned routing adapter surface (pi-sdd-030-routing-adapter; design D1 §3.3).
  *
- * This module defines ONLY Pi-owned adapter shapes: routing routes, risk bands,
- * evidence sufficiency, reversibility, preflight results, route selections,
- * execution-port responses, the per-work-unit budget ledger, and the input
- * envelopes the adapter composes. It does NOT duplicate the published
+ * This module defines ONLY Pi-owned adapter shapes: routing routes (the port
+ * vocabulary), risk bands, evidence sufficiency, reversibility, preflight
+ * results, execution-port responses, the per-work-unit budget ledger, and the
+ * input envelopes the adapter composes. It does NOT duplicate the published
  * `WorkUnit`, `WorkResult`, `WorkStopReason`, or validation helpers.
+ *
+ * Rebase note (2026-08-15, post-0.4.0): the route DECISION now comes from the
+ * Core `route()` router (`drenyra-ai/routing/router.ts`, SDD-030 slice C) —
+ * Pi's preflight produces the `RouteRequest`, the Core router decides the
+ * `Route`, and Pi's executor remains the host-side adapter. Pi proposes and
+ * executes only; the deterministic route table lives in the Core.
  *
  * Authority boundary (REQ-BOUND-001): local types describe inputs, observations,
  * and proposals only. They carry no materiality threshold, gate verdict
@@ -20,7 +26,7 @@
  * | Permission requirement | `requiredModeFor` + `assertMonotonicAuthority` + bound authorization |
  * | Mission/gate outcome | `runChainStep` / `executePreparedStep` / `EdaMissionCoordinator.advance` |
  *
- * Import-path note (deviation, cited evidence): the pinned `drenyra-ai@0.3.0`
+ * Import-path note (deviation, cited evidence): the pinned `drenyra-ai@0.4.0`
  * exports map omits the `./routing` subpath even though `dist/index.js`
  * re-exports the complete routing module (`export * from "./routing/index.js"`).
  * The routing surface is therefore imported from the published package root,
@@ -46,9 +52,14 @@ import type {
 import type {
   Candidate,
   CanonicalTransitionValidator,
+  DurationAndInterruptibility,
+  ExternalEvidence,
   Materiality,
   MaterialityInput,
-  Sha256Hash,
+  RegulatoryObligations,
+  RequestedEffect,
+  Route,
+  SegregationOfDuties,
   WorkBudgets,
   WorkUnit,
   WorkUnitInput,
@@ -61,22 +72,23 @@ import type {
   WorkStopReason,
 } from "drenyra-ai";
 
-/** The three eligible routing routes (design §5). */
-export type RoutingRoute = "direct" | "delegated" | "durable";
+    /**
+     * The three eligible routing routes (design §5) — the Pi execution-port
+     * vocabulary. The route DECISION is made by the Core `route()` router; these
+     * names only select the host-side port (kind → port in the executor).
+     */
+    export type RoutingRoute = "direct" | "delegated" | "durable";
 
-/** Normalized kernel risk band (2 cells). */
-export type RiskBand = "R0_R1" | "R2_R3";
+    /** Normalized kernel risk band (2 cells). */
+    export type RiskBand = "R0_R1" | "R2_R3";
 
-/** Evidence sufficiency classification (3 cells). */
-export type EvidenceSufficiency = "SUFFICIENT" | "INSUFFICIENT" | "AMBIGUOUS";
-
-/** Routing reversibility classification (3 cells). */
+    /** Routing reversibility classification (3 cells). */
 export type RoutingReversibility =
   | "REVERSIBLE"
   | "PARTIALLY_REVERSIBLE"
   | "IRREVERSIBLE";
 
-/** The fixed preflight stages in evaluation order; `workunit` is the helper step. */
+/** The fixed preflight stages in evaluation order; `workunit` and `routing` are the final helper/decision steps. */
 export type PreflightStage =
   | "scope"
   | "permissions"
@@ -85,7 +97,8 @@ export type PreflightStage =
   | "reversibility"
   | "systems"
   | "approval"
-  | "workunit";
+  | "workunit"
+  | "routing";
 
 /** One typed system/tool/destination dependency with explicit availability. */
 export interface SystemAvailability {
@@ -134,6 +147,16 @@ export interface PreflightRequest {
   declaredReversibility?: RoutingReversibility;
   /** Systems/tools/destinations with explicit availability. */
   systems: readonly SystemAvailability[];
+  /** Requested effect of the work (Core routing axis, closed union). */
+  requestedEffect: RequestedEffect;
+  /** Need for external evidence beyond the requesting system (Core axis). */
+  externalEvidence: ExternalEvidence;
+  /** Expected duration and interruptibility (Core axis). */
+  durationAndInterruptibility: DurationAndInterruptibility;
+  /** Whether segregation of duties is required (Core axis). */
+  segregationOfDuties: SegregationOfDuties;
+  /** Whether regulatory obligations apply (Core axis). */
+  regulatoryObligations: RegulatoryObligations;
   approval: ApprovalRequirement;
   /** Evidence store root (isolated in tests; defaults to cwd). */
   evidenceStoresRoot?: string;
@@ -155,7 +178,7 @@ export interface PreflightRequest {
   };
 }
 
-/** A passed preflight: helper-built, helper-validated WorkUnit + classifications. */
+/** A passed preflight: helper-built, helper-validated WorkUnit + classifications + the Core route decision. */
 export type PreflightResult =
   | {
       ok: true;
@@ -164,32 +187,11 @@ export type PreflightResult =
       riskBand: RiskBand;
       evidenceSufficiency: "SUFFICIENT";
       reversibility: RoutingReversibility;
+      /** The Core `route()` decision (drenyra-ai routing/router.ts). */
+      route: Route;
       approvalRequired?: WorkStopReason & { kind: "APPROVAL_REQUIRED" };
     }
   | { ok: false; stage: PreflightStage; reason: WorkStopReason };
-
-/** The basis a route proposal records (advisory only, no authority). */
-export interface RouteBasis {
-  kernelRiskTier: Materiality;
-  evidenceSufficiency: EvidenceSufficiency;
-  reversibility: RoutingReversibility;
-}
-
-/** A route proposal: exactly one route + basis, carrying no authorization. */
-export type RouteSelection =
-  | { ok: true; route: RoutingRoute; basis: RouteBasis }
-  | { ok: false; reason: WorkStopReason };
-
-/** The input to the pure 18-cell route selector (design §5). */
-export interface RouteSelectionInput {
-  kernelRiskTier: Materiality;
-  evidenceSufficiency: EvidenceSufficiency;
-  reversibility: RoutingReversibility;
-  /** Already-validated required hashes (named by MISSING_EVIDENCE). */
-  requiredEvidenceHashes: readonly Sha256Hash[];
-  /** Optional declared tier; a conflict with the kernel tier is AMBIGUOUS_INPUT. */
-  declaredRiskTier?: Materiality;
-}
 
 /** The exact exhausted budget dimension (published WorkStopReason budget). */
 export type BudgetExhaustedDimension =
@@ -387,7 +389,8 @@ export interface RoutingExecutionPorts {
 /** Everything the executor needs for one bounded execution. */
 export interface ExecuteRoutingWorkInput {
   workUnit: WorkUnit;
-  selection: RouteSelection & { ok: true };
+  /** The Core route decision produced by `route()`; Pi executes it only. */
+  route: Route;
   binding: ScopeBinding;
   mission: MissionSnapshot;
   ports: RoutingExecutionPorts;

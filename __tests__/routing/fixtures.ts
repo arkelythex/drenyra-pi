@@ -3,10 +3,11 @@
  *
  * Builds a complete valid `PreflightRequest` (canonical scope binding, mission
  * snapshot, bound authorization, seeded evidence graph, explicit materiality,
- * systems, approval, published `WorkUnitInput`, policy maxima) and an
+ * the five Core routing axes, systems, approval, published `WorkUnitInput`,
+ * policy maxima) and an
  * evidence graph with full source → transformation → conclusion → action
  * lineage (evidence-citation skill). The fixture is shared by the preflight,
- * selector, executor, seam, and journey tests.
+ * executor, seam, and journey tests.
  *
  * Fiscal convention: monetary values are BigInt cents; digests are lowercase
  * hex sha-256; version/sequence numbers are JSON integers.
@@ -25,6 +26,7 @@ import type {
   Candidate,
   Materiality,
   MaterialityInput,
+  Route,
   Sha256Hash,
 } from "drenyra-ai";
 import {
@@ -64,13 +66,45 @@ export function digest(seed: string): string {
   return seed.repeat(64).slice(0, 64);
 }
 
-/** Materiality input that derives R0: zero reversible PE value. */
-export function makeR0MaterialityRequest(): ExplicitMaterialityRequest {
-  return {
-    input: { value: 0n, reversibility: "reversible", jurisdiction: "PE" },
-    minimum: undefined,
-  };
-}
+    /** Materiality input that derives R0: zero reversible PE value. */
+    export function makeR0MaterialityRequest(): ExplicitMaterialityRequest {
+      return {
+        input: { value: 0n, reversibility: "reversible", jurisdiction: "PE" },
+        minimum: undefined,
+      };
+    }
+
+    /** A Core `RouteRequest` literal matching the fixture scope (executor/journey inputs). */
+    const CORE_ROUTE_REQUEST = {
+      scope: {
+        tenantId: "acme",
+        ruc: "20123456786",
+        companyId: "20123456786",
+        period: "202507",
+        intent: "monthly-close",
+      },
+      requestedEffect: "read-only",
+      materiality: "R0",
+      reversibility: "reversible",
+      externalEvidence: "none",
+      durationAndInterruptibility: "immediate",
+      systemsInvolved: ["chain-pipeline"] as [string, ...string[]],
+      segregationOfDuties: "not-required",
+      regulatoryObligations: "none",
+      approval: "not-required",
+    } as const;
+
+    /** A Core `Route` literal of the requested kind with a fixed valid request snapshot. */
+    export function makeCoreRoute(kind: Route["kind"] = "direct-analysis"): Route {
+      switch (kind) {
+        case "direct-analysis":
+          return { kind, authorityCeiling: "no-mutation", request: CORE_ROUTE_REQUEST };
+        case "specialized-agent":
+          return { kind, authorityCeiling: "proposes-only", request: CORE_ROUTE_REQUEST };
+        case "durable-mission":
+          return { kind, authorityCeiling: "through-core", request: CORE_ROUTE_REQUEST };
+      }
+    }
 
 /** Seed a full source → transformation → conclusion → action evidence graph. */
 export async function seedRoutingEvidenceGraph(
@@ -170,7 +204,12 @@ export async function makeRoutingPreflightRequest(
     terminalNodeIds: evidence.terminalNodeIds,
     materiality,
     declaredRiskTier: "R0" as Materiality,
-    systems: [],
+    systems: [makeSystemAvailability("chain-pipeline", true)],
+    requestedEffect: "read-only",
+    externalEvidence: "none",
+    durationAndInterruptibility: "immediate",
+    segregationOfDuties: "not-required",
+    regulatoryObligations: "none",
     approval: { required: false },
     evidenceStoresRoot: storesRoot,
     workUnitInput: {
