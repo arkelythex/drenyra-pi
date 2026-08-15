@@ -7,6 +7,47 @@ All notable changes to Drenyra Pi will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 
+## Unreleased — runtime pin 0.2.0 → 0.3.0 (release event, pre-alpha)
+
+### Changed
+
+- **Runtime pin bumped to `drenyra-ai@0.3.0`** (release event per
+  `contracts/runtime-dependency.md` "Upgrade is explicit"; version stays
+  pre-alpha per the current verification-only release posture):
+  - Vendored tarball `vendored/drenyra-ai-0.3.0.tgz`; entry-artifact checksum
+    `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600`
+    (`dist/cmd/cli.js`), reconciled by `verify:package`.
+  - v0.3.0 is a MINOR backward-compatible addition: configurator
+    (`configurator/managed-config.ts`, `upgrade run`/`rollback run`, doctor
+    diagnostics depth, install/sync delegation) and routing
+    (`routing/` WorkUnit/WorkResult surfaces). The fiscal-authority kernel
+    surface Pi consumes is unchanged — no breaking API change.
+  - `runtime/pin.ts`, `contracts/runtime-dependency.md`,
+    `contracts/package-contract.md`, `docs/architecture/program-lock-facts.json`
+    updated to the new pin; doctor + conformance + full suite re-run.
+
+### Added
+
+- **SDD-040 adapter boundary slice** (Pi is a replaceable RDA host):
+  - `docs/architecture/rda-adapter-boundary-audit.md` — 10/10 boundary rules
+    PASS with executable evidence (no Pi-local violation).
+  - `__tests__/adapter-boundary-replacement.test.ts` + fixtures — harness
+    replacement test: same mission through Pi and an independent substitute
+    host yields equivalent canonical authority projections (candidates, gates,
+    receipts); five negative controls fail on any authority difference.
+  - `docs/architecture/rda-adapter-boundary.md` — adapter contract
+    (operator → prepare → call → present → human decision → verify receipt →
+    project result), per-step ownership, fail-closed behaviors.
+  - Master closure reference: `drenyra-ai` sdd-040-rda-v2 @ `c4d2b6a` (#42).
+
+### Migration note
+
+The pin change is a release event: re-run `/drenyra:doctor` and the
+conformance suite after updating; consumers must install the vendored
+`drenyra-ai-0.3.0.tgz` (exact pin + checksum). No breaking API change from the
+0.2.0 kernel surface; the new configurator/routing modules are additions for
+upcoming SDD-020/030 slices.
+
 ## 0.0.1-prealpha.1 — 2026-08-01
 
 ### Added

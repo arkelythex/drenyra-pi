@@ -22,7 +22,7 @@ describe("decideInstall", () => {
     expect(decision.kind).toBe("pending-release");
     if (decision.kind === "pending-release") {
       expect(decision.notice).toContain("pending-release");
-      expect(decision.notice).toContain("drenyra-ai@0.2.0");
+      expect(decision.notice).toContain("drenyra-ai@0.3.0");
     }
   });
 
@@ -32,9 +32,9 @@ describe("decideInstall", () => {
     expect(decision.kind).toBe("released");
     if (decision.kind === "released") {
       expect(decision.packageName).toBe("drenyra-ai");
-      expect(decision.version).toBe("0.2.0");
+      expect(decision.version).toBe("0.3.0");
       expect(decision.installUrl).toBe(
-        "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz",
+        "https://github.com/arkelythex/drenyra-ai/releases/download/v0.3.0/drenyra-ai-0.3.0.tgz",
       );
     }
   });
@@ -119,7 +119,7 @@ describe("runInstaller", () => {
     try {
       const pin = createPin({ state: "released", checksumSha256: "e".repeat(64) });
       mkdirSync(join(root, "vendored"), { recursive: true });
-      writeFileSync(join(root, "vendored", "drenyra-ai-0.2.0.tgz"), "fake-tgz");
+      writeFileSync(join(root, "vendored", "drenyra-ai-0.3.0.tgz"), "fake-tgz");
       let receivedSource: string | undefined;
       const deps: InstallerDeps = {
         install: async (_root, source) => {
@@ -135,7 +135,7 @@ describe("runInstaller", () => {
       };
       const result = await runInstaller({ pin, packageRoot: root, deps });
       expect(result.exitCode).toBe(0);
-      expect(receivedSource).toBe(join(root, "vendored", "drenyra-ai-0.2.0.tgz"));
+      expect(receivedSource).toBe(join(root, "vendored", "drenyra-ai-0.3.0.tgz"));
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -161,7 +161,7 @@ describe("runInstaller", () => {
       const result = await runInstaller({ pin, packageRoot: root, deps });
       expect(result.exitCode).toBe(0);
       expect(receivedSource).toBe(
-        "https://github.com/arkelythex/drenyra-ai/releases/download/v0.2.0/drenyra-ai-0.2.0.tgz",
+        "https://github.com/arkelythex/drenyra-ai/releases/download/v0.3.0/drenyra-ai-0.3.0.tgz",
       );
     } finally {
       rmSync(root, { recursive: true, force: true });

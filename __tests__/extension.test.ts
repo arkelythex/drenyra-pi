@@ -138,7 +138,7 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:reconcile",
     ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
-    expect(drenyraPiExtension.runtime.version).toBe("0.2.0");
+    expect(drenyraPiExtension.runtime.version).toBe("0.3.0");
     expect(drenyraPiExtension.runtime.state).toBe("released");
   });
 });

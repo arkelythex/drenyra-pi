@@ -53,7 +53,7 @@ const INSTALLED_STATES: readonly AccountingMissionStatus[] = [
 
 function runtimeStatus(): RuntimeStatus {
   return {
-    summary: "drenyra-ai@0.2.0: verified",
+    summary: "drenyra-ai@0.3.0: verified",
     human: "Runtime status: verified",
     machine: {
       pinState: "released",

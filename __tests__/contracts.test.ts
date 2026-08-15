@@ -3,7 +3,7 @@
  * families (mission, evidence, authority, receipts) every harness payload must
  * validate against (REQ-CONTRACTS-007).
  *
- * The schemas mirror the pinned drenyra-ai@0.2.0 types field-for-field and
+ * The schemas mirror the pinned drenyra-ai@0.3.0 types field-for-field and
  * follow the consumer-only discipline (REQ-CONTRACTS-006): the harness
  * references the engine contract, never deep-imports unexported surfaces.
  *
@@ -78,7 +78,7 @@ function expectInvalid($id: string, data: unknown): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// Fixtures (engine-shaped; pinned drenyra-ai@0.2.0 d.ts is the source of truth)
+// Fixtures (engine-shaped; pinned drenyra-ai@0.3.0 d.ts is the source of truth)
 // ---------------------------------------------------------------------------
 
 /** MissionSnapshot fixture mirroring node_modules/drenyra-ai/dist/missions/types.d.ts. */

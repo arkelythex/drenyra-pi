@@ -13,7 +13,7 @@
  */
 
 export const RUNTIME_PACKAGE = "drenyra-ai";
-export const RUNTIME_VERSION = "0.2.0";
+export const RUNTIME_VERSION = "0.3.0";
 
 /**
  * Checksum placeholder while the pinned runtime has not been published yet.
@@ -108,10 +108,15 @@ export function createPin(overrides: Partial<RuntimePin> = {}): RuntimePin {
     /**
      * The pinned Drenyra AI runtime for this package.
      *
-     * Released at v0.2.0 (github:arkelythex/drenyra-ai#v0.2.0,
-     * 2026-08-02). checksumSha256 is the SHA-256 of the release's entry artifact
+     * Released at v0.3.0 (github:arkelythex/drenyra-ai#v0.3.0,
+     * 2026-08-15). checksumSha256 is the SHA-256 of the release's entry artifact
      * dist/cmd/cli.js (the artifact doctor() checksums for a package-local
      * install); the release tarball hash lives in the GitHub Release SHA256SUMS.
+     *
+     * v0.3.0 is a MINOR backward-compatible addition: configurator
+     * (managed-config.ts, upgrade/rollback, doctor depth) and routing
+     * (WorkUnit/WorkResult) land here; the fiscal-authority kernel surface is
+     * unchanged.
      *
      * Upgrading the pin is itself a release of Drenyra Pi (see
      * contracts/runtime-dependency.md, "Upgrade is explicit").
@@ -119,6 +124,6 @@ export function createPin(overrides: Partial<RuntimePin> = {}): RuntimePin {
     export const DEFAULT_PIN: RuntimePin = createPin({
       version: RUNTIME_VERSION,
       checksumSha256:
-        "e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047",
+        "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
       state: "released",
     });

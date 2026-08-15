@@ -242,7 +242,7 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
   (`extensions/register.ts`), 4 chains (`chains/monthly-close.ts`,
   `chains/reconcile.ts`, `chains/verify.ts`, `chains/evidence.ts`), 7 accounting
   agents (`agents/`, mirrored in `assets/agents/`), and the pinned,
-  checksum-verified runtime bootstrap at `drenyra-ai@0.2.0` (released pin).
+  checksum-verified runtime bootstrap at `drenyra-ai@0.3.0` (released pin).
 - **Still open (draft):** the two product contracts — `package-contract` and
   `runtime-dependency` remain `0.1-draft`; the contract freeze is ROADMAP
   Phase 1. Release cadence is pre-alpha (`drenyra-pi@0.0.1-prealpha.1`).

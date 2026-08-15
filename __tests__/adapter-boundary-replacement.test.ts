@@ -4,7 +4,7 @@
  *
  * Runs one bounded monthly-close fixture through (a) Pi's chain pipeline
  * (`MonthlyCloseChain` over an isolated temporary stores root) and (b) an
- * independent substitute host that consumes ONLY public `drenyra-ai@0.2.0`
+ * independent substitute host that consumes ONLY public `drenyra-ai@0.3.0`
  * entry points (`/missions`, `/candidates`, `/gates`, `/receipts`) plus the
  * shared fixture. Both raw results are projected through the canonical
  * `drenyra.authority-projection.v1` schema and compared for exact plain-data

@@ -1,7 +1,7 @@
 # Drenyra Pi Adapter Boundary
 
 > Change: `pi-sdd-040-adapter-boundary` · Repo: `drenyra-pi` · Date: 2026-08-15
-> Runtime baseline: published, pinned `drenyra-ai@0.2.0` (checksum `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047`)
+> Runtime baseline: published, pinned `drenyra-ai@0.3.0` (checksum `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600`)
 > Authority-side record: `drenyra-ai/openspec/changes/sdd-040-rda-v2/`, coordinated 2026-08-15 (final closure identity bound during verification)
 
 ## The boundary in one sentence
@@ -13,7 +13,7 @@ non-authoritative working state, orders kernel calls, and presents results —
 it never computes a materiality tier, accepts a lifecycle transition, creates a
 gate verdict, or verifies a receipt with Pi-local fiscal rules. Every
 authoritative decision in a mission belongs to the pinned
-`drenyra-ai@0.2.0` kernel. This document explains the operator-to-result flow;
+`drenyra-ai@0.3.0` kernel. This document explains the operator-to-result flow;
 the per-rule evidence lives in the
 [adapter-boundary audit](./rda-adapter-boundary-audit.md).
 
@@ -50,7 +50,7 @@ Every failure mode below stops the workflow and names who or what resumes it. Pi
 | Gate denial | The pipeline stops at the first non-allowed verdict (e.g. `BLOCKED_BY_GATE` at approval, or a receipt `UNKNOWN_SIGNER`/empty trusted-key block); no phase advances, no receipt is treated as valid | Human resolves the gate input (explicit approval, trusted key list) and re-runs the phase |
 | UNKNOWN | `derivePreparedStep` returns `null` for an UNKNOWN mission: no step is prepared and zero blind retries occur | Reconciliation or explicit human action (the engine-legal UNKNOWN→RUNNING recovery is never auto-driven) |
 | Receipt verification failure | `verifySignedReceipt` fails or the receipt gate blocks (tampered payload, revoked/expired/unknown signer): the receipt is never treated as valid or execution proof | Human/maintainer repairs the receipt or the trusted-key registry and re-verifies (read-only) |
-| Unavailable runtime | The pinned runtime is missing, mismatched, or unverifiable (checksum mismatch): the harness reports the runtime failure and performs no mission work | Maintainer restores the published pinned `drenyra-ai@0.2.0` artifact (checksum `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047`) |
+| Unavailable runtime | The pinned runtime is missing, mismatched, or unverifiable (checksum mismatch): the harness reports the runtime failure and performs no mission work | Maintainer restores the published pinned `drenyra-ai@0.3.0` artifact (checksum `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600`) |
 
 ## Local store classification
 

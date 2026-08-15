@@ -64,6 +64,6 @@
     "vitest": "^4.1.10",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "drenyra-ai": "file:./vendored/drenyra-ai-0.2.0.tgz"
+    "drenyra-ai": "file:./vendored/drenyra-ai-0.3.0.tgz"
   }
 }
