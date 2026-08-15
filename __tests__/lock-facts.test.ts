@@ -23,6 +23,7 @@ import {
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
+	readdirSync,
 	rmSync,
 	writeFileSync,
 } from "node:fs";
@@ -244,8 +245,26 @@ function collectLockFactsViolations(
 	}
 
 	const active = facts.activeChanges;
-	if (!Array.isArray(active) || !active.includes("pi-sdd-010-participation")) {
-		push("activeChanges must include pi-sdd-010-participation");
+	// Design §6.2: activeChanges is sorted and includes every real local OpenSpec
+	// change discovered at evidence time (pi-sdd-010-participation only while it
+	// was active — it is archived since 2026-08-15). Discover dynamically instead
+	// of hardcoding, so the record stays self-maintaining.
+	const changesDir = join(root, "openspec", "changes");
+	const discoveredActive = readdirSync(changesDir, { withFileTypes: true })
+		.filter((entry) => entry.isDirectory() && entry.name !== "archive")
+		.map((entry) => entry.name)
+		.sort();
+	if (
+		!Array.isArray(active) ||
+		active.join("\n") !== discoveredActive.join("\n")
+	) {
+		push("activeChanges must exactly match the discovered active OpenSpec changes");
+	}
+	if (
+		!Array.isArray(active) ||
+		[...active].sort().join("\n") !== active.join("\n")
+	) {
+		push("activeChanges must be sorted");
 	}
 	if (
 		!Array.isArray(active) ||
@@ -358,7 +377,7 @@ describe("program-lock-facts.json (design §6)", () => {
 			[
 				"active-change set",
 				(f) => {
-					f.activeChanges = [...f.activeChanges].sort().reverse();
+					f.activeChanges = ["zzz", ...f.activeChanges];
 				},
 				/activeChanges must be sorted/,
 			],
