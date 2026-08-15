@@ -4,9 +4,9 @@
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
-## Current state: private repository, verification-only release gate
+## Current state: public repository, verification-only release gate
 
-Drenyra Pi is currently a **private repository** (`arkelythex/drenyra-pi`). Until a human decision flips the repository to a publishing state (see below), the release process is **verification only**:
+Drenyra Pi is currently a **public repository** (`arkelythex/drenyra-pi`, source-available under a proprietary license — see [LICENSE](LICENSE)). Publication of the npm **package** stays off until an explicit, recorded decision flips the package to a publishing state (see below); the release process is **verification only**:
 
 - **No publication happens anywhere in automation**: no npm registry publication, no dist-tag mutations, no GitHub releases, no tag pushes.
 - The release gate is `.github/workflows/release-verify.yml`, a manually dispatched workflow whose single input is the exact annotated `v<semver>` tag. It must be dispatched from the protected default `main` branch.
@@ -24,7 +24,7 @@ Drenyra Pi is currently a **private repository** (`arkelythex/drenyra-pi`). Unti
 
 Publication stays off until a human explicitly decides to publish. A future publish step may be added only when:
 
-1. The repository is made public **or** an explicit, recorded decision to publish this private package is made.
+1. An explicit, recorded decision to publish the npm package is made (the repository itself is now public; the package is still unpublished).
 2. The publish step follows the trusted GitHub Actions pattern: dispatched from protected `main` only, OIDC + npm provenance with the npm registry secret held in a protected environment, the same fail-closed authority checks above re-run immediately before the publish command, and the verification steps kept in front of it.
 3. This document and the checklist below are updated, release notes and the CHANGELOG record the release, and the derived dist-tag is set by that publish step — never by this verification gate.
 
