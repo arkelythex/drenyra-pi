@@ -30,6 +30,10 @@ import {
   type PiCommandContext,
   type PiExtensionApi,
 } from "../extensions/register.js";
+import {
+  registerFiscalGuard,
+  type FiscalGuardExtensionAPI,
+} from "../extensions/fiscal-guard.js";
 import { ScopeContextStore } from "../runtime/context.js";
 import { makeCanonicalScope } from "./helpers/authority-fixtures.js";
 import { sha256Canonical } from "../lib/canonicalization.js";
@@ -50,6 +54,8 @@ function makeMockPi(): { pi: PiExtensionApi; registered: RegisteredCommand[] } {
         handler: options.handler,
       });
     },
+    on(_event: string, _handler: (event: unknown, ctx: unknown) => void): void {},
+    registerTool(_tool: { name: string; description: string; parameters: unknown; execute(toolCallId: string, params: Record<string, unknown>): unknown }): void {},
   };
   return { pi, registered };
 }
@@ -91,7 +97,7 @@ async function runHandler(
   return output;
 }
 
-/** The 14 intended commands (REQ-CMD-001) plus the two legacy extras. */
+/** The 15 intended commands (REQ-CMD-001) plus the two legacy extras. */
 const INTENDED_COMMANDS = [
   "status",
   "doctor",
@@ -107,6 +113,8 @@ const INTENDED_COMMANDS = [
   "receipt",
   "resume",
   "models",
+  "preflight",
+  "persona",
 ] as const;
 
 describe("drenyraPiExtension descriptor", () => {
@@ -128,6 +136,7 @@ describe("drenyraPiExtension descriptor", () => {
     expect(drenyraPiExtension.commands).toEqual([
       "/drenyra:status",
       "/drenyra:doctor",
+      "/drenyra:preflight",
       "/drenyra:company",
       "/drenyra:period",
       "/drenyra:context",
@@ -144,6 +153,7 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:reconcile",
       "/drenyra:install",
       "/drenyra:sync",
+      "/drenyra:persona",
     ]);
     expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
     expect(drenyraPiExtension.runtime.version).toBe("0.4.1");
@@ -158,6 +168,7 @@ describe("registerDrenyraPiExtension", () => {
     expect(registered.map((c) => c.name)).toEqual([
       "drenyra:status",
       "drenyra:doctor",
+      "drenyra:preflight",
       "drenyra:company",
       "drenyra:period",
       "drenyra:context",
@@ -174,6 +185,7 @@ describe("registerDrenyraPiExtension", () => {
       "drenyra:reconcile",
       "drenyra:install",
       "drenyra:sync",
+      "drenyra:persona",
     ]);
     for (const command of registered) {
       expect(command.description.length).toBeGreaterThan(0);
@@ -297,7 +309,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
 });
 
 describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () => {
-  it("registers the 14 intended commands plus company, context, install and sync (18 total)", () => {
+  it("registers the 15 intended commands plus company, context, install and sync (19 commands)", () => {
     const { pi, registered } = makeMockPi();
     registerDrenyraPiExtension(pi);
     const names = registered.map((c) => c.name);
@@ -306,10 +318,10 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     }
     expect(names).toContain("drenyra:company");
     expect(names).toContain("drenyra:context");
-    expect(registered).toHaveLength(18);
+    expect(registered).toHaveLength(20);
     // Descriptor mirrors the registered surface (SC-CMD-001 conformance).
-    expect(drenyraPiExtension.commands).toHaveLength(18);
-    expect(drenyraPiExtension.provides).toHaveLength(13);
+    expect(drenyraPiExtension.commands).toHaveLength(20);
+    expect(drenyraPiExtension.provides).toHaveLength(14);
   });
 
   it("wires /drenyra:verify and /drenyra:evidence to their chains (REQ-CMD-004/008)", async () => {
@@ -556,12 +568,25 @@ describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", ()
       readdirSync(join(process.cwd(), "prompts")).filter(
         (f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md",
       ),
-    ).toHaveLength(15);
+    ).toHaveLength(27);
     expect(
       readdirSync(join(process.cwd(), "skills"))
         .filter((entry) => entry.toLowerCase() !== "readme.md")
         .sort(),
-    ).toEqual(["chain-operation", "evidence-citation", "scope-discipline"]);
+    ).toEqual([
+      "chain-operation",
+      "drenyra-chained-pr",
+      "drenyra-sdd",
+      "evidence-citation",
+      "fiscal-compliance",
+      "fiscal-review",
+      "lens-audit-trail",
+      "lens-ledger-integrity",
+      "lens-sunat-compliance",
+      "lens-tenant-isolation",
+      "ruc-scope",
+      "scope-discipline",
+    ]);
     const themeManifest = JSON.parse(
       readFileSync(
         join(process.cwd(), "themes", "fiscal-operator", "manifest.json"),
@@ -671,5 +696,62 @@ describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () =>
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("fiscal guard money write (fiscal-guard.ts)", () => {
+  function makeGuardPi(): Map<string, (event: unknown, ctx?: unknown) => unknown> {
+    const handlers = new Map<string, (event: unknown, ctx?: unknown) => unknown>();
+    const pi = {
+      on(event: string, handler: (e: unknown, c?: unknown) => unknown) {
+        handlers.set(event, handler);
+      },
+      registerCommand() {},
+      registerTool() {},
+    } as unknown as FiscalGuardExtensionAPI;
+    registerFiscalGuard(pi);
+    return handlers;
+  }
+
+  it("ignores oldText being replaced (no false positive)", () => {
+    const handlers = makeGuardPi();
+    const toolCall = handlers.get("tool_call") as (e: unknown) => unknown;
+    const result = toolCall({
+      toolName: "edit",
+      input: {
+        edits: [
+          {
+            oldText: "install and sync (18 total)",
+            newText: "install and sync (19 commands)",
+          },
+        ],
+      },
+    });
+    expect(result).toBeUndefined();
+  });
+
+  it("blocks a float written into newText", () => {
+    const handlers = makeGuardPi();
+    const toolCall = handlers.get("tool_call") as (e: unknown) => unknown;
+    const result = toolCall({
+      toolName: "edit",
+      input: {
+        edits: [{ oldText: "old", newText: "amount: 15.50" }],
+      },
+    });
+    expect(result).toEqual({
+      block: true,
+      reason: expect.stringContaining("BigInt"),
+    });
+  });
+
+  it("passes write content with the cents convention escape", () => {
+    const handlers = makeGuardPi();
+    const toolCall = handlers.get("tool_call") as (e: unknown) => unknown;
+    const result = toolCall({
+      toolName: "write",
+      input: { content: "total in cents: 1500n" },
+    });
+    expect(result).toBeUndefined();
   });
 });

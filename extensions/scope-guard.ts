@@ -45,6 +45,7 @@ export const COMMAND_SCOPE_POLICY: Readonly<Record<string, CommandScopePolicy>> 
   "drenyra:period": PRE_SCOPE,
   "drenyra:context": PRE_SCOPE,
   "drenyra:models": PRE_SCOPE,
+  "drenyra:preflight": PRE_SCOPE,
   "drenyra:mission": REQUIRES_SCOPE,
   "drenyra:continue": REQUIRES_SCOPE,
   "drenyra:resume": REQUIRES_SCOPE,

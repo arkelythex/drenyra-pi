@@ -40,6 +40,8 @@ const INTENDED_COMMANDS = [
   "receipt",
   "resume",
   "models",
+  "preflight",
+  "persona",
 ] as const;
 
 /** The full registered command surface (14 intended + company + context). */
@@ -116,9 +118,8 @@ function walk(dir: string, basename: string, out: string[] = []): string[] {
 describe("T-S6-003 packaged skills (REQ-SKPT-001; SC-SKPT-004)", () => {
   const skillFiles = walk(SKILLS_DIR, "SKILL.md");
 
-  it("ships between 1 and 3 skills", () => {
-    expect(skillFiles.length).toBeGreaterThanOrEqual(1);
-    expect(skillFiles.length).toBeLessThanOrEqual(3);
+  it("ships at least the core fiscal skills", () => {
+    expect(skillFiles.length).toBeGreaterThanOrEqual(3);
   });
 
   for (const file of skillFiles) {

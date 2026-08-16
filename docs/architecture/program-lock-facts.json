@@ -44,11 +44,11 @@
     ]
   },
   "tests": {
+    "command": "bun test",
     "files": 44,
-    "passed": 689,
-    "failed": 0,
-    "total": 689,
-    "command": "bun test"
+    "total": 700,
+    "passed": 700,
+    "failed": 0
   },
   "checksums": {
     "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
@@ -60,7 +60,7 @@
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "a4c24edd2b265059e1211c2046d28ddce4da7a4d177be04f374c03eddc26dec3"
+    "digestSha256": "1a6166f87c7b7eaa3a6d3edbba2f82d2c606e99cf680cc16c5a82acb271f477f"
   },
   "activeChanges": [
     "pi-program-status-reconciliation"

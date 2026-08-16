@@ -61,6 +61,8 @@ function check(relativePath, predicate, message) {
       "dist/extensions/startup-panel.d.ts",
       "dist/extensions/mission-commands.js",
       "dist/extensions/mission-commands.d.ts",
+      "dist/extensions/fiscal-guard.js",
+      "dist/extensions/fiscal-guard.d.ts",
       "dist/scripts/install-drenyra-ai.js",
     ]) {
       check(entry, undefined, undefined);
