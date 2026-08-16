@@ -15,11 +15,19 @@ on:
 permissions:
   contents: read
 
+# One gate run per tag: a second dispatch of the same tag waits for the first
+# instead of duplicating the verification in parallel. No cancellation — a
+# gate must always run to completion.
+concurrency:
+  group: release-verify-${{ inputs.tag }}
+  cancel-in-progress: false
+
 jobs:
   verify-release:
     # The gate is trusted only for this repository.
     if: github.repository == 'arkelythex/drenyra-pi'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

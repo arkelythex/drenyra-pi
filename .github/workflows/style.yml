@@ -8,6 +8,13 @@ on:
     branches: [main]
   pull_request:
 
+# Cancel stale runs: a new push to the same PR supersedes the in-flight run,
+# and a newer merge to main cancels the older one. Only the latest result
+# matters for the style gate.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Least privilege: read-only contents for the whole workflow; no job here needs
 # write access — none is granted.
 permissions:
@@ -16,6 +23,7 @@ permissions:
 jobs:
   style:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       # Immutable action pins: commit SHA + human-readable tag comment.
       # dependabot (github-actions ecosystem) rewrites these SHAs on release.
