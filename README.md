@@ -4,7 +4,11 @@
 >
 > **Pi-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
 >
-> **Status: pre-alpha.** The harness is being extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
+> **Status: pre-alpha.** The harness extraction from
+> `arkelythex/drenyra-command-center` (`packages/pi`) is **complete**: this
+> repository is now the single source of truth for the Pi accounting harness
+> (fiscal skills, FSD prompts, RED contracts, fiscal-guard extension, theme).
+> Nothing here is production-ready yet.
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
 

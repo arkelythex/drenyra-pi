@@ -9,6 +9,30 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 
 ## Unreleased — runtime pin 0.2.0 → 0.3.0 (release event, pre-alpha)
 
+### Added
+
+- **Fiscal harness extraction complete** — the harness that lived in
+  `drenyra-command-center/packages/pi` now ships from this repository, the
+  single source of truth for the Pi accounting harness:
+  - Packaged skills: `lens-audit-trail`, `lens-ledger-integrity`,
+    `lens-sunat-compliance`, `lens-tenant-isolation`, `ruc-scope`,
+    `fiscal-compliance`, `fiscal-review`, `drenyra-sdd`, `drenyra-chained-pr`.
+  - FSD lifecycle prompts (`fsd-init` … `fsd-archive`) plus `preflight.md` and
+    the new `/drenyra:preflight` command (fail-closed scope + pinned-runtime
+    check).
+  - RED contracts under `contracts/red/` (receipt, fiscal-lens, phase-state)
+    with regenerated `SHA256SUMS.json`.
+  - `extensions/fiscal-guard.ts`: the five fiscal tools
+    (`verify_fiscal_phase`, `list_fiscal_phases`, `record_receipt`,
+    `run_fiscal_lens`, `forecast_fiscal_review`), the `/drenyra:persona`
+    command, and the money/SQL/RUC write guards — registered from the single
+    `register.js` entrypoint. The money guard evaluates only introduced text
+    (newText), never replaced oldText (false-positive fix).
+  - `themes/Drenyra.json`; `typebox` added as a devDependency for tool
+    schemas.
+  - Verification: `verify:package` entry list extended for `fiscal-guard.js`;
+    capability-manifest and program-lock-facts refreshed (703 tests, 44 files).
+
 ### Changed
 
 - **Runtime pin bumped to `drenyra-ai@0.3.0`** (release event per
