@@ -7,7 +7,7 @@ All notable changes to Drenyra Pi will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 
-## Unreleased — runtime pin 0.2.0 → 0.3.0 (release event, pre-alpha)
+## Unreleased — runtime pin → 0.4.1 (release event, pre-alpha)
 
 ### Added
 
@@ -20,8 +20,8 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
   - FSD lifecycle prompts (`fsd-init` … `fsd-archive`) plus `preflight.md` and
     the new `/drenyra:preflight` command (fail-closed scope + pinned-runtime
     check).
-  - RED contracts under `contracts/red/` (receipt, fiscal-lens, phase-state)
-    with regenerated `SHA256SUMS.json`.
+  - RED contract schemas under `contracts/` (receipt, evidence, mission,
+    authority) with regenerated `SHA256SUMS.json`.
   - `extensions/fiscal-guard.ts`: the five fiscal tools
     (`verify_fiscal_phase`, `list_fiscal_phases`, `record_receipt`,
     `run_fiscal_lens`, `forecast_fiscal_review`), the `/drenyra:persona`
@@ -35,17 +35,18 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 
 ### Changed
 
-- **Runtime pin bumped to `drenyra-ai@0.3.0`** (release event per
+- **Runtime pin bumped to `drenyra-ai@0.4.1`** (release event per
   `contracts/runtime-dependency.md` "Upgrade is explicit"; version stays
   pre-alpha per the current verification-only release posture):
-  - Vendored tarball `vendored/drenyra-ai-0.3.0.tgz`; entry-artifact checksum
+  - Vendored tarball `vendored/drenyra-ai-0.4.1.tgz`; entry-artifact checksum
     `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600`
     (`dist/cmd/cli.js`), reconciled by `verify:package`.
-  - v0.3.0 is a MINOR backward-compatible addition: configurator
-    (`configurator/managed-config.ts`, `upgrade run`/`rollback run`, doctor
-    diagnostics depth, install/sync delegation) and routing
-    (`routing/` WorkUnit/WorkResult surfaces). The fiscal-authority kernel
-    surface Pi consumes is unchanged — no breaking API change.
+  - v0.4.1 is a MINOR backward-compatible addition (released 2026-08-15):
+    configurator host integration (PinnedComposition, PINNED_AI_COMPOSITION,
+    drenyra-pi as the fourth managed host) and the routing preflight router
+    (`routing/router.ts`, deterministic `route()` over the eight §5 axes). The
+    fiscal-authority kernel surface Pi consumes is unchanged — no breaking
+    API change.
   - `runtime/pin.ts`, `contracts/runtime-dependency.md`,
     `contracts/package-contract.md`, `docs/architecture/program-lock-facts.json`
     updated to the new pin; doctor + conformance + full suite re-run.
@@ -68,7 +69,7 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 
 The pin change is a release event: re-run `/drenyra:doctor` and the
 conformance suite after updating; consumers must install the vendored
-`drenyra-ai-0.3.0.tgz` (exact pin + checksum). No breaking API change from the
+`drenyra-ai-0.4.1.tgz` (exact pin + checksum). No breaking API change from the
 0.2.0 kernel surface; the new configurator/routing modules are additions for
 upcoming SDD-020/030 slices.
 
