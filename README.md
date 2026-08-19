@@ -46,7 +46,7 @@ Drenyra Pi is a participant in the [Drenyra Dominion Program](https://github.com
 | [SDD-030 — Organic Accounting Work Routing](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-030-routing) | Direct / delegated / durable-mission routing from evidence and risk |
 | [SDD-040 — Receipt-Driven Accounting v2](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-040-rda-v2) | Frozen candidate, proportional review, bounded correction, reusable receipt (RDA v2 chains) |
 
-The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates. Pi's served [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) is **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. **No Pi-local implementation of SDD-020 proceeds until the master promotes readiness.**
+The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates. Pi's served [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) is **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. **No Pi-local implementation of SDD-020 proceeds until the master promotes readiness.** The historical harness draft that reused the SDD-050 label (the early "Drenyra Pi" harness spec) is reconciled in [harness-draft-conformance.md](docs/architecture/harness-draft-conformance.md): the master assigns SDD-050 to monthly close, and the harness was delivered via `pi-sdd-010-participation` + extraction.
 
 Drenyra Pi executes agents and tools with pinned versions and **never authorizes fiscal operations** — fiscal authority remains in `drenyra-ai`.
 
@@ -78,7 +78,11 @@ Bootstrap, context, and read commands run **before** the scope is complete (pre-
 | `/drenyra:company` | Set the company RUC (11 digits, check-digit-validated) |
 | `/drenyra:period` | Set the fiscal period (`YYYYMM`) |
 | `/drenyra:context` | Show the bound company + fiscal period |
-| `/drenyra:models` | Model routing registry |
+| `/drenyra:models` | Model routing registry (advisory) |
+| `/drenyra:preflight` | Scope + pinned runtime preflight (read-only) |
+| `/drenyra:persona` | Toggle the fiscal operator persona on/off |
+| `/drenyra:install` | Render the managed composition + pin asset under `~/.drenyra` (configurator) |
+| `/drenyra:sync` | Synchronize the managed composition with the packaged version (idempotent) |
 
 Mission, receipt, evidence, and chain commands require a **complete canonical scope** (they fail closed otherwise):
 

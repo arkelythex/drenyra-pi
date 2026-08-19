@@ -1,6 +1,6 @@
 # Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-14 (Design 4 — persistence, security, and recovery; Design 3 — agents, skills, and integrations; Design 1 — boundary & authority contract; 2026-08-14 state reconciliation).
+> **Last updated:** 2026-08-18 (harness-draft conformance + stale-count reconciliation).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -238,11 +238,19 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
 
 ## Current state and maturity
 
-- **Implemented on `main`:** a wired harness — 16 registered `/drenyra:*` commands
-  (`extensions/register.ts`), 4 chains (`chains/monthly-close.ts`,
-  `chains/reconcile.ts`, `chains/verify.ts`, `chains/evidence.ts`), 7 accounting
-  agents (`agents/`, mirrored in `assets/agents/`), and the pinned,
+- **Implemented on `main`:** a wired harness — **20 registered `/drenyra:*` commands**
+  (`extensions/register.ts` plus the `persona` toggle in
+  `extensions/fiscal-guard.ts`), 4 chains (`chains/monthly-close.ts`,
+  `chains/reconcile.ts`, `chains/verify.ts`, `chains/evidence.ts`), **10 accounting
+  agents** (`agents/`, mirrored in `assets/agents/`), and the pinned,
   checksum-verified runtime bootstrap at `drenyra-ai@0.4.1` (released pin).
+- **Historical harness draft conformance:** the early draft titled "SDD-050 —
+  Drenyra Pi" maps to this implemented harness; the requirement → evidence
+  matrix, the SDD-050 numbering reconciliation (the master catalog assigns
+  SDD-050 to `sdd-050-monthly-close`; the harness was delivered as
+  `pi-sdd-010-participation` + extraction), and the fresh verification snapshot
+  (44 files / 703 tests, 2026-08-18) live in
+  [`harness-draft-conformance.md`](harness-draft-conformance.md).
 - **Still open (draft):** the two product contracts — `package-contract` and
   `runtime-dependency` remain `0.1-draft`; the contract freeze is ROADMAP
   Phase 1. Release cadence is pre-alpha (`drenyra-pi@0.0.1-prealpha.1`).
