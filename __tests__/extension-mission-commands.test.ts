@@ -72,6 +72,8 @@ function makeMockPi(): { pi: PiExtensionApi; registered: RegisteredCommand[] } {
         handler: options.handler,
       });
     },
+    on(_event: string, _handler: (event: unknown, ctx: unknown) => void): void {},
+    registerTool(_tool: { name: string; description: string; parameters: unknown; execute(toolCallId: string, params: Record<string, unknown>): unknown }): void {},
   };
   return { pi, registered };
 }

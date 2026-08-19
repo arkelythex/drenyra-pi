@@ -31,10 +31,18 @@
 - Drenyra Pi never invents authority. Missions, candidates, gates, and approvals run in Drenyra AI.
 - Explicit human approval is required for material actions (R2/R3 chains such as monthly close).
 
-  ### 5. Memory informs; it never authorizes
-
-  - Drenyra Engram provides context and institutional knowledge.
-  - No memory observation is ever treated as permission to act.
+      ### 5. Memory informs; it never authorizes
+    
+      - Drenyra Engram provides context and institutional knowledge.
+      - No memory observation is ever treated as permission to act.
+      - **Memory never feeds a gate.** Gates (`mission-state`, `receipt`,
+          `approval`) are frozen contracts in drenyra-ai; memory is context for
+          proposing, never input to a gate decision.
+      - **Memory decides WHAT to propose, never HOW MUCH review.** Institutional
+          patterns ("this provider always has 12% detracción", "this account was
+          reclassified last month by human error") shape which candidate an agent
+          drafts; review depth is decided only by the deterministic materiality
+          policy (BigInt thresholds, frozen in drenyra-ai).
 
   ### 6. Authoritative state is persisted, never conversational (Design 4)
 

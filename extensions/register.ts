@@ -40,6 +40,7 @@ import {
 } from "./mission-status.js";
 import { loadEvidenceStatus } from "../lib/evidence-status.js";
 import { showStartupPanel, type StartupPanelDeps } from "./startup-panel.js";
+import { registerFiscalGuard } from "./fiscal-guard.js";
 import {
   renderContinueResult,
   renderMissionStarted,
@@ -109,6 +110,14 @@ export interface PiExtensionApi {
       handler: (args: string, ctx: PiCommandContext) => Promise<void>;
     },
   ): void;
+  on(event: string, handler: (event: unknown, ctx: unknown) => void): void;
+  registerTool(tool: {
+    name: string;
+    label?: string;
+    description: string;
+    parameters: unknown;
+    execute(toolCallId: string, params: Record<string, unknown>): unknown;
+  }): void;
 }
 
 /** Structural slice of `ExtensionCommandContext` consumed by handlers. */
@@ -181,10 +190,12 @@ export const drenyraPiExtension = {
     "evidence",
     "verify",
     "reconcile",
+    "persona",
   ] as const,
   commands: [
     "/drenyra:status",
     "/drenyra:doctor",
+    "/drenyra:preflight",
     "/drenyra:company",
     "/drenyra:period",
     "/drenyra:context",
@@ -201,6 +212,7 @@ export const drenyraPiExtension = {
     "/drenyra:reconcile",
     "/drenyra:install",
     "/drenyra:sync",
+    "/drenyra:persona",
   ] as const,
   runtime: {
     package: DEFAULT_PIN.package,
@@ -311,9 +323,26 @@ export function registerDrenyraPiExtension(
 				);
 			}
 		}
-	}
+    	}
 
-	async function installHandler(
+    	async function preflightHandler(
+    		_args: string,
+    		_ctx: PiCommandContext,
+    	): Promise<void> {
+    		const outcome = scopeGuard.evaluate("drenyra:preflight");
+    		const runtime = await status({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
+    		console.log(outcome.report);
+    		console.log(`runtime: ${runtime.machine.verdict}`);
+    		console.log(
+    			JSON.stringify(
+    				{ scope: outcome.binding !== undefined, verdict: runtime.machine.verdict },
+    				null,
+    				2,
+    			),
+    		);
+    	}
+
+    	async function installHandler(
 		args: string,
 		_ctx: PiCommandContext,
 	): Promise<void> {
@@ -1125,6 +1154,11 @@ export function registerDrenyraPiExtension(
       "Run the fail-closed runtime doctor against the pinned Drenyra AI runtime.",
     handler: doctorHandler,
   });
+  pi.registerCommand("drenyra:preflight", {
+    description:
+      "Run the fail-closed FSD pre-flight: pinned runtime check plus complete canonical scope report.",
+    handler: preflightHandler,
+  });
   pi.registerCommand("drenyra:company", {
     description:
       "Set the company context (RUC, check-digit-validated) for the session — scope for every command.",
@@ -1212,6 +1246,7 @@ export function registerDrenyraPiExtension(
       "Synchronize the drenyra-pi managed composition with the packaged version (configurator; idempotent).",
     handler: syncHandler,
   });
+  registerFiscalGuard(pi);
 }
 
 /**

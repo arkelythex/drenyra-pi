@@ -4,7 +4,11 @@
 >
 > **Pi-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
 >
-> **Status: pre-alpha.** The harness is being extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. Nothing here is production-ready yet.
+> **Status: pre-alpha.** The harness extraction from
+> `arkelythex/drenyra-command-center` (`packages/pi`) is **complete**: this
+> repository is now the single source of truth for the Pi accounting harness
+> (fiscal skills, FSD prompts, RED contracts, fiscal-guard extension, theme).
+> Nothing here is production-ready yet.
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
 
@@ -88,6 +92,63 @@ Mission, receipt, evidence, and chain commands require a **complete canonical sc
 | `/drenyra:verify` | Read-only integrity verify chain |
 | `/drenyra:reconcile` | Bank-vs-ledger reconciliation chain |
 | `/drenyra:close <approverId>` | Monthly-close chain with explicit approval |
+
+## Model routing
+
+`/drenyra:models` exposes the documented routing registry
+(`drenyra.model-routing.v1`): each EDA phase is mapped to the accounting role that
+should carry it. The installed Pi ExtensionAPI slice exposes no model-routing API
+(G30), so this registry is **advisory — it documents intent, it never grants
+authority** (design §15 "No model authority").
+
+| Phase | Role | Guidance |
+| --- | --- | --- |
+| `intake` / `bind-scope` | clerk | Scope-first intake; no interpretation |
+| `ingest` / `normalize` | ledger-analyst | Bounded source refs; deterministic normalization, BigInt cents |
+| `classify` | ledger-analyst | Classify with cited evidence |
+| `reconcile` | reconciliation-agent | Reconcile with anomaly detection |
+| `investigate` | accounting-scout | Investigate anomalies with evidence |
+| `propose` | close-controller | Evidence-cited proposal only |
+| `verify` | evidence-builder | Verify integrity, never mutate |
+| `approve` | tax-controller-pe | Human approval; never self-approve |
+| `execute` / `close` / `archive` | close-controller | Exact approved target; seal with completion receipt |
+
+### Advisory model tiers by mission state
+
+Model choice is the operator's; the harness only documents the shape. The rule of
+thumb: **cost scales with judgment required, and the deterministic core never
+touches an LLM**. Suggested tiers:
+
+| Mission state | Shape | Why |
+| --- | --- | --- |
+| `WAITING_FOR_EVIDENCE` (staging, OCR, matching) | Fast/cheap — flash-tier | Bulk mechanical work |
+| Candidate drafting (journal/correction) | Mid reasoning | Draft, never decide |
+| `BLOCKED_BY_GATE` / materiality scoring | **No LLM — deterministic core** | Materiality policy is frozen BigInt logic, not a model |
+| `AWAITING_APPROVAL` (summary for the human) | High reasoning, clarity-first | The professional decides on this summary |
+| `verify` / Guardian Angel | Independent model, fresh context, different provider if possible | Adversarial review must not share the proposer's blind spots |
+
+## Institutional memory (Drenyra Engram)
+
+Drenyra Pi accesses [Drenyra Engram](https://github.com/arkelythex/drenyra-engram)
+as institutional accounting memory. The boundary is non-negotiable:
+
+- **Memory informs, never authorizes.** No observation is ever permission to act.
+- **Memory never feeds a gate.** `mission-state`, `receipt`, and `approval` gates
+  are frozen contracts in drenyra-ai; if Engram could influence them, the
+  ecosystem's own "inform, never authorize" rule would be broken.
+- **Memory decides WHAT to propose, never HOW MUCH review.** Which candidate to
+  draft ("this provider always has 12% detracción", "this account was
+  reclassified last month by human error") is a proposal question; how much
+  review a candidate needs is decided only by the deterministic materiality
+  policy (BigInt thresholds, frozen in drenyra-ai).
+
+## Host strategy
+
+Drenyra Pi is the v1.0 host: the ecosystem's base runtime, and the name says so.
+The headless-core delivery (library, CLI, or MCP — per the drenyra-ai v1.0
+strategy) means less host surface equals less regulatory risk while validating
+with real Peruvian accountants. Claude Code is the planned second host; the full
+15-agent matrix of Gentle-AI is not a v1.0 goal for the accounting domain.
 
 ## Layout
 
