@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="460" viewBox="0 0 1400 460">
+<rect width="1400" height="460" fill="#f3eadc"/>
+<text x="64" y="50" fill="#725e4c" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start" letter-spacing="2.0">PI-NATIVE MISSION PATH</text>
+<text x="64" y="96" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" text-anchor="start" letter-spacing="0">Operational flow</text>
+<text x="64" y="128" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="500" text-anchor="start" letter-spacing="0">Scope first. Runtime pinned. Evidence informs. Humans decide.</text>
+<line x1="92" y1="250" x2="1306" y2="250" stroke="#3e2f20" stroke-width="1.6"/>
+<g transform="translate(100 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#824f16" stroke-width="2"/>
+      <circle r="6" fill="#824f16"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">HUMAN</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">start</text>
+    </g><g transform="translate(300 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#a7471c" stroke-width="2"/>
+      <circle r="6" fill="#a7471c"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">FISCAL SCOPE</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">RUC + period</text>
+    </g><g transform="translate(500 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#315b31" stroke-width="2"/>
+      <circle r="6" fill="#315b31"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">MISSION ROUTING</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">direct · delegated · durable</text>
+    </g><g transform="translate(700 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#0d4a68" stroke-width="2"/>
+      <circle r="6" fill="#0d4a68"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">PINNED RUNTIME</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">package-local</text>
+    </g><g transform="translate(900 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#824f16" stroke-width="2"/>
+      <circle r="6" fill="#824f16"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">ENGRAM</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">memory informs</text>
+    </g><g transform="translate(1090 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#315b31" stroke-width="2"/>
+      <circle r="6" fill="#315b31"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">RECEIPT</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">signed + verified</text>
+    </g><g transform="translate(1280 250)">
+      <rect x="-54" y="-54" width="108" height="108" rx="12" fill="#fff7ea" stroke="#8a7358" stroke-width="1"/>
+      <circle r="24" fill="#e6d7c4" stroke="#57478b" stroke-width="2"/>
+      <circle r="6" fill="#57478b"/>
+      <text x="0" y="-76" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.4">DECISION</text>
+      <text x="0" y="84" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" text-anchor="middle" letter-spacing="0">human review</text>
+    </g>
+<!-- arrows -->
+<path d="M180 250 H220" stroke="#3e2f20" stroke-width="1.6"/><path d="M220 250 l-8 -5 v10 z" fill="#3e2f20"/><path d="M380 250 H420" stroke="#3e2f20" stroke-width="1.6"/><path d="M420 250 l-8 -5 v10 z" fill="#3e2f20"/><path d="M580 250 H620" stroke="#3e2f20" stroke-width="1.6"/><path d="M620 250 l-8 -5 v10 z" fill="#3e2f20"/><path d="M780 250 H820" stroke="#3e2f20" stroke-width="1.6"/><path d="M820 250 l-8 -5 v10 z" fill="#3e2f20"/><path d="M975 250 H1015" stroke="#3e2f20" stroke-width="1.6"/><path d="M1015 250 l-8 -5 v10 z" fill="#3e2f20"/><path d="M1165 250 H1205" stroke="#3e2f20" stroke-width="1.6"/><path d="M1205 250 l-8 -5 v10 z" fill="#3e2f20"/>
+<g transform="translate(64 386)">
+  <rect width="1272" height="34" rx="8" fill="#fff7ea" stroke="#8a7358"/>
+  <text x="18" y="22" fill="#554638" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0.25">Memory guides · policy restricts · evidence demonstrates · receipt certifies · professional authorizes</text>
+</g>
+</svg>
