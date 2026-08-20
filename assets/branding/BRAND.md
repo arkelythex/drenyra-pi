@@ -4,12 +4,12 @@
 > [`drenyra-ai/contracts/brand-system.md`](https://github.com/arkelythex/drenyra-ai/blob/main/contracts/brand-system.md)
 > (v0.2 DRAFT) and canonical tokens at `contracts/brand-system/tokens.json`.
 >
-> The ecosystem design system is **the same system as Drenyra apps/web**:
-> Black Dark OLED (pure `#000000`) + Dreamcoder Light (warm ivory) themes and
-> the cyan/violet accent system (DTCG token pipeline), with the Dreamcoder-
-> inspired compositional language (elevation, aurora glows, curved geometry,
-> spark accents). Drenyra Pi must **not** invent its own palette — in either
-> theme.
+> The ecosystem design system is **the same system as Drenyra apps/web**: one
+> fused banner composition that transitions seamlessly from Black Dark OLED
+> (pure `#000000`, left) to Dreamcoder Light (warm ivory, right) — plus the
+> cyan/violet accent system (DTCG token pipeline) and the Dreamcoder-inspired
+> compositional language (elevation, aurora glows, curved geometry, spark
+> accents). Drenyra Pi must **not** invent its own palette.
 
 ## Regeneration prompt (ChatGPT Images 2.0)
 
