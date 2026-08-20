@@ -17,7 +17,7 @@ Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a
 
 <div align="center">
 
-<img width="1000" alt="" src="assets/branding/drenyra-pi-operational-flow.png" />
+<img width="1200" alt="Pi-native operational flow — human → fiscal scope → mission routing → pinned runtime → Engram → receipt → human decision" src="assets/branding/drenyra-pi-operational-flow.png" />
 
 </div>
 
@@ -100,6 +100,8 @@ Mission, receipt, evidence, and chain commands require a **complete canonical sc
 
 ## Model routing
 
+<img width="1200" alt="Scope → mission routing — the canonical scope bindings feed direct, delegated and durable missions" src="assets/branding/drenyra-pi-scope-routing.png" />
+
 `/drenyra:models` exposes the documented routing registry
 (`drenyra.model-routing.v1`): each EDA phase is mapped to the accounting role that
 should carry it. The installed Pi ExtensionAPI slice exposes no model-routing API
@@ -148,6 +150,8 @@ as institutional accounting memory. The boundary is non-negotiable:
   policy (BigInt thresholds, frozen in drenyra-ai).
 
 ## Host strategy
+
+<img width="1200" alt="Authority boundary — Drenyra Pi operates, Drenyra AI validates, the professional decides" src="assets/branding/drenyra-pi-authority-boundary.png" />
 
 Drenyra Pi is the v1.0 host: the ecosystem's base runtime, and the name says so.
 The headless-core delivery (library, CLI, or MCP — per the drenyra-ai v1.0
