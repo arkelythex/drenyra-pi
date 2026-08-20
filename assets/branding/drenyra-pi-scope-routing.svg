@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="460" viewBox="0 0 1400 460">
+<rect width="1400" height="460" fill="#f3eadc"/>
+<text x="64" y="50" fill="#725e4c" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start" letter-spacing="2.0">CANONICAL BOUNDARY</text>
+<text x="64" y="96" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" text-anchor="start" letter-spacing="0">Scope before action</text>
+<text x="64" y="128" fill="#352e22" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="500" text-anchor="start" letter-spacing="0">Every mission path starts with an explicit fiscal scope.</text>
+<text x="64" y="168" fill="#554638" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1.5">10 CANONICAL BINDINGS</text>
+<g transform="translate(64 190)">
+<g transform="translate(0 0)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#0d4a68" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">01</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">tenant</text>
+    </g><g transform="translate(148 0)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#a7471c" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">02</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">organization</text>
+    </g><g transform="translate(296 0)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#315b31" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">03</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">company</text>
+    </g><g transform="translate(444 0)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#57478b" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">04</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">fiscalPeriod</text>
+    </g><g transform="translate(592 0)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#824f16" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">05</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">ledgerBook</text>
+    </g><g transform="translate(0 76)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#0d4a68" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">06</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">operationType</text>
+    </g><g transform="translate(148 76)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#a7471c" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">07</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">sourceSnapshot</text>
+    </g><g transform="translate(296 76)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#315b31" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">08</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">policyVersion</text>
+    </g><g transform="translate(444 76)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#57478b" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">09</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">actor</text>
+    </g><g transform="translate(592 76)">
+      <rect width="134" height="60" fill="#fff7ea" stroke="#8a7358" stroke-width=".8"/>
+      <text x="10" y="17" fill="#824f16" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" text-anchor="start" letter-spacing="0">10</text>
+      <text x="10" y="43" fill="#100c07" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="0">authorityLevel</text>
+    </g></g>
+
+<!-- routing board -->
+<g transform="translate(855 178)">
+  <rect width="480" height="214" rx="14" fill="#fff7ea" stroke="#66513b"/>
+  <text x="24" y="30" fill="#725e4c" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1.6">ROUTING OBJECT</text>
+  <line x1="24" y1="48" x2="456" y2="48" stroke="#8a7358"/>
+  <rect x="24" y="70" width="168" height="114" rx="8" fill="#e6d7c4" stroke="#8a7358"/>
+  <text x="38" y="92" fill="#554638" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="start" letter-spacing="1.2">CANONICAL SCOPE</text>
+  <text x="38" y="119" fill="#315b31" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start" letter-spacing="0">complete</text>
+  <text x="38" y="143" fill="#0d4a68" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start" letter-spacing="0">validated</text>
+  <text x="38" y="167" fill="#824f16" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start" letter-spacing="0">bound</text>
+  <path d="M192 127 H236" stroke="#3e2f20" stroke-width="1.5"/>
+  <circle cx="236" cy="127" r="5" fill="#a7471c"/>
+  <path d="M236 127 H266 V88 H294" fill="none" stroke="#0d4a68" stroke-width="1.3"/>
+  <path d="M236 127 H294" fill="none" stroke="#a7471c" stroke-width="1.3"/>
+  <path d="M236 127 H266 V166 H294" fill="none" stroke="#315b31" stroke-width="1.3"/>
+  <rect x="294" y="72" width="138" height="36" rx="6" fill="#decbb1" stroke="#0d4a68"/>
+  <rect x="294" y="109" width="138" height="36" rx="6" fill="#decbb1" stroke="#a7471c"/>
+  <rect x="294" y="146" width="138" height="36" rx="6" fill="#decbb1" stroke="#315b31"/>
+  <text x="363" y="95" fill="#0d4a68" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.6">DIRECT</text>
+  <text x="363" y="132" fill="#a7471c" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.5">DELEGATED</text>
+  <text x="363" y="169" fill="#315b31" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.6">DURABLE</text>
+</g>
+</svg>

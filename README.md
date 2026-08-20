@@ -13,11 +13,17 @@
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
 
+<div align="center">
+
+<img width="1200" alt="Drenyra Pi — the runtime manifest: pinned runtime, source, checksum, scope and authority" src="assets/branding/drenyra-pi-hero-runtime-manifest.svg" />
+
+</div>
+
 ## Operational flow
 
 <div align="center">
 
-<img width="1200" alt="Pi-native operational flow — human → fiscal scope → mission routing → pinned runtime → Engram → receipt → human decision" src="assets/branding/drenyra-pi-operational-flow.png" />
+<img width="1200" alt="Pi-native operational flow — human → fiscal scope → mission routing → pinned runtime → Engram → receipt → human decision" src="assets/branding/drenyra-pi-operational-flow.svg" />
 
 </div>
 
@@ -100,7 +106,7 @@ Mission, receipt, evidence, and chain commands require a **complete canonical sc
 
 ## Model routing
 
-<img width="1200" alt="Scope → mission routing — the canonical scope bindings feed direct, delegated and durable missions" src="assets/branding/drenyra-pi-scope-routing.png" />
+<img width="1200" alt="Scope → mission routing — the ten contractual bindings feed direct, delegated and durable missions" src="assets/branding/drenyra-pi-scope-routing.svg" />
 
 `/drenyra:models` exposes the documented routing registry
 (`drenyra.model-routing.v1`): each EDA phase is mapped to the accounting role that
@@ -151,7 +157,7 @@ as institutional accounting memory. The boundary is non-negotiable:
 
 ## Host strategy
 
-<img width="1200" alt="Authority boundary — Drenyra Pi operates, Drenyra AI validates, the professional decides" src="assets/branding/drenyra-pi-authority-boundary.png" />
+<img width="1200" alt="Authority boundary — Drenyra Pi operates, Drenyra AI validates, the professional decides; fiscal authority remains outside Pi" src="assets/branding/drenyra-pi-authority-boundary.svg" />
 
 Drenyra Pi is the v1.0 host: the ecosystem's base runtime, and the name says so.
 The headless-core delivery (library, CLI, or MCP — per the drenyra-ai v1.0

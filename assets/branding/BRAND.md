@@ -19,14 +19,14 @@
 
 The canonical set lives in
 [`drenyra-ai/docs/assets/brand/gpt-image-prompts.md`](https://github.com/arkelythex/drenyra-ai/blob/main/docs/assets/brand/gpt-image-prompts.md).
-The Drenyra Pi prompt is the **pinned deterministic runtime** motif:
+The Drenyra Pi prompt is the **runtime manifest** motif:
 
 ```text
-Subject: a pinned deterministic runtime node rendered as a sealed precision object. The hero on the right third is a compact central cube with smoked-glass faces and anthracite structural edges, the corners traced with cyan edge light. A single vertical violet pin passes through the object from above, locking it into place with ritual precision, as if the runtime were physically anchored.
+Subject: a pinned runtime manifest as a technical institutional document. The hero on the right third is a warm ivory manifest sheet (surface #FFF7EA on #F3EADC paper) that reads like an operating instrument's identity card: fields for RUNTIME, SOURCE, CHECKSUM, SCOPE and AUTHORITY in dark ink #17120D, with a cocoa #824F16 pin passing vertically through the sheet, physically anchoring it. A small sage #315B31 seal marks the verified package-local state.
 
-Around it, three elegant orbital arcs in muted blue-gray define deterministic boundaries — two complete, one partial — with tiny satellite nodes placed at exact intervals. Near the base, a miniature success-green padlock is engraved into one facet of the cube, extremely subtle, like a trust mark. The surrounding platform is calm and minimal, with only a few luminous intersections.
+Composition: editorial, calm, precise — a technical manifest, not a cube, not an abstract object. Hairline rules, ink-on-paper hierarchy, generous negative space, no glow. The pin communicates exactness and locality: this exact verified version, package-local, never PATH.
 
-The image must communicate locality, determinism, package-level control, and safety. No cube-in-space cliché, no blockchain cube, no random abstract geometry. Signature detail: the pin-lock relationship and the tiny engraved padlock facet.
+Signature detail: the checksum line and the engraved pin seal.
 ```
 
 ## Validate
