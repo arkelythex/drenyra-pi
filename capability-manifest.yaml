@@ -22,11 +22,18 @@
       "state": "implemented",
       "evidence": {
         "sources": [
-          "extensions/register.ts"
+          "extensions/register.ts",
+          "lib/routing/direct-port.ts",
+          "lib/routing/types.ts",
+          "lib/routing/executor.ts",
+          "lib/routing/preflight.ts"
         ],
         "tests": [
-          "__tests__/extension.test.ts"
-        ]
+          "__tests__/extension.test.ts",
+          "__tests__/routing/direct-port.test.ts",
+          "__tests__/routing/executor.test.ts"
+        ],
+        "note": "verificationLevel: lib/routing/direct-port.ts = unit-or-contract-tested (wired into /drenyra:status route; not validated-end-to-end). The routing adapter's `delegated` modality has no production port yet — an explicit, tracked follow-up (REQ-ROUTE-005), not silently omitted; `durable` has a production port (lib/mission-commands.ts createDurableMissionRoutingPort) but is not wired into /drenyra:status."
       }
     },
     "pi-subagents": {

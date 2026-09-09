@@ -377,7 +377,7 @@ describe("program-lock-facts.json (design §6)", () => {
 			[
 				"active-change set",
 				(f) => {
-					f.activeChanges = ["zzz", ...f.activeChanges];
+					f.activeChanges = ["zzz", "aaa", ...f.activeChanges];
 				},
 				/activeChanges must be sorted/,
 			],

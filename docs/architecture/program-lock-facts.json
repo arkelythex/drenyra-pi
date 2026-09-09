@@ -3,7 +3,7 @@
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
   "headSha": "858c0df78aa49602ac81bf2d3de0ec98b1fc55d2",
-  "candidateIdentity": "dirty-sha256:f0abe87103fd286c227352d47dcba1dea22979d1c20c1bfb1271499f5eecb5a8",
+  "candidateIdentity": "dirty-sha256:a70267cff9cab6814fcf5d41ba9e7a0e584e99712cbd92a8cdfbdaaf90e9637e",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -45,27 +45,25 @@
   },
   "tests": {
     "command": "bun test",
-    "files": 44,
-    "total": 700,
-    "passed": 700,
+    "files": 48,
+    "total": 738,
+    "passed": 738,
     "failed": 0
   },
   "checksums": {
     "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
     "contentManifest": {
       "path": "contracts/SHA256SUMS.json",
-      "sha256": "f2cea66e14687e52e4f38450958449900339ef01115ca083275a1202517f788a"
+      "sha256": "bd6471a7d896aa28813a1e4a6a7892965ca4427cae6fff9f126e0ff1afd7de4b"
     }
   },
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "1a6166f87c7b7eaa3a6d3edbba2f82d2c606e99cf680cc16c5a82acb271f477f"
+    "digestSha256": "732c41fee99b4bdc478cc1d324c5648b0abe401c0bcf31ba64bd3fc29e9bc92c"
   },
-  "activeChanges": [
-    "pi-program-status-reconciliation"
-  ],
-  "evidenceDate": "2026-08-15",
+  "activeChanges": [],
+  "evidenceDate": "2026-09-09",
   "derivationCommands": [
     "git rev-parse HEAD",
     "node scripts/compute-candidate-identity.mjs",

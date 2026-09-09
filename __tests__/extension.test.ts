@@ -795,3 +795,81 @@ describe("fiscal guard money write (fiscal-guard.ts)", () => {
     expect(result).toBeUndefined();
   });
 });
+
+describe("REQ-ROUTE-001 /drenyra:status routing-adapter wiring (pi-accounting-orchestration)", () => {
+  it("default /drenyra:status surfaces routing.preflight additively, keeps pre-existing fields, and performs zero mission-store writes (SC-ROUTE-008)", async () => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-status-routing-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      const command = (name: string) =>
+        registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
+      store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "EXECUTE" }));
+
+      const missionOutput = await runHandler(command("mission"), "monthly-close");
+      const startedMachine = parseMachineOutput(missionOutput) as {
+        missionId: string;
+      };
+      const missionId = startedMachine.missionId;
+      const snapshotPath = join(root, ".local", "missions", "snapshots", `${missionId}.json`);
+      const before = { content: readFileSync(snapshotPath, "utf8"), mtime: statSync(snapshotPath).mtimeMs };
+
+      // The plain invocation (no "route" token) — the pre-existing behavior.
+      const output = await runHandler(command("status"), "");
+      const machine = parseMachineOutput(output) as {
+        mission?: { id: string };
+        routing?: { preflight: { ok: boolean }; execution?: unknown };
+      };
+
+      // Pre-existing field unchanged: the reported mission is still surfaced.
+      expect(machine.mission?.id).toBe(missionId);
+      // New, additive field: routing.preflight is present; execution never ran.
+      expect(machine.routing).toBeDefined();
+      expect(machine.routing?.preflight).toBeDefined();
+      expect(machine.routing?.execution).toBeUndefined();
+
+      const after = { content: readFileSync(snapshotPath, "utf8"), mtime: statSync(snapshotPath).mtimeMs };
+      expect(after.content).toBe(before.content);
+      expect(after.mtime).toBe(before.mtime);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("/drenyra:status route on a fresh mission (no bound QUERY authorization) fails closed at stagePermissions with POLICY_BLOCKED, never silently grants", async () => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-status-routing-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      const command = (name: string) =>
+        registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
+      store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "EXECUTE" }));
+
+      // A mission started only through /drenyra:mission has no bound QUERY
+      // authorization on disk (EdaMissionCoordinator never calls
+      // boundAuthorizationFor) — a genuinely "fresh" mission for this check.
+      await runHandler(command("mission"), "monthly-close");
+
+      const output = await runHandler(command("status"), "route");
+      const machine = parseMachineOutput(output) as {
+        routing?: {
+          preflight: { ok: boolean; stage?: string; reason?: { kind: string } };
+          execution?: { attempted: false; reason: string } | { ok: boolean };
+        };
+      };
+
+      expect(machine.routing?.preflight.ok).toBe(false);
+      expect(machine.routing?.preflight.stage).toBe("permissions");
+      expect(machine.routing?.preflight.reason?.kind).toBe("POLICY_BLOCKED");
+      // Execution never dispatched a real port call: it is either absent or an
+      // explicit "did not attempt" marker — never a silently granted result.
+      if (machine.routing?.execution !== undefined && "ok" in machine.routing.execution) {
+        expect(machine.routing.execution.ok).toBe(false);
+      }
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});

@@ -17,7 +17,24 @@ import { doctor } from "../runtime/doctor.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
 import { status } from "../runtime/status.js";
 import type { MissionIntent, MissionSnapshot } from "drenyra-ai/missions";
-import { bindScope } from "../lib/canonicalization.js";
+import {
+  bindScope,
+  sha256Canonical,
+  type ScopeBinding,
+} from "../lib/canonicalization.js";
+import { AuthorityStore } from "../lib/authority-store.js";
+import type { AuthorizationRecord } from "../lib/authority-gates.js";
+import { runRoutingPreflight } from "../lib/routing/preflight.js";
+import { executeRoutingWork } from "../lib/routing/executor.js";
+import { createChainPipelineRoutingPort } from "../lib/routing/direct-port.js";
+import type { ChainDefinition } from "../lib/chain-pipeline.js";
+import {
+  BudgetLedger,
+  type PreflightRequest,
+  type PreflightResult,
+  type RouteExecutionResult,
+  type RoutingExecutionPorts,
+} from "../lib/routing/types.js";
 import {
   EDA_INTENTS,
   EdaMissionCoordinator,
@@ -234,6 +251,128 @@ const SCOPE_USAGE =
   "<ledgerBook> <operationType> <sourceSnapshot> <policyVersion> <actor> <authorityLevel>";
 
 /**
+ * Build a real `PreflightRequest` for the routing-adapter demonstration
+ * (REQ-ROUTE-001) from the bound scope and the active mission `/drenyra:status`
+ * already loaded. `authorization` is sourced from `AuthorityStore` — never a
+ * self-issued GRANT (design "authorization sourcing"): an absent bound QUERY
+ * record becomes an explicit `DENIED` sentinel, correctly routing
+ * `stagePermissions` to `POLICY_BLOCKED` on a mission never touched by a bound
+ * QUERY authorization.
+ *
+ * Every other axis is an honest description of what `/drenyra:status` itself
+ * is (read-only, immediate, no external evidence, no regulatory ceremony) —
+ * never a fabricated business decision.
+ */
+async function buildStatusPreflightRequest(
+  binding: ScopeBinding,
+  mission: MissionSnapshot,
+  storesRoot: string,
+): Promise<PreflightRequest> {
+  const authorityStore = new AuthorityStore(storesRoot);
+  const bound = await authorityStore.findBoundAuthorization({
+    missionId: mission.id,
+    scopeHash: binding.scopeHash,
+    actionFamily: "QUERY",
+    actorId: binding.scope.actor,
+  });
+  const authorization: AuthorizationRecord =
+    bound ?? {
+      id: `auth-denied-${mission.id}-query`,
+      missionId: mission.id,
+      scopeHash: binding.scopeHash,
+      authorityMode: binding.scope.authorityLevel,
+      actionFamily: "QUERY",
+      actorId: binding.scope.actor,
+      decision: "DENIED",
+      issuedAt: new Date().toISOString(),
+    };
+  const outputSchemaHash = sha256Canonical({
+    command: "status-preflight",
+    missionId: mission.id,
+  });
+  return {
+    binding,
+    mission,
+    actionFamily: "QUERY",
+    authorization,
+    governingPolicy: { id: "policies", version: binding.scope.policyVersion },
+    requiredEvidenceHashes: [],
+    terminalNodeIds: [],
+    materiality: {
+      input: { value: 0n, reversibility: "reversible", jurisdiction: "PE" },
+      minimum: undefined,
+    },
+    declaredRiskTier: "R0",
+    declaredReversibility: "REVERSIBLE",
+    systems: [{ systemId: "chain-pipeline", available: true }],
+    requestedEffect: "read-only",
+    externalEvidence: "none",
+    durationAndInterruptibility: "immediate",
+    segregationOfDuties: "not-required",
+    regulatoryObligations: "none",
+    approval: { required: false },
+    evidenceStoresRoot: storesRoot,
+    workUnitInput: {
+      id: `status-preflight-${mission.id}`,
+      objective:
+        "Demonstrate the direct-modality routing preflight for the active mission (read-only; /drenyra:status route)",
+      scope: { tenantId: binding.scope.tenant, ruc: binding.scope.company },
+      evidenceAllowed: [],
+      skills: [],
+      policies: [{ id: "policies", version: binding.scope.policyVersion }],
+      authorizedTools: [
+        { id: "chain-pipeline", version: "0.3.0", operations: ["execute-step"] },
+      ],
+      authorizedDestinations: [{ kind: "EVIDENCE_STORE", id: "evidence" }],
+      outputSchema: {
+        id: "status-preflight",
+        version: "1.0.0",
+        contentHash: outputSchemaHash as never,
+      },
+      successConditions: [],
+      stopConditions: ["BUDGET_EXHAUSTED"],
+    },
+    requestedBudgets: {
+      timeLimitMs: 30_000,
+      tokenLimit: 20_000,
+      costLimitCents: 0n,
+      researchAttempts: 1,
+      correctionAttempts: 1,
+    },
+    policyMax: {
+      maxCostLimitCents: 0n,
+      maxTimeLimitMs: 60_000,
+      maxTokenLimit: 50_000,
+    },
+  };
+}
+
+/**
+ * The `delegated`/`durable` modalities have no production port yet (REQ-ROUTE-
+ * 005 — an explicit, tracked follow-up, not a silent omission). A stub port
+ * throws; `executeRoutingWork` maps that into a typed `AMBIGUOUS_INPUT`
+ * `ports.<name>` stop, so an unexpected Core route kind still fails closed
+ * instead of dispatching invented work.
+ */
+function notImplementedPort(modality: string): RoutingExecutionPorts["direct"] {
+  return async () => {
+    throw new Error(
+      `${modality} routing port: not implemented in this slice — tracked follow-up (REQ-ROUTE-005)`,
+    );
+  };
+}
+
+/** `JSON.stringify` that renders BigInt fields (e.g. `costIncurredCents`) as
+ * strings — needed once `routing.execution` can carry a real `WorkResult`. */
+function stringifyMachineOutput(value: unknown): string {
+  return JSON.stringify(
+    value,
+    (_key, v) => (typeof v === "bigint" ? v.toString() : v),
+    2,
+  );
+}
+
+/**
  * Register the drenyra-pi extension against a Pi ExtensionAPI.
  *
  * Every handler follows the parse → scope policy → lib/chain delegation →
@@ -250,7 +389,7 @@ export function registerDrenyraPiExtension(
   const storesRoot = deps.storesRoot ?? process.cwd();
   const scopeGuard = new ScopeGuard(contextStore);
     
-  async function statusHandler(_args: string, _ctx: PiCommandContext): Promise<void> {
+  async function statusHandler(args: string, _ctx: PiCommandContext): Promise<void> {
     const outcome = scopeGuard.evaluate("drenyra:status");
     const runtime = await status({ pin: DEFAULT_PIN, packageRoot: PACKAGE_ROOT });
     const scope = contextStore.load();
@@ -270,6 +409,59 @@ export function registerDrenyraPiExtension(
       mission === undefined
         ? undefined
         : await loadEvidenceStatus({ storesRoot, missionId: mission.id });
+
+    // Routing-adapter preflight (REQ-ROUTE-001): unconditional, additive,
+    // write-free — `runRoutingPreflight` writes nothing. It runs whenever a
+    // bound scope and an active mission exist, the same precondition the
+    // `evidence` field above already uses; there is no other real data to
+    // build a `PreflightRequest` from. The write-bearing `executeRoutingWork`
+    // dispatch only runs on the explicit opt-in signal `/drenyra:status route`
+    // (SC-ROUTE-008) — a plain `/drenyra:status` never reaches it.
+    let routing:
+      | {
+          preflight: PreflightResult;
+          execution?: RouteExecutionResult | { attempted: false; reason: string };
+        }
+      | undefined;
+    if (outcome.binding !== undefined && mission !== undefined) {
+      const preflightRequest = await buildStatusPreflightRequest(
+        outcome.binding,
+        mission,
+        storesRoot,
+      );
+      const preflight = await runRoutingPreflight(preflightRequest);
+      routing = { preflight };
+      if (args.trim() === "route") {
+        if (preflight.ok) {
+          const ledger = BudgetLedger.create(preflight.workUnit);
+          const ports: RoutingExecutionPorts = {
+            direct: createChainPipelineRoutingPort(
+              verifyChain as unknown as ChainDefinition<unknown, unknown>,
+            ),
+            delegated: notImplementedPort("delegated"),
+            durable: notImplementedPort("durable"),
+          };
+          routing.execution = await executeRoutingWork({
+            workUnit: preflight.workUnit,
+            route: preflight.route,
+            binding: outcome.binding,
+            mission,
+            ports,
+            ledger,
+            chain: verifyChain as unknown as ChainDefinition<unknown, unknown>,
+            chainRun: { binding: outcome.binding, input: {}, storesRoot },
+          });
+        } else {
+          routing.execution = {
+            attempted: false,
+            reason:
+              `preflight did not pass (stage ${preflight.stage}, ` +
+              `${preflight.reason.kind}) — execution requires an ok:true preflight result`,
+          };
+        }
+      }
+    }
+
     const output = await renderStatusView({
       company: scope.company?.ruc,
       period: scope.period?.period,
@@ -279,8 +471,12 @@ export function registerDrenyraPiExtension(
       mission,
       ...(evidence === undefined ? {} : { evidence }),
     });
+    const machine =
+      routing === undefined
+        ? output.machine
+        : { ...(output.machine as Record<string, unknown>), routing };
     console.log(output.summary);
-    console.log(JSON.stringify(output.machine, null, 2));
+    console.log(stringifyMachineOutput(machine));
   }
 
 	async function doctorHandler(

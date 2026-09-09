@@ -295,6 +295,24 @@ function expectFailure(result: RouteExecutionResult): Extract<RouteExecutionResu
     expect(calls.durable()).toBe(0);
   });
 
+  it("missing port: a route resolved to \"direct\" with no direct port fails closed with AMBIGUOUS_INPUT and zero port calls", async () => {
+    const harness = makeHarness();
+    const ports = {
+      direct: undefined as unknown as RoutingExecutionPorts["direct"],
+      delegated: async () => makeSuccessResponse(harness.workUnit, harness.mission),
+      durable: async () => makeSuccessResponse(harness.workUnit, harness.mission),
+    };
+    const result = await executeRoutingWork(
+      makeExecutionInput(harness, ports, validateTransition, makeCoreRoute("direct-analysis")),
+    );
+    const failure = expectFailure(result);
+    expect(failure.reason.kind).toBe("AMBIGUOUS_INPUT");
+    if (failure.reason.kind === "AMBIGUOUS_INPUT") {
+      expect(failure.reason.fields).toContain("ports.direct");
+    }
+    expect(failure.portCalls).toBe(0);
+  });
+
   it("validator denial: an injected validator rejecting the observed edge returns INVALID_TRANSITION and leaves the unit unchanged", async () => {
     const harness = makeHarness();
     const spy: CanonicalTransitionValidator = (from, to) => {
