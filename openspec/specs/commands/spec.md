@@ -16,7 +16,8 @@ The system MUST keep company and context registered as backward-compatible extra
 
 ### Requirement: REQ-CMD-003 — Scope guard before every command
 
-The system MUST enforce the scope guard before every command: commands that require scope MUST fail closed with an explanatory error when scope is missing or invalid.
+The system MUST enforce the scope guard before every command: commands that require scope MUST fail closed with an explanatory error when scope is missing, invalid, stale, or inconsistent with persisted company/period selections. The guard MUST run before delegation to protected mission, chain, evidence-mutation, approval, or receipt-target code, and rejection MUST mutate nothing.
+(Previously: Commands requiring scope failed closed with an explanatory error when scope was missing or invalid.)
 
 ### Requirement: REQ-CMD-004 — Thin handlers
 
@@ -59,6 +60,24 @@ The system MUST make /drenyra:capabilities report the engine getCapabilities() p
 - GIVEN a command requiring scope (for example /drenyra:close) and no company or period bound
 - WHEN the command runs
 - THEN it fails closed with an explanatory scope error and mutates nothing
+
+#### Scenario: SC-CMD-002-A — Rejection after company or period change
+
+- GIVEN a complete canonical scope and a valid subsequent company or fiscal-period selection
+- WHEN a protected mission, chain, evidence-mutation, approval, or receipt-target command runs
+- THEN the guard rejects the command before protected code executes and no protected state is mutated
+
+#### Scenario: SC-CMD-002-B — Legacy/canonical mismatch is rejected
+
+- GIVEN persisted legacy company or period values that disagree with the canonical binding
+- WHEN a protected command runs
+- THEN the guard fails closed with an explanatory error and no protected code executes
+
+#### Scenario: SC-CMD-002-C — Changing away and back does not bypass the guard
+
+- GIVEN a canonical binding for an earlier company or fiscal period
+- WHEN the selection changes away and then returns to the earlier value without a fresh explicit complete bind
+- THEN the protected command remains rejected and the prior binding is not silently reused
 
 #### Scenario: SC-CMD-003 — Continue advances one step
 

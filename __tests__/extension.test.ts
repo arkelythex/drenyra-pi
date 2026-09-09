@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  existsSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -305,6 +306,45 @@ describe("entrypoint packaging (T-S4A-004)", () => {
     expect(output).toContain("missing");
     expect(output).not.toContain("verified");
     cleanupTempStore(store);
+  });
+});
+
+describe("selector-change isolation at protected command handlers", () => {
+  it.each([
+    ["company", "20512345671"],
+    ["period", "202508"],
+  ] as const)("blocks mission and evidence mutation after a real %s change", async (selector, value) => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-selector-isolation-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      const command = (name: string) => registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
+      const canonical = makeCanonicalScope();
+      const bindOutput = await runHandler(
+        command("scope"),
+        `set ${canonical.tenant} ${canonical.organization} ${canonical.company} ` +
+          `${canonical.fiscalPeriod} ${canonical.ledgerBook} ${canonical.operationType} ` +
+          `${canonical.sourceSnapshot} ${canonical.policyVersion} ${canonical.actor} ${canonical.authorityLevel}`,
+      );
+      expect(bindOutput).toContain("scopeHash");
+      await runHandler(command(selector), value);
+      expect(existsSync(join(root, ".local"))).toBe(false);
+
+      const missionOutput = await runHandler(command("mission"), "monthly-close");
+      const evidenceOutput = await runHandler(
+        command("evidence"),
+        JSON.stringify({
+          op: "add-node",
+          node: { id: "src-isolated", nodeKind: "source", payload: { reference: "B001" } },
+        }),
+      );
+      expect(missionOutput).toMatch(/complete|missing|re-bind/i);
+      expect(evidenceOutput).toMatch(/complete|missing|re-bind/i);
+      expect(existsSync(join(root, ".local"))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 

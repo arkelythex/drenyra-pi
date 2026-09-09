@@ -1,0 +1,72 @@
+change: pi-operator-onboarding
+created: 2026-09-08
+store_mode: hybrid
+session_preflight:
+  execution_mode: auto
+  delivery_strategy: auto-chain
+  review_budget_lines: 400
+  chain_strategy: stacked-to-main
+links:
+  master_program: dominion
+  served_capabilities: [SDD-020]
+  depends_on_change: pi-capability-conformance
+decisions:
+  scope_narrowing: safety_fix_only
+  scope_narrowing_reason: >-
+    No confirmed drenyra-ai kernel API derives the 8 non-company/period
+    canonical scope fields (verified against node_modules/drenyra-ai
+    tenant-core + policy .d.ts). Inventing them in Pi would encroach on
+    kernel authority. User chose to scope this change down to only the
+    scope cross-contamination bugfix; the guided-onboarding/source-selection
+    wizard is deferred to a later change, pending a kernel-contract
+    investigation.
+note: >-
+  A second, concurrent Claude Code session on this same repo (Engram kept
+  reporting "multiple active runtime sessions" throughout — confirmed real,
+  not a transient error) ran this change's full cycle end-to-end
+  (proposal/preproposal/specs/design/tasks/apply/verify) independently and
+  in parallel with this orchestrator's own exploration+scope-narrowing
+  question to the user. Its proposal.md landed on the exact same
+  safety-fix-only scope this orchestrator's exploration also converged on
+  and the user then confirmed here. This orchestrator independently
+  re-verified the delivered work rather than trusting it outright: re-ran
+  bun test (47/47 files, 731/731 tests), typecheck, verify:capability — all
+  pass — and read the runtime/context.ts diff by hand (setCompany/setPeriod
+  now delete a stale canonical binding unless the new value already matches
+  it; setCanonicalScope now atomically syncs legacy company/period alongside
+  canonical; loadCanonicalScope/isValidScope now require full canonical/
+  legacy consistency before trusting canonical data). Diagnosis: sound,
+  matches the proposal and verify-report.md's PASS verdict (5/5 requirements,
+  15/15 scenarios). No ledger integrity issue this time (sdd-attempt status:
+  complete, decision_required: false) — unlike SDD #1's apply phase.
+phases:
+  explore:
+    status: done
+    artifact: exploration.md
+  research:
+    status: superseded_by_deeper_exploration
+  proposal:
+    status: done
+    artifact: proposal.md
+    note: delivered by the concurrent session, independently reviewed and accepted
+  specs:
+    status: done
+    domains: [commands, scope-binding]
+  design:
+    status: done
+    artifact: design.md
+  tasks:
+    status: done
+    total: 13
+    completed: 13
+  apply:
+    status: done
+    artifact: apply-progress.md
+  verify:
+    status: done
+    artifact: verify-report.md
+    verdict: pass
+    requirements: "5/5"
+    scenarios: "15/15"
+  archive:
+    status: ready
