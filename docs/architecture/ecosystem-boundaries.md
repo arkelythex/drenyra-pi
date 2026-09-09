@@ -1,6 +1,6 @@
 # Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-18 (harness-draft conformance + stale-count reconciliation).
+> **Last updated:** 2026-08-18 (Pi-local contract-family freeze and boundary reconciliation).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
@@ -20,7 +20,7 @@ Drenyra Pi does **not** contain the accounting engine. It **installs and consume
 - Packaged skills and RDA (Receipt-Driven Accounting) command chains.
 - Tool safety: broad-deny, narrow-allow permissions for fiscal actions.
 - Company & period context: RUC-scoped context threaded across tools and agents.
-- Drenyra Engram integration: institutional memory access (memory never authorizes).
+- Drenyra Engram boundary: institutional memory may inform future proposals, but executable context/memory integration is not yet evidenced (memory never authorizes).
 
 ## Explicit non-goals
 
@@ -88,6 +88,17 @@ flowchart TD
 - Drenyra and Drenyra Pi consume **published versions** of Drenyra-AI. Drenyra-AI never depends on them.
 - The UI may go down and rebuild from Core state; a transcript may be lost and the mission recovered from events and evidence.
 - **No consumer may convert a Core rejection into an approval.**
+
+### Pi-local schema boundary
+
+The frozen v0.1 families under `contracts/evidence/`, `contracts/authority/`, `contracts/receipts/`, and `contracts/mission/` are Pi-owned conformance adapters. They validate documents Pi consumes, persists, or projects; they are not published Dominion/Drenyra-AI engine contracts.
+
+- **Evidence:** Pi owns its `schemaVersion: 1` graph record envelope; the pinned engine remains authoritative for evidence hashing used by receipts and authority decisions.
+- **Authority:** Pi validates local scope and authorization records; the Core owns gates and authorization semantics.
+- **Receipts:** Pi owns `drenyra.receipt-binding.v1` and its trusted-key registry storage; the Core owns SignedReceipt production, cryptography, and protocol semantics.
+- **Missions:** Pi validates and projects public mission documents; the Core owns lifecycle transitions.
+
+Every shipped schema byte is checksum-covered. An incompatible external document is rejected until a reviewed Pi adapter version and migration are available; Pi never silently widens v0.1 or copies a private engine definition.
 
 ## Agent orchestration contract (Design 3 — approved in `drenyra-ai`)
 
@@ -232,28 +243,35 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
 | Direction | Party | Relation |
 | --------- | ----- | -------- |
 | Consumes | `drenyra-ai` | pinned, verified, package-local runtime (never `PATH`) |
-| Consumes | `drenyra-engram` | memory reads/context (memory never authorizes) |
+| Planned consumption | `drenyra-engram` | executable memory reads/context are not yet integrated; memory never authorizes |
 | Produces for | Pi users | the disciplined accounting operator experience |
 | Provides | `drenyra-pi` package | installable via `pi install npm:drenyra-pi` |
 
 ## Current state and maturity
 
-- **Implemented on `main`:** a wired harness — **20 registered `/drenyra:*` commands**
-  (`extensions/register.ts` plus the `persona` toggle in
+- **Implemented in the audited working tree:** a wired harness — **20 registered
+  `/drenyra:*` commands** (`extensions/register.ts` plus the `persona` toggle in
   `extensions/fiscal-guard.ts`), 4 chains (`chains/monthly-close.ts`,
   `chains/reconcile.ts`, `chains/verify.ts`, `chains/evidence.ts`), **10 accounting
   agents** (`agents/`, mirrored in `assets/agents/`), and the pinned,
   checksum-verified runtime bootstrap at `drenyra-ai@0.4.1` (released pin).
+- **Current point-in-time evidence:** the
+  [`capability-conformance-matrix.md`](capability-conformance-matrix.md) records
+  per-capability citations, the independently verified 47-file / 717-passing
+  baseline, and current limitations. The manifest's embedded 44-file / 700-test
+  `testState` is an older scoped snapshot; it is not the 47/717 baseline.
+  Monthly-close evidence is an in-process fixture, not an operational E2E run,
+  and executable Engram integration remains incomplete.
 - **Historical harness draft conformance:** the early draft titled "SDD-050 —
-  Drenyra Pi" maps to this implemented harness; the requirement → evidence
-  matrix, the SDD-050 numbering reconciliation (the master catalog assigns
-  SDD-050 to `sdd-050-monthly-close`; the harness was delivered as
-  `pi-sdd-010-participation` + extraction), and the fresh verification snapshot
-  (44 files / 703 tests, 2026-08-18) live in
-  [`harness-draft-conformance.md`](harness-draft-conformance.md).
-- **Still open (draft):** the two product contracts — `package-contract` and
-  `runtime-dependency` remain `0.1-draft`; the contract freeze is ROADMAP
-  Phase 1. Release cadence is pre-alpha (`drenyra-pi@0.0.1-prealpha.1`).
+  Drenyra Pi" maps to this implemented harness. Its 44-file / 703-test run was
+  observed on 2026-08-18 and remains historical rather than being relabeled;
+  see [`harness-draft-conformance.md`](harness-draft-conformance.md).
+- **Frozen Pi-local contracts:** `package-contract` and `runtime-dependency`
+  remain frozen at v0.1. The implemented evidence, authority, receipt, and
+  mission schema families are also frozen at Pi-local v0.1 as consumption and
+  adaptation boundaries; their existing schema bytes did not require a version
+  bump or migration. Release cadence remains pre-alpha
+  (`drenyra-pi@0.0.1-prealpha.1`).
 - Future slices continue to land as vertical PRs on released, pinned versions of
   `drenyra-ai` — never a checkout.
 

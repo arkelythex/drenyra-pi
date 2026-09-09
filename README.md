@@ -27,7 +27,7 @@ Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a
 
 </div>
 
-The visual flow is fully represented in text: **human start → fiscal scope (RUC and period) → mission routing → pinned, sealed runtime → Engram memory and append-only evidence → signed, verified cryptographic receipt → human approve or reject decision**.
+The target visual flow is fully represented in text: **human start → fiscal scope (RUC and period) → mission routing → pinned, sealed runtime → Engram memory and append-only evidence → signed, verified cryptographic receipt → human approve or reject decision**. The current harness has no complete executable Engram integration; that memory step remains planned and never authorizes.
 
 ## What it provides
 
@@ -40,7 +40,7 @@ The visual flow is fully represented in text: **human start → fiscal scope (RU
 - **RDA chains** — Receipt-Driven Accounting command chains.
 - **Tool safety** — broad-deny, narrow-allow tool permissions for fiscal actions.
 - **Company & period context** — RUC-scoped context threading across tools and agents.
-- **Drenyra Engram integration** — institutional memory access (memory never authorizes).
+- **Drenyra Engram boundary** — institutional memory access is planned but not yet executable (memory never authorizes).
 - **Pinned Drenyra AI runtime** — exact verified version, package-local, never `PATH`.
 
 ### Drenyra Dominion Program
@@ -49,26 +49,30 @@ Drenyra Pi is a participant in the [Drenyra Dominion Program](https://github.com
 
 | SDD | Role in Drenyra Pi |
 | --- | --- |
-| [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) | Served primarily by Drenyra Pi: `install`, `doctor`, `sync`, `upgrade`, `rollback` plus host integration |
+| [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) | Pre-Wave-1 scaffolding in Pi: `install`, `doctor`, and `sync` consume the public configurator contract; this is not the Wave-1 SDD-020 implementation |
 | [SDD-030 — Organic Accounting Work Routing](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-030-routing) | Direct / delegated / durable-mission routing from evidence and risk |
 | [SDD-040 — Receipt-Driven Accounting v2](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-040-rda-v2) | Frozen candidate, proportional review, bounded correction, reusable receipt (RDA v2 chains) |
 
-The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates. Pi's served [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) is **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. **No Pi-local implementation of SDD-020 proceeds until the master promotes readiness.** The historical harness draft that reused the SDD-050 label (the early "Drenyra Pi" harness spec) is reconciled in [harness-draft-conformance.md](docs/architecture/harness-draft-conformance.md): the master assigns SDD-050 to monthly close, and the harness was delivered via `pi-sdd-010-participation` + extraction.
+The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates. [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) remains **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. Pi's existing `/drenyra:install`, `/drenyra:doctor`, and `/drenyra:sync` commands are legitimate pre-Wave-1 scaffolding that consumes the public configurator contract; they do not claim delivery of the master SDD. Any further Wave-1 implementation waits for master readiness. The historical harness draft that reused the SDD-050 label (the early "Drenyra Pi" harness spec) is reconciled in [harness-draft-conformance.md](docs/architecture/harness-draft-conformance.md): the master assigns SDD-050 to monthly close, and the harness was delivered via `pi-sdd-010-participation` + extraction.
 
 Drenyra Pi executes agents and tools with pinned versions and **never authorizes fiscal operations** — fiscal authority remains in `drenyra-ai`.
 
 ## Install
 
+npm publication is pending; the release item remains open in [ROADMAP.md](ROADMAP.md). The eventual install command will be:
+
 ```bash
 pi install npm:drenyra-pi
 ```
+
+Do not expect that package reference to resolve until the npm release is published.
 
 ## First run
 
 Inside Pi, follow this order — each step's prerequisite is the previous one:
 
 1. **`/drenyra:doctor`** — verifies the pinned, package-local Drenyra AI runtime (checksum + version, fails closed on any mismatch). The startup panel runs the same check at activation.
-2. **`/drenyra:scope`** — shows the 10-element canonical scope and what is missing. Bind it with `/drenyra:scope set <tenant> <organization> <company> <fiscalPeriod> <ledgerBook> <operationType> <sourceSnapshot> <policyVersion> <actor> <authorityLevel>` (or set company and period first via `/drenyra:company` and `/drenyra:period`).
+2. **`/drenyra:scope`** — shows the 10-element canonical scope and what is missing. Bind it with `/drenyra:scope set <tenant> <organization> <company> <fiscalPeriod> <ledgerBook> <operationType> <sourceSnapshot> <policyVersion> <actor> <authorityLevel>` (or set company and period first via `/drenyra:company` and `/drenyra:period`). A real company or period selector change removes the prior canonical binding; bind a fresh complete scope before running protected commands.
 3. **`/drenyra:mission <intent>`** — starts a mission once the scope is complete (`monthly-close | correction | reconciliation | invoice-review | compliance-check`).
 4. **`/drenyra:status`** — confirms the active company/period, mission state, and next authorized action.
 
@@ -200,9 +204,9 @@ Drenyra Pi uses an **exact, verified, package-local version of Drenyra AI** — 
 | --- | --- |
 | [Drenyra Command Center](https://github.com/arkelythex/drenyra-command-center) | Command Center — web application (consumes AI) |
 | [Drenyra AI](https://github.com/arkelythex/drenyra-ai) | Agent ecosystem (installed, pinned) |
-| [Drenyra Engram](https://github.com/arkelythex/drenyra-engram) | Institutional accounting memory (used) |
+| [Drenyra Engram](https://github.com/arkelythex/drenyra-engram) | Institutional accounting memory (planned integration) |
 
-**Direction rule:** Drenyra Pi depends on Drenyra AI and Drenyra Engram. It never leaks into Drenyra AI's contracts, and Drenyra AI never knows Drenyra Pi exists.
+**Direction rule:** Drenyra Pi depends on Drenyra AI; Drenyra Engram integration is planned. Pi never leaks into Drenyra AI's contracts, and Drenyra AI never knows Drenyra Pi exists.
 
 ## National alignment
 

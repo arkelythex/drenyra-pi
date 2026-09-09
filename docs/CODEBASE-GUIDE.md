@@ -89,7 +89,7 @@ runtime/  ──►  vendored/drenyra-ai-0.4.1.tgz (package-local, checksum-veri
 
 ## Testing and verification
 
-- `bun run test` — Vitest suite (commands, chains, permissions, fail-closed matrix).
+- `bun run test` — Vitest suite (commands, chains, permissions, fail-closed matrix). Discovery is rooted at `__tests__/` and `chains/__tests__/`; repository-local dependency or cache copies outside those roots are intentionally excluded.
 - `bun run typecheck` — `tsc --noEmit`.
 - `bun run verify:package` — build + tests + package-file verification (vendored pin reconciled).
 - `bun run verify:capability` — capability-manifest consistency.

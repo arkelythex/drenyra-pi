@@ -37,12 +37,14 @@ never duplicates them.
 
 Extracted via vertical PRs and versioned releases, **not** a bulk move:
 
-- [ ] Slice 1: persona + startup panel
-- [ ] Slice 2: `/drenyra:status` + `/drenyra:company` + `/drenyra:period` context threading
-- [ ] Slice 3: `/drenyra:mission` + `/drenyra:receipt` + `/drenyra:ledger`
-- [ ] Slice 4: monthly-close chain (R2 gate, explicit approval)
+- [x] Slice 1: persona + startup panel
+- [x] Slice 2: `/drenyra:status` + `/drenyra:company` + `/drenyra:period` context threading
+- [x] Slice 3: `/drenyra:mission` + `/drenyra:receipt` + `/drenyra:ledger`
+- [x] Slice 4: monthly-close chain (R2 gate, explicit approval)
 - [ ] Slice 5: Drenyra Engram integration (context, memory reads)
 - [ ] Package released as `drenyra-pi` on npm with pinned `drenyra-ai`
+
+Slices 1–4 are shipped and covered by repository tests. The monthly-close evidence is an in-process fixture, not an operational end-to-end run. Executable Engram context/memory integration remains a separate follow-up; static context prose and the development-grade JSON store do not complete Slice 5.
 
 ## Phase 3 — Ecosystem maturity (alpha → beta)
 

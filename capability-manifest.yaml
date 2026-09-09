@@ -86,11 +86,22 @@
       "state": "implemented",
       "evidence": {
         "sources": [
-          "chains/monthly-close.ts"
+          "chains/monthly-close.ts",
+          "chains/reconcile.ts",
+          "chains/verify.ts",
+          "chains/evidence.ts",
+          "lib/accounting-semantics.ts",
+          "lib/evidence-projection.ts"
         ],
         "tests": [
-          "chains/__tests__/monthly-close-flow.test.ts"
-        ]
+          "chains/__tests__/monthly-close-flow.test.ts",
+          "chains/__tests__/reconcile.test.ts",
+          "chains/__tests__/verify.test.ts",
+          "chains/__tests__/evidence.test.ts",
+          "__tests__/accounting-semantics.test.ts",
+          "__tests__/evidence-projection.test.ts"
+        ],
+        "note": "verificationLevel: chains/reconcile.ts = unit-or-contract-tested (chains/__tests__/reconcile.test.ts); verificationLevel: chains/verify.ts = unit-or-contract-tested (chains/__tests__/verify.test.ts); verificationLevel: chains/evidence.ts = unit-or-contract-tested (chains/__tests__/evidence.test.ts); verificationLevel: lib/accounting-semantics.ts = unit-or-contract-tested (__tests__/accounting-semantics.test.ts); verificationLevel: lib/evidence-projection.ts = unit-or-contract-tested (__tests__/evidence-projection.test.ts). These in-process tests do not establish operational end-to-end validation."
       }
     },
     "tool-safety-broad-deny": {
