@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "858c0df78aa49602ac81bf2d3de0ec98b1fc55d2",
-  "candidateIdentity": "dirty-sha256:a70267cff9cab6814fcf5d41ba9e7a0e584e99712cbd92a8cdfbdaaf90e9637e",
+  "headSha": "ad6b7f662e9c3a3dcdd7ce09e654b92137397464",
+  "candidateIdentity": "dirty-sha256:9a1528f2707710239e64488f83152797479bd395238eb4f089f8a62af62c3c8f",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -60,9 +60,11 @@
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "732c41fee99b4bdc478cc1d324c5648b0abe401c0bcf31ba64bd3fc29e9bc92c"
+    "digestSha256": "71f4a36e603133290a514b82948cbdbc39972ee0d4b54bc28e8f20df9b9ea3ca"
   },
-  "activeChanges": [],
+  "activeChanges": [
+    "pi-skills-memory-integration"
+  ],
   "evidenceDate": "2026-09-09",
   "derivationCommands": [
     "git rev-parse HEAD",

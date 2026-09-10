@@ -102,13 +102,15 @@
         ],
         "tests": [
           "chains/__tests__/monthly-close-flow.test.ts",
+          "chains/__tests__/monthly-close.test.ts",
+          "chains/__tests__/monthly-close-reconcile-flow.test.ts",
           "chains/__tests__/reconcile.test.ts",
           "chains/__tests__/verify.test.ts",
           "chains/__tests__/evidence.test.ts",
           "__tests__/accounting-semantics.test.ts",
           "__tests__/evidence-projection.test.ts"
         ],
-        "note": "verificationLevel: chains/reconcile.ts = unit-or-contract-tested (chains/__tests__/reconcile.test.ts); verificationLevel: chains/verify.ts = unit-or-contract-tested (chains/__tests__/verify.test.ts); verificationLevel: chains/evidence.ts = unit-or-contract-tested (chains/__tests__/evidence.test.ts); verificationLevel: lib/accounting-semantics.ts = unit-or-contract-tested (__tests__/accounting-semantics.test.ts); verificationLevel: lib/evidence-projection.ts = unit-or-contract-tested (__tests__/evidence-projection.test.ts). These in-process tests do not establish operational end-to-end validation."
+        "note": "verificationLevel: chains/reconcile.ts = unit-or-contract-tested (chains/__tests__/reconcile.test.ts); verificationLevel: chains/verify.ts = unit-or-contract-tested (chains/__tests__/verify.test.ts); verificationLevel: chains/evidence.ts = unit-or-contract-tested (chains/__tests__/evidence.test.ts); verificationLevel: lib/accounting-semantics.ts = unit-or-contract-tested (__tests__/accounting-semantics.test.ts); verificationLevel: lib/evidence-projection.ts = unit-or-contract-tested (__tests__/evidence-projection.test.ts); verificationLevel: chains/monthly-close.ts RECONCILE phase = unit-or-contract-tested (chains/__tests__/monthly-close.test.ts exercises runReconcilePhase in isolation; chains/__tests__/monthly-close-reconcile-flow.test.ts is a multi-chain in-process integration test driving sources -> real reconciliation -> evidence -> proposal -> approval (incl. the R2-gate fail-closed negative case) -> execution -> close -> verify over the real MissionRuntime/ApprovalGate/receipts stack). These in-process tests do not establish operational end-to-end validation."
       }
     },
     "tool-safety-broad-deny": {

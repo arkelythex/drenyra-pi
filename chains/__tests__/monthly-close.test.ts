@@ -26,6 +26,7 @@ import type { MaterialityInput } from "drenyra-ai/candidates";
 import { makeScopeBinding } from "../../__tests__/helpers/authority-fixtures.js";
 import { createEdaSteps, EDA_PHASE, EDA_PHASE_ORDER } from "../../lib/accounting-status.js";
 import { recoverDurableMissions } from "../../lib/mission-store.js";
+import { EvidenceGraphStore, EVIDENCE_NODE_KIND } from "../../lib/evidence-graph.js";
 import {
   MonthlyCloseChain,
   MonthlyCloseWaitError,
@@ -271,5 +272,78 @@ describe("MonthlyCloseChain over durable stores", () => {
     expect(again.waitReason).toBe(WaitReason.POLICY_GATE);
     expect(again.phase).toBeNull();
     expect(again.mission.status).toBe(AccountingMissionStatus.BLOCKED_BY_GATE);
+  });
+
+  it("wires real reconciliation into RECONCILE: a discrepancy manifest produces an anomaly conclusion node and an ERROR blocker (REQ-CHAIN-001)", async () => {
+    const root = tempRoot();
+    const chain = new MonthlyCloseChain(makeScopeBinding(), { storesRoot: root });
+    const mission = await chain.startMission({
+      ...startInput(),
+      reconcileManifest: {
+        bank: [{ reference: "B002", amountCents: 250_000 }],
+        ledger: [{ reference: "B002", amountCents: 230_000 }],
+      },
+    });
+
+    // Drive the mission to (and through) the RECONCILE phase.
+    let current = mission;
+    let reconciled = false;
+    for (let i = 0; i < 10; i += 1) {
+      const step = await chain.advance({ missionId: current.id });
+      current = step.mission;
+      if (step.phase === EDA_PHASE.RECONCILE) {
+        reconciled = true;
+        break;
+      }
+    }
+    expect(reconciled).toBe(true);
+    // RECONCILE always completes — it never halts the mission (design decision 3).
+    const reconcileStep = current.steps.find((step) => step.id === EDA_PHASE.RECONCILE);
+    expect(reconcileStep?.status).toBe("COMPLETED");
+
+    const graph = new EvidenceGraphStore(root);
+    const loaded = await graph.load(mission.id);
+    const anomaly = loaded.nodes.find((node) => node.id === "anomaly-B002");
+    expect(anomaly).toBeDefined();
+    expect(anomaly?.nodeKind).toBe(EVIDENCE_NODE_KIND.CONCLUSION);
+    // The evidence graph ndjson round-trips through JSON, so a BigInt payload
+    // field is read back as a plain JSON integer (no float; canonicalization
+    // preserves the exact value — same round-trip behavior as reconcile.ts's
+    // own CONCLUSION nodes).
+    expect(
+      (anomaly?.payload as { differenceCents?: unknown } | undefined)?.differenceCents,
+    ).toBe(20_000);
+
+    expect(
+      current.blockers.some(
+        (blocker) =>
+          blocker.severity === "ERROR" &&
+          blocker.resolvedAt === undefined &&
+          blocker.reason.toLowerCase().includes("reconcil"),
+      ),
+    ).toBe(true);
+  });
+
+  it("falls back to the prior no-op completion at RECONCILE when no manifest is supplied (backward compatible)", async () => {
+    const root = tempRoot();
+    const chain = new MonthlyCloseChain(makeScopeBinding(), { storesRoot: root });
+    const mission = await chain.startMission(startInput());
+
+    let current = mission;
+    let reconciled = false;
+    for (let i = 0; i < 10; i += 1) {
+      const step = await chain.advance({ missionId: current.id });
+      current = step.mission;
+      if (step.phase === EDA_PHASE.RECONCILE) {
+        reconciled = true;
+        break;
+      }
+    }
+    expect(reconciled).toBe(true);
+    const reconcileStep = current.steps.find((step) => step.id === EDA_PHASE.RECONCILE);
+    expect(reconcileStep?.status).toBe("COMPLETED");
+    expect(
+      current.blockers.some((blocker) => blocker.reason.toLowerCase().includes("reconcil")),
+    ).toBe(false);
   });
 });
