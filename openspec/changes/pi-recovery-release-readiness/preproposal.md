@@ -129,3 +129,17 @@ The delivery also required repairing the release gate itself. The required `pack
 The bounded scope the exploration recommended, restricted to what survives D8: U2 (publish the recovery sequence durably and discoverably), U3 (repair `RELEASING.md` — step 7 must invoke the sanctioned generator, add the mirror and `--check`, and rewrite checklist item 3 per D9), U4 (version `0.1.0` across its three surfaces plus the recovery pair), U5 (correct the stale release-facing prose), D5 (the `postinstall` warning), and U6's remnant if any. U1 is done. U7 (an executable guard that fails when the docs drift) remains explicitly optional.
 
 **The proposal must not inflate scope to justify the SDD 6 slot.** If what remains is a four-file documentation fix plus one behavioural change and one version bump, the proposal should say exactly that.
+
+### D11 — Version carriers (raised by the specs phase, decided after the proposal)
+
+The specs phase found that `0.1.0` has **five** carriers, not the three the proposal's U4 bounded. The three guarded ones are `package.json`, `capability-manifest.yaml#repository.version`, and `docs/architecture/program-lock-facts.json#packageVersion`. Two more carry the pre-alpha string with **no guard coupling them to `package.json#version`**:
+
+| Carrier | Value | Coupled by |
+| --- | --- | --- |
+| `extensions/register.ts:95` | `0.0.1-prealpha.1` | nothing |
+| `extensions/fiscal-guard.ts:49` | `0.0.1-prealpha.1` | nothing |
+| `__tests__/configurator.test.ts:26` | mirrors the above | nothing |
+
+**Confirmed answer: bump all five carriers and add a guard that couples the two harness-version constants to `package.json#version`**, so the same silent drift cannot recur. Without the guard the harness would keep reporting its own version as `0.0.1-prealpha.1` after the bump, and nothing would fail — precisely the silent-drift class this change exists to remove. The new guard is coherent with `REQ-REL-002`, which forbids a release gate with no executable implementation.
+
+**This supersedes the proposal's U4 boundary**, which named three surfaces. The design phase must size U4 as five carriers plus one guard, and the spec's `REQ-REL-003` should be read at that width.
