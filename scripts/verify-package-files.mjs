@@ -205,7 +205,6 @@ function check(relativePath, predicate, message) {
       check(`skills/${skill}/SKILL.md`, undefined, undefined);
     }
     for (const themeFile of [
-      "themes/fiscal-operator/manifest.json",
       "themes/fiscal-operator/fiscal-operator-light.json",
       "themes/fiscal-operator/fiscal-operator-dark.json",
     ]) {
@@ -225,8 +224,12 @@ function check(relativePath, predicate, message) {
     // (REQ-SKPT-007): prompts, skills, and themes.
     for (const key of ["prompts", "skills", "themes"]) {
       for (const entry of Array.isArray(pkg.pi?.[key]) ? pkg.pi[key] : []) {
-        if (typeof entry !== "string") continue;
-        check(entry.replace(/^\.\//, ""), undefined, `pi.${key} entry ${entry} must resolve`);
+        if (typeof entry !== "string" || entry.startsWith("!")) continue;
+        const resourceRoot = entry
+          .replace(/^\.\//, "")
+          .replace(/[*?[{].*$/, "")
+          .replace(/\/$/, "");
+        check(resourceRoot, undefined, `pi.${key} entry ${entry} must resolve`);
       }
     }
     // The files field must carry every packaged operating-content directory.
@@ -255,11 +258,20 @@ if (
 if (!Array.isArray(pkg.pi?.prompts) || !pkg.pi.prompts.includes("./prompts")) {
   errors.push("package.json pi.prompts must include ./prompts");
 }
-if (!Array.isArray(pkg.pi?.skills) || !pkg.pi.skills.includes("./skills")) {
-  errors.push("package.json pi.skills must include ./skills");
+if (
+  JSON.stringify(pkg.pi?.skills) !==
+  JSON.stringify(["./skills/*/SKILL.md"])
+) {
+  errors.push("package.json pi.skills must target only SKILL.md files");
 }
-if (!Array.isArray(pkg.pi?.themes) || !pkg.pi.themes.includes("./themes")) {
-  errors.push("package.json pi.themes must include ./themes");
+if (
+  JSON.stringify(pkg.pi?.themes) !==
+      JSON.stringify([
+        "./themes/fiscal-operator/fiscal-operator-light.json",
+        "./themes/fiscal-operator/fiscal-operator-dark.json",
+      ])
+) {
+  errors.push("package.json pi.themes must list only the two Pi theme files");
 }
 if (pkg.exports?.["."] !== "./dist/index.js") {
 	errors.push('package.json exports["."] must be ./dist/index.js');
