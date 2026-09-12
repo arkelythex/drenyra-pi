@@ -1,15 +1,6 @@
-# Program Conformance Specification
+# Delta for Program Conformance
 
-## Purpose
-
-Defines the evidence-cited capability conformance matrix: a point-in-time,
-commit-scoped artifact that tags every `drenyra-pi` capability with a
-verification level backed by a checkable citation, so README, ROADMAP, and
-`capability-manifest.yaml` cannot silently drift into contradiction again.
-This is a new capability with no prior spec; every requirement below is
-additive.
-
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: REQ-CONF-001 — Evidence-cited capability rows
 
@@ -101,41 +92,7 @@ README.md, ROADMAP.md, `capability-manifest.yaml`, the capability conformance ma
 - WHEN the available evidence is only local or referenced-only
 - THEN conformance verification MUST fail
 
-### Requirement: REQ-CONF-005 — Single active conformance change
-
-At most one OpenSpec change folder governing capability-conformance or
-reconciliation status MAY be open under `openspec/changes/` at a time. A
-superseded change MUST be archived, not left open alongside a newer one.
-
-#### Scenario: Superseded change archived
-
-- GIVEN a newer conformance change supersedes an older open one
-- WHEN the newer change is finalized
-- THEN the older change folder is moved under `openspec/changes/archive/`
-
-#### Scenario: Duplicate active change flagged
-
-- GIVEN two open change folders both governing conformance status
-- WHEN this is detected
-- THEN one MUST be archived before either is treated as current
-
-### Requirement: REQ-CONF-006 — Manifest coverage for wired capabilities
-
-`capability-manifest.yaml` MUST have a row, using its existing schema fields
-(`state`, `evidence.sources`, `evidence.tests`), for every capability backed
-by a live, tested `/drenyra:*` command or chain.
-
-#### Scenario: Wired chain has a manifest row
-
-- GIVEN a chain module wired to a `/drenyra:*` command and covered by tests
-- WHEN the manifest is checked
-- THEN it has a row citing that chain's source and test files
-
-#### Scenario: Untested chain not overclaimed
-
-- GIVEN a chain module with no cited test
-- WHEN its manifest row is written
-- THEN its `state` MUST NOT claim a tested level it has no citation for
+## ADDED Requirements
 
 ### Requirement: REQ-CONF-007 — Ownership and authority boundaries
 
@@ -190,9 +147,3 @@ The repository MUST provide a focused, reproducible conformance guard that runs 
 - GIVEN capability records contain an invalid key or state, contradictory verification, stale current snapshot, ownership escalation, or unsupported end-to-end claim
 - WHEN the conformance guard runs
 - THEN it produces a failing result identifying the violated conformance condition
-
-## Out of Scope
-
-`capability-manifest.yaml` schema/tooling redesign (generator, lint-check);
-fixes inside `drenyra-ai` itself; and any rewrite of
-`docs/architecture/ecosystem-boundaries.md` beyond correcting stale counts.

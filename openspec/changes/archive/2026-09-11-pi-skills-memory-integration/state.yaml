@@ -1,0 +1,96 @@
+change: pi-skills-memory-integration
+created: 2026-09-09
+store_mode: hybrid
+status: blocked_superseded
+session_preflight:
+  execution_mode: auto
+  delivery_strategy: auto-chain
+  review_budget_lines: 400
+  chain_strategy: stacked-to-main
+links:
+  master_program: dominion
+  served_capabilities: []
+  referenced_only: [SDD-070, SDD-080]
+decisions:
+  scope: skills_only_wiring
+  scope_reason: >-
+    (Orchestrator's own decision, now superseded -- see phases.specs note.)
+    User chose to wire Pi as a thin consumer of the Core's existing
+    drenyra-ai/skills SkillRegistry.resolveAt() (real task+jurisdiction+
+    validity selection, fail-closed on stale/wrong-jurisdiction). Engram
+    memory explicitly deferred as blocked-on-master -- no Core API exists
+    anywhere to consume; nothing invented locally.
+  superseding_decision: functional_selection_contract_first
+  superseding_decision_reason: >-
+    A concurrent session's own preproposal.md + rewritten proposal.md
+    recorded the user explicitly choosing functional_selection_contract_first
+    over adapter_only_explicit and defer_skills_advance_journey. Rationale:
+    since no MissionIntent value matches a BASE_PE_SKILLS id, adapter-only
+    wiring would always resolve SKILL_NOT_FOUND in production -- a no-op
+    dressed up as functional selection. Blocks tasks/apply until an
+    authoritative kernel task-to-skill-requirements contract is published
+    (see upstream-contract-proposal.md) and design/spec are revised against
+    its actual published types.
+phases:
+  explore:
+    status: done
+    artifact: exploration.md
+  research:
+    status: unselected
+    note: purely internal architecture question (consuming an existing Core API); no external prior-art question exists
+  proposal:
+    status: superseded
+    artifact: proposal.md
+    note: >-
+      Rewritten by the concurrent session at 14:25 (this orchestrator's
+      original adapter-only proposal from ~13:37 no longer reflects current
+      authority). Current proposal.md is titled "Contract-First Production
+      Skill Selection" and explicitly states its decisions "supersede the
+      adapter-only direction in the current design.md and
+      specs/skills-selection/spec.md. Those files remain historical planning
+      inputs requiring a later revision; they are not implementation
+      authority." A companion upstream-contract-proposal.md proposes the
+      missing kernel contract (not implemented, not approved, not published).
+  design:
+    status: superseded
+    artifact: design.md
+    note: >-
+      Built against the now-superseded adapter-only proposal. Its own
+      finding (no MissionIntent matches any BASE_PE_SKILLS id) is exactly
+      what the concurrent session's deeper analysis used to reject the
+      adapter-only approach as a no-op. Corrected 3 proposal assumptions
+      along the way (SkillRegistry needs BASE_PE_SKILLS registered before
+      use; WorkUnitInput.skills is VersionPin[] not SkillDefinition[]; "at"
+      must be YYYY-MM-DD not a full ISO timestamp) -- these facts remain
+      true and reusable once a real contract-first design is authorized.
+  specs:
+    status: superseded
+    artifact: specs/skills-selection/spec.md
+    note: >-
+      Corrected once for spec/design drift (folded manifest evidence into
+      drenyra-commands instead of a new key; covered all 5 SkillError
+      codes including SKILL_NOT_FOUND) -- then superseded entirely by the
+      concurrent session's proposal rewrite before sdd-tasks could run.
+      sdd-tasks correctly refused to build tasks against this stale
+      authority once it detected the proposal/state.yaml inconsistency.
+  tasks:
+    status: blocked
+    note: >-
+      sdd-tasks refused to proceed (correct behavior) upon detecting that
+      proposal.md had been rewritten out from under design.md/spec.md by a
+      concurrent session, with an explicit "tasks/apply must not advance"
+      instruction in the new proposal. Blocked pending an approved,
+      published upstream drenyra-ai contract -- not something this change
+      can resolve locally.
+notes: >-
+  Critical finding (still true, now more precisely stated by the concurrent
+  session): SDD-070 (skills) and SDD-080 (Engram memory) are BOTH
+  master-owned-only per README's Dominion Program table. The pinned
+  drenyra-ai@0.4.1 Core ships SkillRegistry.resolveAt() but it resolves an
+  already-known skill ID, not mission-to-skill REQUIREMENTS -- no kernel API
+  determines which skills a given MissionIntent needs. Building an adapter
+  that calls resolveAt(mission.intent, ...) is real code but functionally a
+  no-op today (always SKILL_NOT_FOUND). This change is now correctly blocked
+  pending a new kernel contract (drenyra-ai, outside this repo's
+  allowedEditRoots) that doesn't exist yet. Engram memory remains a wholly
+  separate, unresolved dependency regardless of the skills outcome.
