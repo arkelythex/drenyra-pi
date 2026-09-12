@@ -2,8 +2,8 @@
 
 **Change:** `pi-recovery-release-readiness` (local SDD 6 of 6)
 **Store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
-**Phase state:** explore **done** → pre-proposal gate **OPEN** → proposal **not authorized**
-**Status:** `pending-product-decisions` — `sdd-proposal` MUST NOT be invoked until every blocking decision below is confirmed.
+**Phase state:** explore **done** → pre-proposal gate **CLOSED** → proposal **authorized**
+**Status:** `confirmed` — every decision below is answered by the maintainer. The proposer receives this as a confirmed handoff and MUST NOT interview the human or infer further consent.
 
 ## Gate position
 
@@ -13,8 +13,8 @@
 | Change selection | unambiguous — this change is the only new one; `pi-skills-memory-integration` is a separate, blocked change |
 | Exploration artifact | `exploration.md` (447 lines), written and readable |
 | Selected research | **unselected** — a purely internal architecture/documentation question; no external prior-art question exists, so the research gate does not block |
-| Product decisions | **NOT confirmed** — see §2 and §3 |
-| Proposal launch | **blocked** by this artifact |
+| Product decisions | **CONFIRMED** — all ten answered; see §6 |
+| Proposal launch | **authorized** |
 
 ## 1. Evidence added by the parent after exploration
 
@@ -96,8 +96,36 @@ The exploration's honest verdict, which I endorse: this is **warranted as a sepa
 
 Its ceiling: **U1 (the commit boundary) is the unit that matters.** U2–U6 are discoverability, documentation, one destructive cleanup, and two decisions. If D1 is answered "handle delivery outside SDD" and D6 "do not open a second change folder", the honest resolution is to deliver U2+U3+U5+U6 as an **amendment to existing surfaces** and close this change as superseded — **not** to pad the scope to fill the SDD 6 slot.
 
-## 5. What must happen next
+## 5. Confirmed decision record (gate closed)
 
-1. Round 1 answers D1, D6, D3, D2.
-2. Round 2 confirms or corrects §3.
-3. Only then may `sdd-proposal` be invoked, with this artifact as its confirmed handoff. The proposer must not interview the human or infer consent.
+All ten decisions are answered. Two were already executed before this record, and the rest are now settled for the proposal to build on.
+
+| # | Decision | Confirmed answer | State |
+| --- | --- | --- | --- |
+| D1 | Delivery boundary | **U1 = the commit/push boundary as the change's first unit**, with the 400-line reviewer budget enforced at commit boundaries | executed |
+| D2 | Version | **`0.1.0`** — both frozen contracts already imply it | settled |
+| D3 | `pi-skills-memory-integration` disposition | **archive as superseded** | executed |
+| D4 | Stray `./~/` tree | **remove via absolute path + `~*` ignore guard** | executed |
+| D5 | `postinstall` when the compiled installer is absent | **print a visible warning, keep exit 0** — smallest change that removes the silent fail-open without breaking CI's install-before-build ordering | settled |
+| D6 | May a second change folder be open (`REQ-CONF-005`) | **archive the active change first** | executed |
+| D7 | Authority over identity-allowlisted surfaces | **granted**, with the recovery pair (`refresh:lock-facts` → rewrite the mirror in `openspec/config.yaml` → `--check` → full verification) as a **mandatory post-step of every unit that writes one** | settled |
+| D8 | Publication posture | **confirmed: no publication.** The change stops at a verified gate plus honest documentation. No npm publish, no `publishConfig`, no publish step; the ROADMAP item stays unchecked | settled |
+| D9 | "Conformance vectors" has no executable runner | **rewrite the checklist item** to name the gates that actually run; build no runner | settled |
+| D10 | Missing artifacts of the superseded change | **resolved by D3's execution** — `tasks.md` and `upstream-contract-proposal.md` are recorded as explicit absences in its `supersession-record.md`, so no status change can launder them into "done" | executed |
+
+### D1 executed — what the delivery actually produced
+
+Two chained PRs merged to protected `main`:
+
+- **PR #70** `feat/capability-conformance-guard` → `sync/accumulated-main` — ten commits by work area, all four required checks green.
+- **PR #69** `sync/accumulated-main` → `main` — absorbed #70, went green, and merged as `70d87ac`.
+
+The delivery also required repairing the release gate itself. The required `package` check failed on **every** branch: the postinstall runs a nested `npm install` with `cwd` inside the installed package, npm reads drenyra-pi's published manifest and walks its devDependency tree, and npm 10.9.x crashes there in Arborist `#loadPeerSet` (`Cannot read properties of null (reading 'edgesOut')`). Reproduced deterministically by pinning npm 10.9.0 locally; fixed with `--legacy-peer-deps` and verified on both npm 10.9.0 and 11.19.0.
+
+**This is a unit of SDD 6's own subject matter that arrived early**, so the proposal should account for it as already-delivered rather than re-planning it: release readiness was blocked by a defect the repository's own gate could not name, and the diagnostics fix that made it nameable is now part of the delivery.
+
+### What the proposal must now produce
+
+The bounded scope the exploration recommended, restricted to what survives D8: U2 (publish the recovery sequence durably and discoverably), U3 (repair `RELEASING.md` — step 7 must invoke the sanctioned generator, add the mirror and `--check`, and rewrite checklist item 3 per D9), U4 (version `0.1.0` across its three surfaces plus the recovery pair), U5 (correct the stale release-facing prose), D5 (the `postinstall` warning), and U6's remnant if any. U1 is done. U7 (an executable guard that fails when the docs drift) remains explicitly optional.
+
+**The proposal must not inflate scope to justify the SDD 6 slot.** If what remains is a four-file documentation fix plus one behavioural change and one version bump, the proposal should say exactly that.
