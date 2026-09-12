@@ -16,9 +16,16 @@
  */
 
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { EDA_PHASE } from "../../lib/accounting-status.js";
 import { sha256Canonical } from "../../lib/canonicalization.js";
 import {
   EvidenceGraphStore,
@@ -26,6 +33,7 @@ import {
   EVIDENCE_RELATION,
 } from "../../lib/evidence-graph.js";
 import { runChainStep, type ChainRunResult } from "../../lib/chain-pipeline.js";
+import { createDurableMissionStores } from "../../lib/mission-store.js";
 import {
   evidenceChain,
   parseEvidenceOp,
@@ -52,6 +60,27 @@ afterEach(() => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+function snapshotDirectory(root: string): Readonly<Record<string, string>> {
+  const snapshot: Record<string, string> = {};
+  if (!existsSync(root)) return snapshot;
+
+  function visit(directory: string, prefix: string): void {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const relativePath =
+        prefix.length === 0 ? entry.name : `${prefix}/${entry.name}`;
+      const absolutePath = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(absolutePath, relativePath);
+      } else if (entry.isFile()) {
+        snapshot[relativePath] = readFileSync(absolutePath).toString("base64");
+      }
+    }
+  }
+
+  visit(root, "");
+  return snapshot;
+}
 
 /** Run one evidence-chain step (one op per invocation) over a fresh stores root. */
 async function runOp(
@@ -87,7 +116,9 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
 
     const graph = new EvidenceGraphStore(root);
     const loaded = await graph.load(missionId);
-    const node = loaded.nodes.find((candidate) => candidate.id === "src-balance");
+    const node = loaded.nodes.find(
+      (candidate) => candidate.id === "src-balance",
+    );
     expect(node).toBeDefined();
     expect(node?.payloadHash).toBe(sha256Canonical(node!.payload));
   });
@@ -101,7 +132,11 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
         node: {
           id: "src-1",
           nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-          payload: { kind: "bank-movement", reference: "B001", amountCents: 250_000 },
+          payload: {
+            kind: "bank-movement",
+            reference: "B001",
+            amountCents: 250_000,
+          },
         },
       },
     });
@@ -181,7 +216,9 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
       op: { op: "query-lineage", nodeId: "action-1" },
     });
     expect(lineageResult.output?.lineage).toBeDefined();
-    const ancestors = lineageResult.output!.lineage!.ancestors.map((node) => node.id);
+    const ancestors = lineageResult.output!.lineage!.ancestors.map(
+      (node) => node.id,
+    );
     expect(ancestors).toEqual(["src-1", "trans-1", "concl-1"]);
     // The kinds follow source → transformation → conclusion → action.
     const kinds = lineageResult.output!.lineage!.ancestors.map(
@@ -194,6 +231,57 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
     ]);
     // The connecting edges are part of the lineage.
     expect(lineageResult.output!.lineage!.edges.length).toBeGreaterThan(0);
+
+    const queryStores = createDurableMissionStores(root);
+    const queryGraph = new EvidenceGraphStore(root);
+    const provenanceResult = await evidenceChain.runStep({
+      chain: evidenceChain.name,
+      binding: makeScopeBinding(),
+      stores: queryStores,
+      graph: queryGraph,
+      mission: lineageResult.mission!,
+      phase: EDA_PHASE.INVESTIGATE,
+      input: {
+        missionId,
+        op: { op: "query-provenance", nodeId: "action-1" },
+      },
+    });
+    const provenance = provenanceResult.output.provenance;
+    expect(provenance?.terminal).toMatchObject({
+      missionId,
+      nodeId: "action-1",
+      nodeKind: EVIDENCE_NODE_KIND.ACTION,
+    });
+    expect(provenance?.validationState).toBe("verified");
+    expect(provenance?.nodes.map((node) => node.id)).toEqual([
+      "src-1",
+      "trans-1",
+      "concl-1",
+      "action-1",
+    ]);
+    expect(provenance?.nodes.every((node) => node.payloadHashVerified)).toBe(
+      true,
+    );
+    expect(provenance?.edges.some((edge) => edge.to === "action-1")).toBe(true);
+    expect(provenance?.receiptEvidenceHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(provenance?.blockingReasons).toEqual([]);
+
+    await expect(
+      evidenceChain.runStep({
+        chain: evidenceChain.name,
+        binding: makeScopeBinding({ company: FIXTURE_RUC_B }),
+        stores: queryStores,
+        graph: queryGraph,
+        mission: lineageResult.mission!,
+        phase: EDA_PHASE.INVESTIGATE,
+        input: {
+          missionId,
+          op: { op: "query-provenance", nodeId: "action-1" },
+        },
+      }),
+    ).rejects.toThrow(
+      /outside the active bound scope|provenance query rejected/i,
+    );
   });
 
   it("rejects a conclusion without citations (REQ-EVID-004)", async () => {
@@ -204,7 +292,11 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
         node: {
           id: "src-1",
           nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-          payload: { kind: "bank-movement", reference: "B001", amountCents: 100 },
+          payload: {
+            kind: "bank-movement",
+            reference: "B001",
+            amountCents: 100,
+          },
         },
       },
     });
@@ -227,7 +319,9 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
     // Nothing was appended: the graph holds only the source node.
     const graph = new EvidenceGraphStore(root);
     const loaded = await graph.load(missionId);
-    expect(loaded.nodes.some((node) => node.id === "concl-uncited")).toBe(false);
+    expect(loaded.nodes.some((node) => node.id === "concl-uncited")).toBe(
+      false,
+    );
   });
 
   it("rejects citations that do not exist in the target mission (fail closed)", async () => {
@@ -238,7 +332,11 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
         node: {
           id: "src-1",
           nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-          payload: { kind: "bank-movement", reference: "B001", amountCents: 100 },
+          payload: {
+            kind: "bank-movement",
+            reference: "B001",
+            amountCents: 100,
+          },
         },
       },
     });
@@ -270,7 +368,11 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
         node: {
           id: "src-1",
           nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-          payload: { kind: "ledger-entry", reference: "B001", amountCents: 100 },
+          payload: {
+            kind: "ledger-entry",
+            reference: "B001",
+            amountCents: 100,
+          },
         },
       },
     });
@@ -288,42 +390,54 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
     ).rejects.toThrow(/unknown node/i);
   });
 
-      it("rejects cross-mission edges (the graph stays bound to the mission — design §7.2)", async () => {
-        const root = tempRoot();
-        // Mission A holds a source node; mission B holds an unrelated source node
-        // under a DIFFERENT company scope (active-mission reuse matches by
-        // company + fiscal period, so a different company starts a second mission).
-        const bindingA = makeScopeBinding({ company: FIXTURE_RUC });
-        const bindingB = makeScopeBinding({ company: FIXTURE_RUC_B });
-        const missionA = (await runOp(
-          root,
-          {
-            op: {
-              op: "add-node",
-              node: {
-                id: "src-a",
-                nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-                payload: { kind: "ledger-entry", reference: "A001", amountCents: 100 },
+  it("rejects cross-mission edges (the graph stays bound to the mission — design §7.2)", async () => {
+    const root = tempRoot();
+    // Mission A holds a source node; mission B holds an unrelated source node
+    // under a DIFFERENT company scope (active-mission reuse matches by
+    // company + fiscal period, so a different company starts a second mission).
+    const bindingA = makeScopeBinding({ company: FIXTURE_RUC });
+    const bindingB = makeScopeBinding({ company: FIXTURE_RUC_B });
+    const missionA = (
+      await runOp(
+        root,
+        {
+          op: {
+            op: "add-node",
+            node: {
+              id: "src-a",
+              nodeKind: EVIDENCE_NODE_KIND.SOURCE,
+              payload: {
+                kind: "ledger-entry",
+                reference: "A001",
+                amountCents: 100,
               },
             },
           },
-          bindingA,
-        )).mission!;
-        const missionB = (await runOp(
-          root,
-          {
-            op: {
-              op: "add-node",
-              node: {
-                id: "src-b",
-                nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-                payload: { kind: "ledger-entry", reference: "B001", amountCents: 100 },
+        },
+        bindingA,
+      )
+    ).mission!;
+    const missionB = (
+      await runOp(
+        root,
+        {
+          op: {
+            op: "add-node",
+            node: {
+              id: "src-b",
+              nodeKind: EVIDENCE_NODE_KIND.SOURCE,
+              payload: {
+                kind: "ledger-entry",
+                reference: "B001",
+                amountCents: 100,
               },
             },
           },
-          bindingB,
-        )).mission!;
-        expect(missionA.id).not.toBe(missionB.id);
+        },
+        bindingB,
+      )
+    ).mission!;
+    expect(missionA.id).not.toBe(missionB.id);
 
     // An edge in mission A referencing a node that only exists in mission B fails.
     await expect(
@@ -342,28 +456,87 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
     ).rejects.toThrow(/endpoint|does not exist/i);
   });
 
-  it("keeps queries read-only (no new nodes after a query)", async () => {
+  it("keeps query domain computation fully read-only", async () => {
     const root = tempRoot();
-    const first = await runOp(root, {
-      op: {
-        op: "add-node",
-        node: {
-          id: "src-1",
-          nodeKind: EVIDENCE_NODE_KIND.SOURCE,
-          payload: { kind: "ledger-entry", reference: "B001", amountCents: 100 },
+    const binding = makeScopeBinding();
+    const first = await runOp(
+      root,
+      {
+        op: {
+          op: "add-node",
+          node: {
+            id: "src-1",
+            nodeKind: EVIDENCE_NODE_KIND.SOURCE,
+            payload: {
+              kind: "ledger-entry",
+              reference: "B001",
+              amountCents: 100,
+            },
+          },
         },
       },
-    });
-    const missionId = first.mission!.id;
-    const before = (await new EvidenceGraphStore(root).load(missionId)).nodes.length;
+      binding,
+    );
+    const mission = first.mission!;
+    const missionId = mission.id;
+    const stores = createDurableMissionStores(root);
+    const graph = new EvidenceGraphStore(root);
+    const beforeGraph = structuredClone(await graph.load(missionId));
+    const evidenceLogPath = join(
+      root,
+      ".local",
+      "evidence",
+      `${missionId}.ndjson`,
+    );
+    const beforeLogBytes = readFileSync(evidenceLogPath);
+    const beforeMissions = snapshotDirectory(join(root, ".local", "missions"));
+    const beforeAuthority = snapshotDirectory(
+      join(root, ".local", "authority"),
+    );
+    const beforeReceipts = snapshotDirectory(join(root, ".local", "receipts"));
 
-    await runOp(root, { missionId, op: { op: "query-node", nodeId: "src-1" } });
-    await runOp(root, {
-      missionId,
-      op: { op: "query-lineage", nodeId: "src-1" },
+    const nodeQuery = await evidenceChain.runStep({
+      chain: evidenceChain.name,
+      binding,
+      stores,
+      graph,
+      mission,
+      phase: EDA_PHASE.INVESTIGATE,
+      input: { missionId, op: { op: "query-node", nodeId: "src-1" } },
     });
-    const after = (await new EvidenceGraphStore(root).load(missionId)).nodes.length;
-    expect(after).toBe(before);
+    const lineageQuery = await evidenceChain.runStep({
+      chain: evidenceChain.name,
+      binding,
+      stores,
+      graph,
+      mission,
+      phase: EDA_PHASE.INVESTIGATE,
+      input: { missionId, op: { op: "query-lineage", nodeId: "src-1" } },
+    });
+    const provenanceQuery = await evidenceChain.runStep({
+      chain: evidenceChain.name,
+      binding,
+      stores,
+      graph,
+      mission,
+      phase: EDA_PHASE.INVESTIGATE,
+      input: { missionId, op: { op: "query-provenance", nodeId: "src-1" } },
+    });
+
+    expect(nodeQuery.output.queriedNode?.id).toBe("src-1");
+    expect(lineageQuery.output.lineage?.nodeId).toBe("src-1");
+    expect(provenanceQuery.output.provenance?.validationState).toBe("verified");
+    expect(await graph.load(missionId)).toEqual(beforeGraph);
+    expect(readFileSync(evidenceLogPath)).toEqual(beforeLogBytes);
+    expect(snapshotDirectory(join(root, ".local", "missions"))).toEqual(
+      beforeMissions,
+    );
+    expect(snapshotDirectory(join(root, ".local", "authority"))).toEqual(
+      beforeAuthority,
+    );
+    expect(snapshotDirectory(join(root, ".local", "receipts"))).toEqual(
+      beforeReceipts,
+    );
   });
 
   it("parses a bounded evidence op envelope and fails closed on invalid input", () => {
@@ -390,7 +563,10 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
     );
     expect(() =>
       parseEvidenceOp(
-        JSON.stringify({ op: "add-node", node: { id: "x", nodeKind: "source" } }),
+        JSON.stringify({
+          op: "add-node",
+          node: { id: "x", nodeKind: "source" },
+        }),
       ),
     ).toThrow(/payload/i);
     expect(() =>
@@ -400,11 +576,20 @@ describe("evidence chain (REQ-CHAIN-004; SC-CHAIN-006)", () => {
           node: {
             id: "x",
             nodeKind: "source",
-            payload: { kind: "ledger-entry", reference: "B1", amountCents: 10.5 },
+            payload: {
+              kind: "ledger-entry",
+              reference: "B1",
+              amountCents: 10.5,
+            },
           },
         }),
       ),
     ).toThrow(/float/i);
+    expect(
+      parseEvidenceOp(JSON.stringify({ op: "query-provenance", nodeId: "x" })),
+    ).toEqual({
+      op: { op: "query-provenance", nodeId: "x" },
+    });
     expect(() =>
       parseEvidenceOp(
         JSON.stringify({ op: "query-lineage", nodeId: "x", extra: 1 }),

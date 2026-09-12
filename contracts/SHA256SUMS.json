@@ -10,7 +10,7 @@
     "assets/schemas/evidence/node.schema.json": "d67423b8f7d0316b66195c0fac7f1d230b87b69c229686910d03760ead8820ca",
     "assets/schemas/scope/authority-mode.schema.json": "dd8aa4f8eaf897284799373e7a432e64918e54b32054109e9bd59a17c02e25cf",
     "assets/schemas/scope/scope-binding.schema.json": "51358ec08be18079d2e534043f1ff44cb5e3f150261005368de2f70b53ecb5d7",
-    "contracts/README.md": "0300db4328cc6e6972efccc2702ea74246fac9c0a907fbd19d72133f792120fb",
+    "contracts/README.md": "513cb2bd2f62c3544a5387be130de809d610269f792b4cf0af1fac6136419bf6",
     "contracts/authority/authority-mode.schema.json": "dd8aa4f8eaf897284799373e7a432e64918e54b32054109e9bd59a17c02e25cf",
     "contracts/authority/authorization-record.schema.json": "d12f584e2bb4512e497f76d741e30f9ef998fa46eec9e8578f9f91674d2d0687",
     "contracts/authority/scope-binding.schema.json": "51358ec08be18079d2e534043f1ff44cb5e3f150261005368de2f70b53ecb5d7",

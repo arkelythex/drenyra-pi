@@ -21,14 +21,15 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { EvidenceStatusProjectionInput } from "./accounting-status.js";
 import { EvidenceGraphStore } from "./evidence-graph.js";
+import { projectEvidenceProvenanceSet } from "./evidence-projection.js";
 import { isSafeStoreIdentifier } from "./authority-store.js";
 
 /** Input for `loadEvidenceStatus`: the durable stores root + target mission. */
 export interface EvidenceStatusLoadInput {
-  /** The durable stores root (`.local/evidence/<mission-id>.ndjson`). */
-  storesRoot: string;
-  /** The mission whose graph is projected. */
-  missionId: string;
+ /** The durable stores root (`.local/evidence/<mission-id>.ndjson`). */
+ storesRoot: string;
+ /** The mission whose graph is projected. */
+ missionId: string;
 }
 
 /**
@@ -40,38 +41,39 @@ export interface EvidenceStatusLoadInput {
  * never implied valid (REQ-EVID-008; SC-EVID-003).
  */
 export async function loadEvidenceStatus(
-  input: EvidenceStatusLoadInput,
+ input: EvidenceStatusLoadInput,
 ): Promise<EvidenceStatusProjectionInput> {
-  if (!isSafeStoreIdentifier(input.missionId)) {
-    return {
-      missionId: input.missionId,
-      error: `mission id "${input.missionId}" is not a safe store identifier — evidence unavailable`,
-    };
-  }
-  const logPath = join(
-    input.storesRoot,
-    ".local",
-    "evidence",
-    `${input.missionId}.ndjson`,
-  );
-  if (!existsSync(logPath)) {
-    return {
-      missionId: input.missionId,
-      error: `no evidence graph log for mission ${input.missionId} — evidence unavailable`,
-    };
-  }
-  const store = new EvidenceGraphStore(input.storesRoot);
-  let graph;
-  try {
-    graph = await store.load(input.missionId);
-  } catch (cause) {
-    return {
-      missionId: input.missionId,
-      error:
-        `evidence graph for mission ${input.missionId} is malformed — evidence ` +
-        `unavailable until repaired (${cause instanceof Error ? cause.message : String(cause)})`,
-    };
-  }
-  const validation = await store.validate(input.missionId);
-  return { missionId: input.missionId, graph, validation };
+ if (!isSafeStoreIdentifier(input.missionId)) {
+  return {
+   missionId: input.missionId,
+   error: `mission id "${input.missionId}" is not a safe store identifier — evidence unavailable`,
+  };
+ }
+ const logPath = join(
+  input.storesRoot,
+  ".local",
+  "evidence",
+  `${input.missionId}.ndjson`,
+ );
+ if (!existsSync(logPath)) {
+  return {
+   missionId: input.missionId,
+   error: `no evidence graph log for mission ${input.missionId} — evidence unavailable`,
+  };
+ }
+ const store = new EvidenceGraphStore(input.storesRoot);
+ let graph;
+ try {
+  graph = await store.load(input.missionId);
+ } catch (cause) {
+  return {
+   missionId: input.missionId,
+   error:
+    `evidence graph for mission ${input.missionId} is malformed — evidence ` +
+    `unavailable until repaired (${cause instanceof Error ? cause.message : String(cause)})`,
+  };
+ }
+ const validation = await store.validate(input.missionId);
+ const provenance = projectEvidenceProvenanceSet(graph, validation);
+ return { missionId: input.missionId, graph, validation, provenance };
 }

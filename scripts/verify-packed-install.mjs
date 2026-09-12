@@ -25,7 +25,17 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+// The repository's own manifest is an input to this gate. A missing or
+// malformed one is a named failure rather than an unhandled throw, so the
+// reader learns what broke instead of reading a stack trace.
+let pkg;
+try {
+  pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+} catch (error) {
+  console.error("verify-packed-install: FAILED");
+  console.error(`  - repository package.json is missing or malformed: ${error.message}`);
+  process.exit(1);
+}
 // The build has already run when this script executes, so the compiled pin is
 // readable; its state decides what the postinstall must print.
 const { DEFAULT_PIN, RUNTIME_VERSION } = await import(
@@ -46,8 +56,16 @@ try {
       `npm install --no-save --no-package-lock --prefix ${installDir} ${join(work, tgzName)}`,
       { cwd: root, stdio: "pipe" },
     );
-  } catch {
+  } catch (error) {
     failures.push("npm install of the packed tgz failed (postinstall or dependency error)");
+    // npm's own diagnostics are the only way to tell a postinstall failure
+    // from a dependency error or a registry problem. The captured streams are
+    // surfaced verbatim, because a gate that reports a cause it cannot name
+    // sends the reader chasing its own consequence instead.
+    for (const stream of [error?.stdout, error?.stderr]) {
+      const text = stream ? stream.toString().trim() : "";
+      if (text) console.error(text);
+    }
   }
 
   // (a) the pi manifest is present in the INSTALLED package.json.

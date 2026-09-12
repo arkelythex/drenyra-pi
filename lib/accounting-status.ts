@@ -44,6 +44,10 @@ import {
   type EvidenceGraphValidation,
   type EvidenceNodeKind,
 } from "./evidence-graph.js";
+import {
+  EVIDENCE_PROJECTION_VALIDATION_STATE,
+  type EvidenceProvenanceProjection,
+} from "./evidence-projection.js";
 
 /** The 13 canonical EDA phases (REQ-MISS-001; design §4.2). */
 export const EDA_PHASE = {
@@ -241,7 +245,7 @@ export const PHASE_APPLICABILITY: Readonly<
     archive: REQUIRED,
   },
 };
-    
+
 /** The applicability of one phase for one intent (design §4.3). */
 export function applicabilityFor(
   intent: string,
@@ -354,14 +358,14 @@ export function derivePreparedStep(
 
   const wait = waitReasonFor(snapshot.status);
   let disposition: PreparedStep["disposition"];
-  if (wait !== null) {
-    disposition = "WAIT";
-  } else {
+  if (wait === null) {
     const policy = applicabilityFor(snapshot.intent, phase);
     disposition =
       policy === "conditional" && !hasTriggeringCondition(snapshot)
-      ? "SKIP"
-      : "RUN";
+        ? "SKIP"
+        : "RUN";
+  } else {
+    disposition = "WAIT";
   }
 
   return {
@@ -495,6 +499,8 @@ export interface EvidenceStatusView {
   conclusionIds?: readonly string[];
   /** Node ids of every displayed action, when verified (REQ-EVID-007). */
   actionIds?: readonly string[];
+  /** Deterministic terminal provenance projections for audit/review output. */
+  provenance?: readonly EvidenceProvenanceProjection[];
   /** Fail-closed reason when the graph is missing, malformed, or invalid. */
   reason?: string;
 }
@@ -512,6 +518,8 @@ export interface EvidenceStatusProjectionInput {
   graph?: EvidenceGraph;
   /** The store's integrity validation (REQ-EVID-008). */
   validation?: EvidenceGraphValidation;
+  /** Read-only terminal provenance projections, when the graph could be loaded. */
+  provenance?: readonly EvidenceProvenanceProjection[];
   /** A load failure reason — the graph is unavailable for authority use. */
   error?: string;
 }
@@ -565,39 +573,67 @@ export interface AccountingStatusInput {
 export function projectEvidenceStatus(
   input: EvidenceStatusProjectionInput,
 ): EvidenceStatusView {
-  const { missionId, graph, validation, error } = input;
+  const { missionId, graph, validation, error, provenance } = input;
   if (error !== undefined) {
-    return {
+    const status: EvidenceStatusView = {
       available: false,
       integrity: "unavailable",
       summary: error,
-      ...(missionId === undefined ? {} : { missionId }),
-      reason: error,
     };
+    if (missionId !== undefined) status.missionId = missionId;
+    status.reason = error;
+    return status;
   }
   if (graph === undefined || validation === undefined) {
-    return {
+    const status: EvidenceStatusView = {
       available: false,
       integrity: "unavailable",
       summary:
         "no evidence graph supplied — evidence unavailable (no active mission graph to project)",
-      ...(missionId === undefined ? {} : { missionId }),
-      reason: "evidence graph not supplied",
     };
+    if (missionId !== undefined) status.missionId = missionId;
+    status.reason = "evidence graph not supplied";
+    return status;
   }
   if (!validation.valid) {
-    return {
+    const status: EvidenceStatusView = {
       available: false,
       integrity: "unavailable",
       summary:
         `evidence graph for mission ${missionId ?? "?"} failed integrity validation — ` +
         "evidence unavailable until repaired",
-      ...(missionId === undefined ? {} : { missionId }),
-      reason: validation.errors.join("; ") || "integrity validation failed",
     };
+    if (missionId !== undefined) status.missionId = missionId;
+    if (provenance !== undefined) status.provenance = provenance;
+    status.reason =
+      validation.errors.join("; ") || "integrity validation failed";
+    return status;
   }
 
-  const nodeCounts: Record<EvidenceNodeKind, number> = {
+  const blockedProvenance = provenance?.filter(
+    (projection) =>
+      projection.validationState ===
+      EVIDENCE_PROJECTION_VALIDATION_STATE.BLOCKED,
+  );
+  if (blockedProvenance !== undefined && blockedProvenance.length > 0) {
+    const provenanceReasons = blockedProvenance.flatMap(
+      (projection) => projection.blockingReasons,
+    );
+    const status: EvidenceStatusView = {
+      available: false,
+      integrity: "unavailable",
+      summary:
+        `evidence graph for mission ${missionId ?? "?"} failed provenance validation — ` +
+        "evidence unavailable until repaired",
+    };
+    if (missionId !== undefined) status.missionId = missionId;
+    status.provenance = provenance;
+    status.reason =
+      provenanceReasons.join("; ") || "provenance validation failed";
+    return status;
+  }
+
+  const nodeCounts = {
     [EVIDENCE_NODE_KIND.SOURCE]: 0,
     [EVIDENCE_NODE_KIND.TRANSFORMATION]: 0,
     [EVIDENCE_NODE_KIND.CONCLUSION]: 0,
@@ -614,19 +650,21 @@ export function projectEvidenceStatus(
       actionIds.push(node.id);
     }
   }
-  return {
+  const status: EvidenceStatusView = {
     available: true,
     integrity: "verified",
     summary:
       `evidence graph for mission ${missionId ?? "?"}: ${graph.nodes.length} node(s) ` +
       `verified (${graph.edges.length} edge(s)) — ${conclusionIds.length} conclusion(s), ` +
       `${actionIds.length} action(s)`,
-    ...(missionId === undefined ? {} : { missionId }),
-    nodeIds: graph.nodes.map((node) => node.id),
-    nodeCounts,
-    conclusionIds,
-    actionIds,
   };
+  if (missionId !== undefined) status.missionId = missionId;
+  status.nodeIds = graph.nodes.map((node) => node.id);
+  status.nodeCounts = nodeCounts;
+  status.conclusionIds = conclusionIds;
+  status.actionIds = actionIds;
+  if (provenance !== undefined) status.provenance = provenance;
+  return status;
 }
 
 /**

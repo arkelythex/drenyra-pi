@@ -16,7 +16,10 @@
         "tests": [
           "__tests__/extension.test.ts"
         ]
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "drenyra-commands": {
       "state": "implemented",
@@ -34,7 +37,10 @@
           "__tests__/routing/executor.test.ts"
         ],
         "note": "verificationLevel: lib/routing/direct-port.ts = unit-or-contract-tested (wired into /drenyra:status route; not validated-end-to-end). The routing adapter's `delegated` modality has no production port yet — an explicit, tracked follow-up (REQ-ROUTE-005), not silently omitted; `durable` has a production port (lib/mission-commands.ts createDurableMissionRoutingPort) but is not wired into /drenyra:status."
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "pi-subagents": {
       "state": "implemented",
@@ -54,7 +60,10 @@
         "tests": [
           "__tests__/agents.test.ts"
         ]
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "model-routing": {
       "state": "partial",
@@ -67,7 +76,10 @@
           "__tests__/extension.test.ts"
         ],
         "limitation": "advisory registry exists; the installed Pi host slice exposes no model-routing API (G30) and model suggestions never grant authority"
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "packaged-skills": {
       "state": "implemented",
@@ -87,7 +99,10 @@
         "tests": [
           "__tests__/content.test.ts"
         ]
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "rda-chains": {
       "state": "implemented",
@@ -111,7 +126,10 @@
           "__tests__/evidence-projection.test.ts"
         ],
         "note": "verificationLevel: chains/reconcile.ts = unit-or-contract-tested (chains/__tests__/reconcile.test.ts); verificationLevel: chains/verify.ts = unit-or-contract-tested (chains/__tests__/verify.test.ts); verificationLevel: chains/evidence.ts = unit-or-contract-tested (chains/__tests__/evidence.test.ts); verificationLevel: lib/accounting-semantics.ts = unit-or-contract-tested (__tests__/accounting-semantics.test.ts); verificationLevel: lib/evidence-projection.ts = unit-or-contract-tested (__tests__/evidence-projection.test.ts); verificationLevel: chains/monthly-close.ts RECONCILE phase = unit-or-contract-tested (chains/__tests__/monthly-close.test.ts exercises runReconcilePhase in isolation; chains/__tests__/monthly-close-reconcile-flow.test.ts is a multi-chain in-process integration test driving sources -> real reconciliation -> evidence -> proposal -> approval (incl. the R2-gate fail-closed negative case) -> execution -> close -> verify over the real MissionRuntime/ApprovalGate/receipts stack). These in-process tests do not establish operational end-to-end validation."
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "tool-safety-broad-deny": {
       "state": "implemented",
@@ -122,7 +140,10 @@
         "tests": [
           "__tests__/agents.test.ts"
         ]
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "engram-integration": {
       "state": "partial",
@@ -134,7 +155,10 @@
           "__tests__/extension.test.ts"
         ],
         "limitation": "Pi reads Drenyra Engram context at the memory boundary and never authorizes operations, but no complete executable Engram integration is evidenced; context persistence is a development-grade local JSON store and canonical memory integration is a later concern (REQ-BOUND-001)"
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     },
     "pinned-ai-runtime": {
       "state": "implemented",
@@ -145,7 +169,10 @@
         "tests": [
           "__tests__/pin.test.ts"
         ]
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "kernel-consumed",
+      "authority": "pi-operates-never-authorizes"
     },
     "configurator-install-doctor-sync": {
       "state": "implemented",
@@ -159,10 +186,29 @@
           "__tests__/configurator.test.ts"
         ],
         "note": "Pi consumes the drenyra-ai@0.4.1 public configurator: doctor reports managed-composition diagnostics incl. pinned-ai-runtime; install/sync render the drenyra-pi managed composition + pin asset under ~/.drenyra."
-      }
+      },
+      "verificationLevel": "unit-or-contract-tested",
+      "ownership": "pi-local",
+      "authority": "pi-operates-never-authorizes"
     }
   },
-  "testState": {
+      "currentProjection": {
+        "surfaces": [
+          "README.md",
+          "ROADMAP.md",
+          "docs/architecture/capability-conformance-matrix.md"
+        ],
+    "note": "Read-only cross-surface projection surfaces. Each declared surface carries `<!-- conformance:kind key=value -->` markers whose capability state/verification/ownership must agree with this manifest; current snapshot facts must agree with `evidenceSnapshot`, and preserved values are labeled historical with a source. Verified by `bun run verify:capability`.",
+    "evidenceRecords": [
+      "openspec/config.yaml",
+      "docs/architecture/program-lock-facts.json"
+    ],
+    "currentSnapshot": "openspec/config.yaml#/current_test_state",
+    "evidenceRecordsNote": "Snapshot evidence records read read-only by `bun run verify:capability`. `openspec/config.yaml#/current_test_state` is the canonical current snapshot; `program-lock-facts.json` carries the generated live candidate identity plus its preserved, labeled test evidence. The records are read by fixed repository-relative path, so removing this declaration cannot skip the check."
+  },
+      "testState": {
+    "evidenceScope": "historical",
+    "evidenceSource": "docs/architecture/ecosystem-boundaries.md#current-state-and-maturity",
     "command": "bun test",
     "result": "passing",
     "files": 44,
@@ -176,5 +222,15 @@
     "arkelythex/drenyra-ai@4975f4f capability-matrix.yaml Pi row (read-only)",
     "package.json version (drenyra-pi)",
     "design §5.2 state table (pi-sdd-010-participation)"
-  ]
+  ],
+  "evidenceSnapshot": {
+    "scope": "point-in-time",
+    "evidenceScope": "current",
+    "classification": "dirty-candidate",
+    "command": "bun test",
+    "result": "767 passed, 0 failed",
+    "date": "2026-09-11",
+    "candidateIdentityRef": "docs/architecture/program-lock-facts.json#/candidateIdentity",
+    "note": "Current PR 3 snapshot. `bun test` ran 767 tests across 50 files with 0 failures from the canonical repository root on 2026-09-11. The identity is delegated to the generated `docs/architecture/program-lock-facts.json#/candidateIdentity` because this manifest's bytes participate in that identity: restating the live value here would invalidate it. Preserved older snapshots (`testState` 44/700, lock-facts `tests` 48/738) remain historical, labeled, and sourced."
+  }
 }

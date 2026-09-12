@@ -13,84 +13,93 @@ additive.
 
 ### Requirement: REQ-CONF-001 — Evidence-cited capability rows
 
-The capability matrix MUST cite concrete, checkable evidence for every listed
-capability: a `file:line` reference, an exact test name, or both. A row MUST
-NOT be published on self-reported status alone.
+Every advertised capability MUST have current, checkable evidence and an explicit verification classification. Evidence MUST identify the supporting source, exact test, recorded runtime/package result, or an explicit statement that no such evidence exists. A capability MUST NOT be presented as implemented, tested, or operational solely on self-reported status.
 
-#### Scenario: Citation present on publish
+(Previously: Matrix rows required a source or test citation but did not require explicit current-evidence classification across advertised surfaces.)
 
-- GIVEN a capability row drafted for the matrix
-- WHEN the matrix is published
-- THEN the row carries at least one `file:line` reference or exact test name
+#### Scenario: Evidence supports an advertised classification
 
-#### Scenario: Uncited row rejected
+- GIVEN a capability is advertised in a current-state surface
+- WHEN its conformance evidence is evaluated
+- THEN its classification and claim are supported by checkable evidence appropriate to that classification
 
-- GIVEN a drafted row with no `file:line` or test-name citation
-- WHEN the matrix is finalized
-- THEN that row MUST be excluded until a citation is added
+#### Scenario: Unsupported capability claim is rejected
+
+- GIVEN an advertised capability has no supporting current evidence
+- WHEN conformance is verified
+- THEN the capability MUST NOT be represented as implemented, tested, or validated
 
 ### Requirement: REQ-CONF-002 — Four-tier verification level taxonomy
 
-Every row MUST be tagged with exactly one of four verification levels:
+Every current capability claim MUST use exactly one of these verification levels: `declared-only`, `implemented`, `unit-or-contract-tested`, or `validated-end-to-end`. `validated-end-to-end` MUST be supported by reproducible installed-package or runtime evidence exercising the complete observable invocation path; fixture-only, isolated unit, contract, or in-process evidence MUST NOT qualify. The taxonomy MUST remain distinct from capability state and ownership, and MUST NOT be represented as a one-to-one adoption of an external standard.
 
-| Level | Entry criteria |
-|---|---|
-| `declared-only` | Named in docs/manifest; no cited source file and no cited test |
-| `implemented` | Source exists at a cited `file:line`; no automated test cited |
-| `unit-or-contract-tested` | A cited unit or contract test exercises the capability's logic in isolation |
-| `validated-end-to-end` | A cited test or recorded run exercises the full invocation path (command/chain through observable output) |
+(Previously: End-to-end validation could be established by any cited full invocation-path test, without requiring reproducible installed-package or runtime evidence.)
 
-The matrix MUST state that this four-level scheme synthesizes Kubernetes-style
-evidence-gated readiness and Backstage-style manifest embedding as this
-project's own taxonomy, and MUST NOT claim it mirrors either standard 1:1.
+#### Scenario: Single verification level per current claim
 
-#### Scenario: Single tag per row
+- GIVEN a current capability claim
+- WHEN its verification level is published
+- THEN it has exactly one defined verification level
 
-- GIVEN a capability row
-- WHEN the matrix is built
-- THEN it is tagged with exactly one of the four defined levels
+#### Scenario: Fixture-only evidence does not qualify as end-to-end
 
-#### Scenario: Level matches strongest citation
+- GIVEN a capability is supported only by fixture, isolated unit, contract, or in-process evidence
+- WHEN its verification level is evaluated
+- THEN it MUST NOT be classified as `validated-end-to-end`
 
-- GIVEN a capability cited only by source location, with no test
-- WHEN its level is assigned
-- THEN it is tagged `implemented`, not `unit-or-contract-tested` or higher
+#### Scenario: Reproducible runtime evidence qualifies for end-to-end
 
-### Requirement: REQ-CONF-003 — Commit-scoped, non-evergreen snapshot
+- GIVEN a recorded, reproducible installed-package or runtime execution exercises a complete observable invocation path
+- WHEN its verification level is evaluated
+- THEN it MAY be classified as `validated-end-to-end`
 
-The matrix MUST declare the exact commit SHA or `dirty-sha256:<hash>` it was
-audited against, following the `docs/architecture/program-lock-facts.json`
-convention, plus an evidence date, and MUST state it is a point-in-time
-snapshot rather than an evergreen document.
+### Requirement: REQ-CONF-003 — Identified, non-evergreen evidence snapshots
 
-#### Scenario: Dirty tree labeled
+Every current evidence snapshot MUST identify the exact verification command, complete result, evidence date, candidate identity, and whether it is a verified baseline or a dirty candidate. A snapshot MUST state that it is point-in-time evidence rather than evergreen status. Historical baselines and historical command-count or test-count claims MUST be explicitly labeled historical and MUST NOT be presented as evidence for the current dirty candidate. Conflicting or stale current snapshot metadata MUST cause conformance verification to fail.
 
-- GIVEN the matrix is audited against an uncommitted working tree
-- WHEN it is published
-- THEN it records a `dirty-sha256:<hash>` identity and an evidence date
+(Previously: The matrix required candidate identity and date, but not command, result, baseline/dirty distinction, or failure on conflicting current metadata.)
 
-#### Scenario: Snapshot disclaimer present
+#### Scenario: Current dirty candidate is fully identified
 
-- GIVEN the published matrix
-- WHEN a reader opens it
-- THEN it explicitly disclaims evergreen accuracy beyond its recorded SHA
+- GIVEN evidence is recorded for an uncommitted candidate
+- WHEN it is published as current evidence
+- THEN it records the verification command, complete result, evidence date, `dirty-sha256:<hash>` identity, and dirty-candidate classification
 
-### Requirement: REQ-CONF-004 — README/ROADMAP/matrix non-contradiction
+#### Scenario: Verified baseline is distinguished from current candidate
 
-README.md and ROADMAP.md MUST NOT contradict each other or the matrix on any
-capability's shipped/unshipped status.
+- GIVEN a historical or verified baseline is retained beside current evidence
+- WHEN a reader or verifier evaluates the records
+- THEN the baseline is labeled historical or baseline and is not presented as the current dirty candidate
 
-#### Scenario: Consistent shipped status
+#### Scenario: Conflicting current snapshots fail
 
-- GIVEN a capability marked shipped in the matrix
-- WHEN README.md and ROADMAP.md are checked
-- THEN neither document marks that capability unshipped or missing
+- GIVEN two current-state surfaces report incompatible command results, candidate identities, or snapshot classifications without an explicit historical distinction
+- WHEN conformance verification runs
+- THEN verification MUST fail
 
-#### Scenario: Contradiction blocks publication
+### Requirement: REQ-CONF-004 — Cross-surface capability consistency
 
-- GIVEN README.md and ROADMAP.md disagree on a capability's status
-- WHEN the matrix is finalized
-- THEN the contradiction MUST be resolved before publication
+README.md, ROADMAP.md, `capability-manifest.yaml`, the capability conformance matrix, OpenSpec project context, and program lock-facts MUST agree on each current capability's state, verification level where represented, ownership, and snapshot semantics. A surface MAY retain a differing value only when it explicitly identifies that value as historical or generated and identifies its source. Current surfaces MUST NOT imply operational Engram or packaged-skills integration, or end-to-end validation, when only local, unit, contract, or referenced-only evidence exists.
+
+(Previously: Consistency was limited to README, ROADMAP, and matrix shipped/unshipped status.)
+
+#### Scenario: Current surfaces agree
+
+- GIVEN a capability has a current conformance record
+- WHEN all current-state surfaces are checked
+- THEN their capability state, ownership, verification claim, and snapshot meaning are consistent with that record
+
+#### Scenario: Historical or generated value remains explainable
+
+- GIVEN a surface retains a value different from the current snapshot
+- WHEN conformance is verified
+- THEN the value is explicitly labeled historical or generated and identifies its source
+
+#### Scenario: Unsupported operational implication is rejected
+
+- GIVEN a current surface portrays Engram or packaged skills as an operational end-to-end integration
+- WHEN the available evidence is only local or referenced-only
+- THEN conformance verification MUST fail
 
 ### Requirement: REQ-CONF-005 — Single active conformance change
 
@@ -127,6 +136,60 @@ by a live, tested `/drenyra:*` command or chain.
 - GIVEN a chain module with no cited test
 - WHEN its manifest row is written
 - THEN its `state` MUST NOT claim a tested level it has no citation for
+
+### Requirement: REQ-CONF-007 — Ownership and authority boundaries
+
+Capability evidence MUST identify whether behavior is Pi-local, consumed from the pinned kernel, referenced-only under Dominion/master ownership, or unavailable as an operational integration. Pi-local documentation, tests, and conformance records MUST NOT upgrade kernel or Dominion/master-owned behavior to Pi ownership, grant Pi fiscal authority, or represent referenced-only behavior as locally validated end-to-end.
+
+#### Scenario: Kernel-consumed behavior retains kernel ownership
+
+- GIVEN Pi invokes behavior exposed by the pinned Drenyra AI kernel
+- WHEN the capability is documented or verified
+- THEN the record identifies the behavior as kernel-consumed and does not attribute fiscal authority to Pi
+
+#### Scenario: Referenced-only capability remains bounded
+
+- GIVEN a Dominion/master-owned capability is referenced by Pi
+- WHEN current conformance is published
+- THEN it is identified as referenced-only and is not represented as Pi-local implementation or validation
+
+#### Scenario: Ownership escalation is rejected
+
+- GIVEN a current capability claim upgrades referenced-only or kernel-consumed behavior to Pi-local ownership
+- WHEN conformance verification runs
+- THEN verification MUST fail
+
+### Requirement: REQ-CONF-008 — Legacy surface retention criteria
+
+Every identified legacy capability, helper, compatibility path, or historical surface MUST have a recorded disposition and known consumers where discoverable. A legacy surface MUST remain retained unless a separately bounded change provides a replacement or explicit compatibility decision, package verification, and focused regression evidence. Lack of current wiring alone MUST NOT justify removal.
+
+#### Scenario: Unproven legacy remains retained
+
+- GIVEN a legacy helper has no proven replacement or compatibility decision
+- WHEN this conformance change is completed
+- THEN the helper remains retained and is recorded for later bounded review
+
+#### Scenario: Evidence-backed future removal is eligible
+
+- GIVEN a separately bounded change supplies a replacement or compatibility decision, package verification, and focused regression evidence
+- WHEN the legacy surface is evaluated for removal
+- THEN it MAY be removed by that separately bounded change
+
+### Requirement: REQ-CONF-009 — Deterministic conformance guard
+
+The repository MUST provide a focused, reproducible conformance guard that runs without network access or ambient secrets and rejects invalid capability keys or states, contradictory verification levels, stale or conflicting current snapshots, ownership escalation, and unsupported `validated-end-to-end` claims. The guard MUST produce a deterministic pass or failure result from the repository evidence supplied to it.
+
+#### Scenario: Valid evidence passes reproducibly
+
+- GIVEN consistent capability records, valid vocabulary, correctly classified ownership, and current snapshot evidence
+- WHEN the conformance guard runs in equivalent offline environments
+- THEN it produces a passing result
+
+#### Scenario: Invalid evidence fails deterministically
+
+- GIVEN capability records contain an invalid key or state, contradictory verification, stale current snapshot, ownership escalation, or unsupported end-to-end claim
+- WHEN the conformance guard runs
+- THEN it produces a failing result identifying the violated conformance condition
 
 ## Out of Scope
 

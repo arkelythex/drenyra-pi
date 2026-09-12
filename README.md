@@ -35,13 +35,32 @@ The target visual flow is fully represented in text: **human start → fiscal sc
 - **Startup panel** — company and fiscal period context on session start.
 - **`/drenyra:*` commands** — doctor, scope, status, capabilities, company/period context, missions, receipts, evidence, verify, and close (see [Command reference](#command-reference)).
 - **Pi-native subagents** — accounting agents for exploration, apply, verify, review.
-- **Model routing** — per-phase model selection for fiscal work.
+- **Model routing** — advisory per-phase model registry (documented intent; it never grants authority).
 - **Packaged skills** — Drenyra-specific skills shipped with the extension.
 - **RDA chains** — Receipt-Driven Accounting command chains.
 - **Tool safety** — broad-deny, narrow-allow tool permissions for fiscal actions.
 - **Company & period context** — RUC-scoped context threading across tools and agents.
 - **Drenyra Engram boundary** — institutional memory access is planned but not yet executable (memory never authorizes).
 - **Pinned Drenyra AI runtime** — exact verified version, package-local, never `PATH`.
+
+<!-- conformance:surface id=readme authority=pi-operates-never-authorizes source=AGENTS.md#non-negotiable-rules -->
+<!-- conformance:snapshot scope=current source=capability-manifest.yaml#/evidenceSnapshot -->
+
+### Capability evidence
+
+[`capability-manifest.yaml`](capability-manifest.yaml) is the machine-readable
+capability record; the
+[conformance matrix](docs/architecture/capability-conformance-matrix.md) is its
+human-readable explanation, evidence citations, limitations, and the exact rules
+`bun run verify:capability` enforces. Every advertised capability carries exactly
+one state, one verification level (`declared-only`, `implemented`,
+`unit-or-contract-tested`, or `validated-end-to-end`), one ownership, and the
+authority boundary `pi-operates-never-authorizes`.
+
+**No capability is `validated-end-to-end`.** This repository has no live
+operational run of an installed Pi command through external services, so packaged
+skills and the Engram boundary are local or referenced-only evidence — never
+operational end-to-end integration.
 
 ### Drenyra Dominion Program
 

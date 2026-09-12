@@ -46,7 +46,7 @@ function walk(dir: string, out: string[] = []): string[] {
 
 /** One Ajv instance with every shipped schema registered by $id. */
 function buildAjv(): Ajv {
-  const ajv = new Ajv({ allErrors: true, strict: false });
+  const ajv = new Ajv({ strict: false });
   addFormats(ajv);
   for (const file of walk(CONTRACTS_DIR)) {
     const schema = JSON.parse(readFileSync(file, "utf8")) as { $id?: unknown };
@@ -392,6 +392,64 @@ function trustedKeyRegistryFixture(): Record<string, unknown> {
     },
   };
 }
+
+describe("contracts: frozen v0.1 compatibility boundaries", () => {
+  const SNAPSHOT_ID =
+    "https://drenyra.dev/harness/contracts/mission/snapshot.schema.json";
+  const GRAPH_ID =
+    "https://drenyra.dev/harness/contracts/evidence/graph.schema.json";
+  const AUTH_ID =
+    "https://drenyra.dev/harness/contracts/authority/authorization-record.schema.json";
+  const BINDING_ID =
+    "https://drenyra.dev/harness/contracts/receipts/receipt-binding.schema.json";
+
+  it("accepts one representative v0.1 document from every Pi-local family", () => {
+    expectValid(SNAPSHOT_ID, missionSnapshotFixture());
+    expectValid(GRAPH_ID, evidenceGraphFixture());
+    expectValid(AUTH_ID, authorizationRecordFixture());
+    expectValid(BINDING_ID, receiptBindingFixture());
+  });
+
+  it("rejects representative tampered or malformed documents from every family", () => {
+    const mission = missionSnapshotFixture();
+    mission.receiptHash = "tampered";
+    expectInvalid(SNAPSHOT_ID, mission);
+
+    const evidence = evidenceGraphFixture();
+    (evidence.nodes as Record<string, unknown>[])[0].payloadHash = "A".repeat(
+      64,
+    );
+    expectInvalid(GRAPH_ID, evidence);
+
+    const authority = authorizationRecordFixture();
+    (authority.authorization as Record<string, unknown>).scopeHash = "0".repeat(
+      63,
+    );
+    expectInvalid(AUTH_ID, authority);
+
+    const binding = receiptBindingFixture();
+    binding.targetHash = "not-a-digest";
+    expectInvalid(BINDING_ID, binding);
+  });
+
+  it("fails closed on documents that declare incompatible family versions", () => {
+    const mission = missionSnapshotFixture();
+    mission.schemaVersion = 2;
+    expectInvalid(SNAPSHOT_ID, mission);
+
+    const evidence = evidenceGraphFixture();
+    evidence.schemaVersion = 2;
+    expectInvalid(GRAPH_ID, evidence);
+
+    const authority = authorizationRecordFixture();
+    authority.schemaVersion = 2;
+    expectInvalid(AUTH_ID, authority);
+
+    const binding = receiptBindingFixture();
+    binding.version = "drenyra.receipt-binding.v2";
+    expectInvalid(BINDING_ID, binding);
+  });
+});
 
 describe("contracts: authority family (REQ-CONTRACTS-003)", () => {
   const SCOPE_ID =

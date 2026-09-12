@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "ad6b7f662e9c3a3dcdd7ce09e654b92137397464",
-  "candidateIdentity": "dirty-sha256:9a1528f2707710239e64488f83152797479bd395238eb4f089f8a62af62c3c8f",
+  "headSha": "deddc86090d1914781ebf3c071a1de91f3c089fd",
+  "candidateIdentity": "dirty-sha256:70ca1dfa4faf05c7190400ba52d95c3c9e3852feb00c9ff6f4ddb0a13b0cd45d",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -60,11 +60,21 @@
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "71f4a36e603133290a514b82948cbdbc39972ee0d4b54bc28e8f20df9b9ea3ca"
+    "digestSha256": "1ad1c4413cba95788146af3eb734175e2e36d26d0d976a96b0b782232e748e83"
   },
   "activeChanges": [
-    "pi-skills-memory-integration"
+    "pi-recovery-release-readiness"
   ],
+  "snapshotRecord": {
+    "evidenceScope": "historical",
+    "evidenceSource": "openspec/changes/archive/2026-09-09-pi-accounting-orchestration/verify-report.md",
+    "labelledFields": [
+      "tests",
+      "evidenceDate",
+      "derivationCommands"
+    ],
+    "note": "`tests`, `evidenceDate`, and the older `derivationCommands` describe their recorded evidence date (2026-09-09, 48 files / 738 tests) and are preserved verbatim by scripts/refresh-program-lock-facts.mjs. They do not claim current test counts. `candidateIdentity` is generated and does identify the live dirty candidate; the canonical current snapshot is published in openspec/config.yaml#/current_test_state."
+  },
   "evidenceDate": "2026-09-09",
   "derivationCommands": [
     "git rev-parse HEAD",

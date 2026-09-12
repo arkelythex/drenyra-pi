@@ -74,7 +74,19 @@ function runNpmInstall(packageRoot: string, installUrl: string): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(
       "npm",
-      ["install", "--no-save", "--no-package-lock", installUrl],
+      // --legacy-peer-deps is load-bearing. The nested install runs with cwd
+      // inside the installed package, so npm reads THIS package's published
+      // manifest and walks its devDependency tree (vitest and friends).
+      // npm 10.9.x crashes there in Arborist #loadPeerSet with "Cannot read
+      // properties of null (reading 'edgesOut')", failing the whole
+      // postinstall. Skipping peer resolution avoids that code path
+      // entirely; the pinned runtime's own integrity is proved separately by
+      // doctor(), which fails closed.
+      //
+      // Do NOT add --omit=dev: the pinned runtime is declared in
+      // devDependencies, so omitting dev deps drops the very package this
+      // install exists to place, and doctor then correctly reports it missing.
+      ["install", "--no-save", "--no-package-lock", "--legacy-peer-deps", installUrl],
       { cwd: packageRoot },
       (error, _stdout, stderr) => {
         if (error !== null) {

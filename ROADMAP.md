@@ -1,6 +1,15 @@
 # Drenyra Pi — Roadmap
 
 > **Last updated:** 2026-08-14. Status: pre-alpha (public repository policy decided 2026-08-14; source-available under the proprietary license).
+>
+> Roadmap checkboxes are delivery intent, not capability evidence. The current
+> capability state, verification level, ownership, and limitations live in
+> [`capability-manifest.yaml`](capability-manifest.yaml) and
+> [the conformance matrix](docs/architecture/capability-conformance-matrix.md);
+> no roadmap item is `validated-end-to-end`.
+
+<!-- conformance:surface id=roadmap authority=pi-operates-never-authorizes source=AGENTS.md#non-negotiable-rules -->
+<!-- conformance:snapshot scope=current source=capability-manifest.yaml#/evidenceSnapshot -->
 
 ## Program alignment
 
@@ -44,7 +53,11 @@ Extracted via vertical PRs and versioned releases, **not** a bulk move:
 - [ ] Slice 5: Drenyra Engram integration (context, memory reads)
 - [ ] Package released as `drenyra-pi` on npm with pinned `drenyra-ai`
 
-Slices 1–4 are shipped and covered by repository tests. The monthly-close evidence is an in-process fixture, not an operational end-to-end run. Executable Engram context/memory integration remains a separate follow-up; static context prose and the development-grade JSON store do not complete Slice 5.
+Slices 1–4 are shipped and covered by repository tests, which makes them
+`unit-or-contract-tested` — not `validated-end-to-end`. The monthly-close evidence
+is an in-process fixture, not an operational end-to-end run. Executable Engram
+context/memory integration remains a separate follow-up; static context prose and
+the development-grade JSON store do not complete Slice 5.
 
 ## Phase 3 — Ecosystem maturity (alpha → beta)
 

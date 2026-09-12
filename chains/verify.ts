@@ -23,7 +23,16 @@
 
 import { AUTHORITY_MODE } from "../runtime/context.js";
 import { EDA_PHASE, type EdaPhase } from "../lib/accounting-status.js";
-import { bindScope, sha256Canonical, type ScopeBinding } from "../lib/canonicalization.js";
+import {
+  findBankLedgerMismatches,
+  sumLedgerTotals,
+  toBigIntCents as normalizeBigIntCents,
+} from "../lib/accounting-semantics.js";
+import {
+  bindScope,
+  sha256Canonical,
+  type ScopeBinding,
+} from "../lib/canonicalization.js";
 import { AuthorityStore } from "../lib/authority-store.js";
 import { parseJsonOrThrow } from "../lib/parse.js";
 import type { EvidenceGraphStore } from "../lib/evidence-graph.js";
@@ -106,9 +115,6 @@ const MAX_MANIFEST_ENTRIES = 500;
 /** Safe reference/account ids. */
 const REFERENCE_RE = /^[A-Za-z0-9._:/-]{1,256}$/;
 
-/** Integer decimal money at the boundary (JSON integer or decimal string). */
-const INTEGER_RE = /^-?\d+$/;
-
 const HEX64 = /^[0-9a-f]{64}$/;
 
 /**
@@ -136,25 +142,7 @@ export class VerifyChainBlockedError extends Error {
  * are rejected (REQ-CONTRACTS-008; REQ-CHAIN-006).
  */
 export function toBigIntCents(value: number | string): bigint {
-  if (typeof value === "number") {
-    if (!Number.isInteger(value)) {
-      throw new Error(
-        `verify: float money rejected at the manifest boundary (${value}) — use integer cents or an integer decimal string`,
-      );
-    }
-    return BigInt(value);
-  }
-  if (typeof value === "bigint") {
-    throw new Error(
-      "verify: money at the JSON boundary must be integer cents or an integer decimal string — bigint is not a JSON type; convert with BigInt() after parsing",
-    );
-  }
-  if (typeof value !== "string" || !INTEGER_RE.test(value)) {
-    throw new Error(
-      `verify: money must be integer cents or an integer decimal string (got ${String(value)})`,
-    );
-  }
-  return BigInt(value);
+  return normalizeBigIntCents(value, "verify");
 }
 
 function parseEntryList(
@@ -172,9 +160,7 @@ function parseEntryList(
   }
   value.forEach((entry, index) => {
     if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
-      throw new Error(
-        `verify: manifest.${label}[${index}] must be an object`,
-      );
+      throw new Error(`verify: manifest.${label}[${index}] must be an object`);
     }
     parseEntry(entry as Record<string, unknown>, index);
   });
@@ -263,10 +249,12 @@ function parseManifestRecord(value: unknown): VerifySourceManifest {
   const bank: VerifyBankEntry[] = [];
   parseEntryList(record.ledger, "ledger", (entry, index) => {
     parseLedgerEntry(entry, index);
+    // SAFETY: parseLedgerEntry validates every required VerifyLedgerEntry field.
     ledger.push(entry as unknown as VerifyLedgerEntry);
   });
   parseEntryList(record.bank, "bank", (entry, index) => {
     parseBankEntry(entry, index);
+    // SAFETY: parseBankEntry validates every required VerifyBankEntry field.
     bank.push(entry as unknown as VerifyBankEntry);
   });
   return {
@@ -298,7 +286,9 @@ export function parseVerifyInput(json: string): VerifyChainInput {
     // Envelope form.
     for (const key of Object.keys(record)) {
       if (key !== "manifest" && key !== "missionId" && key !== "receiptHash") {
-        throw new Error(`verify: unknown envelope property "${key}" is rejected`);
+        throw new Error(
+          `verify: unknown envelope property "${key}" is rejected`,
+        );
       }
     }
     const missionId = record.missionId;
@@ -378,7 +368,8 @@ export function checkNormalization(
   return {
     check: "normalization",
     verdict: "pass",
-    detail: "all money values normalize deterministically to BigInt cents (no floats)",
+    detail:
+      "all money values normalize deterministically to BigInt cents (no floats)",
   };
 }
 
@@ -386,12 +377,10 @@ export function checkNormalization(
 export function checkLedgerEquations(
   entries: readonly VerifyLedgerEntry[],
 ): VerifyCheckResult {
-  let debitTotal = 0n;
-  let creditTotal = 0n;
-  for (const entry of entries) {
-    debitTotal += toBigIntCents(entry.debitCents);
-    creditTotal += toBigIntCents(entry.creditCents);
-  }
+  const { debitCents: debitTotal, creditCents: creditTotal } = sumLedgerTotals(
+    entries,
+    "verify",
+  );
   if (debitTotal !== creditTotal) {
     return {
       check: "ledger-equations",
@@ -410,39 +399,19 @@ export function checkLedgerEquations(
 export function checkReconciliationCorrectness(
   manifest: VerifySourceManifest,
 ): VerifyCheckResult {
-  const netLedger = new Map<string, bigint>();
-  for (const entry of manifest.ledger) {
-    if (
-      manifest.bankAccount !== undefined &&
-      entry.account !== manifest.bankAccount
-    ) {
-      // Only the bank/cash account legs reconcile against the statements; the
-      // contra legs belong to the ledger-equations check.
-      continue;
-    }
-    const current = netLedger.get(entry.reference) ?? 0n;
-    netLedger.set(
-      entry.reference,
-      current + toBigIntCents(entry.debitCents) - toBigIntCents(entry.creditCents),
-    );
-  }
-  const differences: string[] = [];
-  for (const bankEntry of manifest.bank) {
-    const ledgerNet = netLedger.get(bankEntry.reference) ?? 0n;
-    const bankAmount = toBigIntCents(bankEntry.amountCents);
-    if (bankAmount !== ledgerNet) {
-      differences.push(
-        `${bankEntry.reference}: bank ${bankAmount} cents != ledger net ${ledgerNet} cents`,
-      );
-    }
-  }
-  for (const [reference, net] of netLedger) {
-    if (!manifest.bank.some((entry) => entry.reference === reference)) {
-      differences.push(
-        `${reference}: ledger net ${net} cents has no bank statement`,
-      );
-    }
-  }
+  const mismatches = findBankLedgerMismatches({
+    bank: manifest.bank,
+    ledger: manifest.ledger,
+    consumer: "verify",
+    ...(manifest.bankAccount === undefined
+      ? {}
+      : { bankAccount: manifest.bankAccount }),
+  });
+  const differences = mismatches.map((mismatch) =>
+    mismatch.bankCents === undefined
+      ? `${mismatch.reference}: ledger net ${mismatch.ledgerCents} cents has no bank statement`
+      : `${mismatch.reference}: bank ${mismatch.bankCents} cents != ledger net ${mismatch.ledgerCents} cents`,
+  );
   if (differences.length > 0) {
     return {
       check: "reconciliation-correctness",
@@ -588,7 +557,8 @@ export function checkReceiptBinding(input: {
     return {
       check: "receipt-binding",
       verdict: "fail",
-      detail: "receipt binding digest does not match the signed payload hash — tampered or stale binding",
+      detail:
+        "receipt binding digest does not match the signed payload hash — tampered or stale binding",
     };
   }
   return {

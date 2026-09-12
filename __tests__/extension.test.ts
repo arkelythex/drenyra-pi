@@ -595,13 +595,17 @@ describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", ()
       expect(entries.length, `pi.${key} must declare entries`).toBeGreaterThan(
         0,
       );
-      for (const entry of entries) {
-        const resolved = join(process.cwd(), entry.replace(/^\.\//, ""));
-        expect(
-          statSync(resolved).isDirectory(),
-          `${entry} must resolve to a directory`,
-        ).toBe(true);
-      }
+        for (const entry of entries) {
+          const resourcePath = entry
+            .replace(/^\.\//, "")
+            .replace(/[*?[{].*$/, "")
+            .replace(/\/$/, "");
+          const resolved = statSync(join(process.cwd(), resourcePath));
+          expect(
+            resolved.isFile() || resolved.isDirectory(),
+            `${entry} must resolve to existing packaged content`,
+          ).toBe(true);
+        }
     }
     // Concrete content counts (REQ-SKPT-001/002/003).
     expect(
@@ -627,15 +631,10 @@ describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", ()
       "ruc-scope",
       "scope-discipline",
     ]);
-    const themeManifest = JSON.parse(
-      readFileSync(
-        join(process.cwd(), "themes", "fiscal-operator", "manifest.json"),
-        "utf8",
-      ),
-    ) as { variants?: Record<string, string> };
-    expect(Object.keys(themeManifest.variants ?? {})).toEqual([
-      "light",
-      "dark",
+    const themeEntries = (pkg.pi as { themes?: string[] } | undefined)?.themes;
+    expect(themeEntries).toEqual([
+      "./themes/fiscal-operator/fiscal-operator-light.json",
+      "./themes/fiscal-operator/fiscal-operator-dark.json",
     ]);
   });
 });

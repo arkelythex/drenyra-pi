@@ -164,6 +164,14 @@ function headHasBlob(cwd, path) {
 	return result.status === 0;
 }
 
+function headBytesFor(cwd, path) {
+	const result = spawnSync("git", ["show", `HEAD:${path}`], { cwd });
+	if (result.error || result.status !== 0) {
+		throw new Error(`cannot read HEAD bytes for allowlisted path: ${path}`);
+	}
+	return result.stdout;
+}
+
 function headModeFor(cwd, path) {
 	const result = gitSpawn(cwd, ["ls-tree", "HEAD", "--", path]);
 	const line = result.stdout.split("\n").find((l) => l.includes(`\t${path}`));
@@ -204,10 +212,18 @@ function isExecutable(fullPath) {
 
 /**
  * Compute the dirty-candidate identity for the repository at `cwd`.
+ * `lockFactsBytes` prospectively replaces only the lock-facts file in memory;
+ * all other paths retain their working-tree behavior.
  * Returns `{ identity, head, entries }` where entries are the sorted changed
  * allowlisted paths with their state/mode/sha256.
  */
-export function computeCandidateIdentity({ cwd = process.cwd() } = {}) {
+export function computeCandidateIdentity({
+	cwd = process.cwd(),
+	lockFactsBytes,
+} = {}) {
+	if (lockFactsBytes !== undefined && typeof lockFactsBytes !== "string") {
+		throw new Error("lockFactsBytes must be a UTF-8 string when provided");
+	}
 	const headResult = gitSpawn(cwd, ["rev-parse", "HEAD"]);
 	const head = headResult.stdout.trim();
 	if (!/^[0-9a-f]{40}$/.test(head)) {
@@ -218,26 +234,35 @@ export function computeCandidateIdentity({ cwd = process.cwd() } = {}) {
 	for (const path of PARTICIPATION_PATHS_V1) {
 		const fullPath = join(cwd, path);
 		const hasHead = headHasBlob(cwd, path);
-		const exists = existsSync(fullPath);
+		const override =
+			path === "docs/architecture/program-lock-facts.json"
+				? lockFactsBytes
+				: undefined;
+		const exists = override !== undefined || existsSync(fullPath);
+		const currentBytes = override ?? (exists ? readFileSync(fullPath, "utf8") : undefined);
 
 		if (!hasHead && !exists) continue;
 
 		let state;
 		let mode;
 		let digest;
-		if (!hasHead && exists) {
+		if (!hasHead && currentBytes !== undefined) {
 			state = "A";
 			mode = isExecutable(fullPath) ? "100755" : "100644";
-			digest = sha256Hex(normalizeBytesFor(path, readFileSync(fullPath, "utf8")));
-		} else if (hasHead && !exists) {
+			digest = sha256Hex(normalizeBytesFor(path, currentBytes));
+		} else if (hasHead && currentBytes === undefined) {
 			state = "D";
 			mode = headModeFor(cwd, path);
 			digest = "-";
 		} else {
-			if (!workingTreeChanged(cwd, path)) continue;
+			const changed =
+				override !== undefined
+					? !Buffer.from(override).equals(headBytesFor(cwd, path))
+					: workingTreeChanged(cwd, path);
+			if (!changed) continue;
 			state = "M";
 			mode = headModeFor(cwd, path);
-			digest = sha256Hex(normalizeBytesFor(path, readFileSync(fullPath, "utf8")));
+			digest = sha256Hex(normalizeBytesFor(path, currentBytes));
 		}
 		entries.push({ path, state, mode, sha256: digest });
 	}
