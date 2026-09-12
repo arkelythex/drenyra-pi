@@ -53,10 +53,14 @@ Chain strategy: feature-branch-chain
 # 0. the unit's own edits are complete, including every recorded count
 bun run refresh:lock-facts
 
-# 1. copy the identity the generator just produced into the normalization-exempt mirror
-node -e "const{readFileSync,writeFileSync}=require('node:fs');const facts=JSON.parse(readFileSync('docs/architecture/program-lock-facts.json','utf8'));const id=facts.candidateIdentity;const p='openspec/config.yaml';const before=readFileSync(p,'utf8');const after=before.replace(/^(\s*candidate_identity:\s*).*$/m,'$1\"'+id+'\"');if(after===before)throw new Error('openspec/config.yaml has no candidate_identity line to rewrite');writeFileSync(p,after);console.log('config.yaml mirror <- '+id);"
+# 1. copy the identity the generator just produced into the normalization-exempt mirror. The
+#    payload is single-quoted and supplies the replacement as a function, so neither the shell
+#    nor String.replace can interpret a dollar pattern.
+node -e 'const{readFileSync,writeFileSync}=require("node:fs");const facts=JSON.parse(readFileSync("docs/architecture/program-lock-facts.json","utf8"));const id=facts.candidateIdentity;const p="openspec/config.yaml";const before=readFileSync(p,"utf8");const after=before.replace(/^(\s*candidate_identity:\s*).*$/m,function(_match,key){return key+JSON.stringify(id);});if(after===before)throw new Error("openspec/config.yaml has no candidate_identity line to rewrite");writeFileSync(p,after);console.log("config.yaml mirror <- "+id);'
 
-# 2. the checkpoint is current AND the mirror write did not move the identity
+# 2. the checkpoint is current. `openspec/config.yaml` is allowlisted as a *path* even though
+#    its mirror field is normalization-exempt as a *value*: if the mirror write was that file's
+#    only change, run step 0-1 again first (see docs/architecture/program-lock-facts.md).
 node scripts/refresh-program-lock-facts.mjs --check
 
 # 3. full verification — every command a release record can cite

@@ -943,3 +943,270 @@ Diff-shape proof that §1–§25 survived: `git diff --numstat` over the two art
 - Unlike Slice 1, **both** injected paths existed this run; no registry or path fallback was used.
 
 `skill_resolution`: **paths-injected** (both injected in-repo paths existed and were read; no registry or path fallback used).
+
+---
+
+# Slice 3b — documentation repair unit (D-1, D-2, E-2). Docs only; no allowlisted path was written, no recovery pair forced
+
+**Run scope.** A parent-mandated bounded repair unit for the three defects already reported in this record: **D-1** (§20, the canonical command is shell-unsafe), **D-2** (§20, the ordering premise is conditionally false) and **E-2** (§31, the `CHANGELOG.md` headings render as code). Nothing else: no source, no test, no config, no contract, no behaviour change, no new test. §1–§34 above are preserved **byte-for-byte**; this section is an append.
+
+**Committed / branched / pushed / tagged / PR'd by this run: no.** No `git add`, `git commit`, `git push`, branch, tag or PR; no child subagent.
+
+## 35. Status and action context consumed (with the guard read explicitly)
+
+Native authority for `pi-recovery-release-readiness`, consumed before any edit: `applyState: all_done`, `taskProgress 26/26`, `unchecked: []`, `deferredParentActions 0/0`, `artifactStore: openspec`, `actionContext.mode: repo-local`, `allowedEditRoots: [<repo root>]`, `isNonAuthoritative: false`, `blockedReasons: []`, `nextRecommended: sdd-verify`.
+
+The engine's guidance for that state is *"All implementation tasks are checked complete; do not edit."* — which forbids re-running this change's 26 implementation rows and forbids touching them. It does not describe this unit: Slice 3b is a **separately authorised repair slice** whose write surface is the six paths named in the parent prompt, and it is not a re-run of `sdd-apply`. Both readings were honoured literally:
+
+| Guard | How this run honoured it | Evidence |
+| --- | --- | --- |
+| "do not edit" (implementation rows) | **No implementation row was created, selected, checked or unchecked.** `tasks.md` still reads **26 `- [x]` / 0 `- [ ]`** after the run | §41 |
+| `allowedEditRoots` | Every write is inside the repo root; no write outside it | §42 |
+| `applyState: blocked` / missing artifacts | Not the case — status is `all_done`, and all four apply artifacts (tasks, spec, design, apply-progress) were read from disk before any edit | §35 |
+| Review Workload Gate | Read from `tasks.md`: `Decision needed before apply: No`, `Chained PRs recommended: Yes`, `Chain strategy: feature-branch-chain`, `400-line budget risk: Medium` (all four guard lines verified at `tasks.md:18-28`); session preflight resolves `auto-chain`. This unit is **107 changed lines** of repair surface and stays inside its assigned slice boundary, so it implements a slice, not a new work unit | §47 |
+| Strict TDD | Not active for this unit: it changes **no** executable artefact, so there is no behaviour to Red-Green. No test was written, none was weakened | §38, §43 |
+
+## 36. Defect D-1 (HIGH) — the canonical command is now shell-safe, and it was executed
+
+**Exact replacement**, in `docs/architecture/program-lock-facts.md` §"The sequence", step 2 (old form deleted, new form is line 29):
+
+```sh
+# OLD (deleted) — `$1` is expanded by the POSIX shell inside the double-quoted payload, so the
+# backreference is lost and the whole match becomes a bare value:
+node -e "…before.replace(/^(\s*candidate_identity:\s*).*$/m,'$1\"'+id+'\"');…"
+
+# NEW (in the document) — single-quoted payload, replacement supplied as a FUNCTION:
+node -e 'const{readFileSync,writeFileSync}=require("node:fs");const facts=JSON.parse(readFileSync("docs/architecture/program-lock-facts.json","utf8"));const id=facts.candidateIdentity;const p="openspec/config.yaml";const before=readFileSync(p,"utf8");const after=before.replace(/^(\s*candidate_identity:\s*).*$/m,function(_match,key){return key+JSON.stringify(id);});if(after===before)throw new Error("openspec/config.yaml has no candidate_identity line to rewrite");writeFileSync(p,after);console.log("config.yaml mirror <- "+id);'
+```
+
+Shape guarantees, measured on the documented line itself: **0 backticks** (nothing to command-substitute) and **1 dollar sign**, which is the regex end-anchor `$` inside the single-quoted payload — the shell cannot expand it, and the replacement is a function, so `String.replace` cannot interpret a `$` pattern either. `JSON.stringify(id)` reproduces the existing double-quoted YAML scalar exactly.
+
+**Executed proof (verbatim).** The command was extracted from the canonical document by pattern and run in a real POSIX shell against the real tree. Because the mirror already carried the generator's value, the precondition was created first with a byte-neutral, self-reverting perturbation (the corrected command cannot fire when `after === before`, and re-inflicting the old corruption on a committed file would have produced no new evidence — the old form's failure is already measured verbatim in §20):
+
+```text
+$ grep -n 'candidate_identity' openspec/config.yaml
+41:      candidate_identity: "dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce"
+$ sha256sum openspec/config.yaml
+270e0122903bdbd5fdafff95b2326028dbb0e513bebae36f18a8f3a7b7b50ecf  openspec/config.yaml
+
+$ node -e 'const fs=require("node:fs");const p="openspec/config.yaml";const b=fs.readFileSync(p,"utf8");const a=b.replace(/^(\s*candidate_identity:\s*).*$/m,function(_m,k){return k+JSON.stringify("dirty-sha256:"+"0".repeat(64))});if(a===b)throw new Error("no mirror line");fs.writeFileSync(p,a);console.log("perturbed (deliberately stale value)")'
+perturbed (deliberately stale value)
+$ grep -n 'candidate_identity' openspec/config.yaml
+41:      candidate_identity: "dirty-sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+$ CMD=$(grep -m1 "^node -e 'const{readFileSync" docs/architecture/program-lock-facts.md)
+$ sh -c "$CMD"
+config.yaml mirror <- dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce
+exit=0
+
+$ grep -n 'candidate_identity' openspec/config.yaml
+41:      candidate_identity: "dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce"
+$ sha256sum openspec/config.yaml
+270e0122903bdbd5fdafff95b2326028dbb0e513bebae36f18a8f3a7b7b50ecf  openspec/config.yaml
+sha256: BYTE-IDENTICAL to baseline (net-zero write)
+
+$ node -e 'const{readFileSync}=require("node:fs");const YAML=require("yaml");const d=YAML.parse(readFileSync("openspec/config.yaml","utf8"));console.log("YAML.parse OK — current_test_state.candidate_identity =",d.current_test_state.candidate_identity)'
+YAML.parse OK — current_test_state.candidate_identity = dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce
+
+$ node scripts/refresh-program-lock-facts.mjs --check
+refresh-program-lock-facts: FAILED: program lock facts are stale; run bun run refresh:lock-facts
+exit=1
+```
+
+**Verdict against the three required clauses.** (a) the `candidate_identity:` key **survives**, with its indentation and its value; (b) the file stays **valid YAML** (`YAML.parse` succeeds where the old form produced `L41: Implicit map keys need to be followed by map values`); (c) the write is **byte-neutral** — sha256 identical to the pre-proof bytes, so `workingTreeChanged()` for that path is unchanged and the command cannot have moved the identity.
+
+**The third clause as the prompt states it — "`--check` still reports `current`" — is NOT satisfiable at this tree, and that is not caused by this repair.** Measured: `--check` exits **1**. Cause, measured rather than inferred (§44): the recorded `headSha` is `2c74ee24…` (the Slice 2 commit) while `HEAD` is `edcdeed…` (the commit that contains the Slice 3 work), and `deriveProgramLockFacts` sets `prospective.headSha = gitHead(root)` (`scripts/refresh-program-lock-facts.mjs:146`), so the checkpoint is stale **unconditionally** at this commit. The other half of the proof is unaffected: `bun run verify:capability` → `OK` (§43).
+
+## 37. Defect D-2 (HIGH) — the ordering paragraph now states the measured truth
+
+**Exact replacement** of the `**Why the order matters.**` paragraph in `docs/architecture/program-lock-facts.md` (old paragraph deleted in full):
+
+```md
+**Why the order matters.** `openspec/config.yaml#/current_test_state/candidate_identity` is the one field the
+identity algorithm normalizes (`normalizeConfigYaml` in `scripts/compute-candidate-identity.mjs`): the mirror
+is normalization-exempt as a **value**, never as a **path**. Membership is decided by `workingTreeChanged()`
+→ `git diff --quiet HEAD -- <path>` over raw bytes, so when the mirror write is `openspec/config.yaml`'s
+**only** change the identity moves with that write, and `refresh → mirror → --check` cannot converge in one
+pass: `--check` reports `program lock facts are stale`. Iterate to the fixed point — run the refresh **again**
+once the mirror line exists, then `--check`. When other `openspec/config.yaml` fields change in the same unit
+(the usual case: the recorded counts participate in the identity), the first refresh already computed the
+identity with the file modified, so the single pass converges.
+
+A refresh **without** the mirror rewrite is the other failure mode, and it is silent: `bun run
+verify:capability` goes red while the generator's own `--check` still exits 0, because the mirror is not an
+input to the checkpoint. The mirror must carry exactly the value the last refresh produced, and step 3 must
+follow it. **Steps 1-3 are one indivisible operation.**
+```
+
+It keeps the true half (the silent-red `verify:capability` symptom, the "write the mirror last" rule, the indivisibility) and replaces the false half with the two cases that were actually measured: mirror-only change → iterate to the fixed point; other `config.yaml` fields changed too → one pass converges.
+
+**One companion line, same defect class.** Step 3's fence comment asserted "*this also proves step 2 did not move the identity*". That is the falsified premise in executable position, so it now reads: `# 3. The checkpoint must now be current. If the mirror write was openspec/config.yaml's only / # change, the identity moved with it: repeat steps 1-2, then run this check (see below).` No other line of the fence changed.
+
+## 38. Defect E-2 (HIGH) — `CHANGELOG.md` headings restored
+
+**Exact change:** the four leading spaces were removed from **line 75** (the `Migration note` continuation) and from **every non-empty line of 77–106** — the `## 0.1.0` entry and the four-space-demoted `## 0.0.1-prealpha.1` heading. 26 non-empty lines affected (75, 77, 79, 81–97, 99, 101–104, 106); blank lines inside the range were already empty and needed no change. Continuation lines went from 6 → 2 spaces, which is their correct list-continuation indent under `-`.
+
+**Rest of the file checked for the same class** (every line with ≥4 leading spaces): lines 18–35, 42–53, 58–67 and 122–149 are legitimate continuations nested under ` - ` items (list content column 4), not inadvertent indentation. Verified by rendering the document, not by eye — at `HEAD` both target headings were a **code block** and after the repair there is none:
+
+```text
+--- CHANGELOG.md @ HEAD (damaged) ---
+headings: 8 | code tokens: 1 [ '"## 0.1.0 — 2026-09-12"' ]
+has 0.1.0 heading: false | has 0.0.1-prealpha.1 heading: false
+--- CHANGELOG.md @ repaired working tree ---
+headings: 12 | code tokens: 0
+has 0.1.0 heading: true | has 0.0.1-prealpha.1 heading: true
+```
+
+(`marked.lexer`, walking nested tokens, recursively.) The damaged content predated this change, so the **pre-existing** `## 0.0.1-prealpha.1` heading is restored too. No changelog **content** changed: `git diff` for the file is indentation-only (26 lines out, 26 in).
+
+## 39. `RELEASING.md` — checked, and **left byte-identical** (it does not restate the command)
+
+Verified rather than assumed, by reading the whole of step 7 and grepping the file:
+
+- step 7 contains **no** `node -e` command at all. It names the obligations and delegates the one command: `# produced (exact command: docs/architecture/program-lock-facts.md, step 2)` (`RELEASING.md:98-99`), followed by `node scripts/refresh-program-lock-facts.mjs --check`.
+- `grep -n "node -e\|$1" RELEASING.md` → **no matches** for the shell-unsafe form anywhere in the file.
+
+So the canonical statement lives in one place exactly as designed, and no edit was needed. **Disclosed nuance, deliberately not edited:** the same sentence calls the mirror write "safe" via the normalization exemption — a compressed form of the D-2 premise. It is bounded by the link ("is **not restated here**") and the canonical document now states the value/path distinction normatively; the parent prompt's mandate for this file was "fix only if you find restatement", and there is none. Recorded here so a reviewer can decide, rather than silently widened.
+
+## 40. `tasks.md` and `design.md` — the operational artifact corrected, the design record annotated (not rewritten)
+
+**`tasks.md`, "The indivisible command block":** the unsafe step-1 command was replaced with the **same shell-safe form** as the canonical document (§36), and its step-2 comment now states the value/path distinction and the fixed-point rule, pointing at the canonical document. Nothing else in the file changed — **no checkbox, no ownership marker** — and the diff is **7 insertions / 3 deletions**.
+
+**`design.md`:** the design text is **kept as authored**, including both command occurrences (lines 119, 477) and the falsified `# 2. … AND the mirror write did not move the identity` comment. One clearly marked blockquote note was added at §8.2 (the block that carries both defects) titled `> **Measurement note — two premises of this block were falsified during apply (repair unit 3b).**` It (1) names the shell-unsafety of the double-quoted `$1` form and the function-replacement fix, (2) states that value-exemption ≠ path-exemption and gives the fixed-point rule, and (3) points at `docs/architecture/program-lock-facts.md` as the corrected normative statement (relative link `../../../docs/architecture/program-lock-facts.md`). No design prose was deleted or rewritten; the diff is **16 added lines, 0 removed**.
+
+## 41. Persisted task checkboxes — unchanged, and re-read after the run
+
+```text
+grep -c '^- \[x\]' openspec/changes/pi-recovery-release-readiness/tasks.md    → 26
+grep -c '^- \[ \]' openspec/changes/pi-recovery-release-readiness/tasks.md    → 0
+```
+
+The only diff lines in `tasks.md` are inside the command-block fence (§40), i.e. **7 insertions / 3 deletions outside any checkbox line**. No malformed or duplicate `sdd-owner` marker exists; none was added (`grep` finds 26 markers, all of the terminal form `<!-- sdd-owner: implementation -->`). Every implementation row remains `- [x]`, so nothing in this run can leave a completed task reflected only in prose — the phases' completion evidence is unchanged by this unit.
+
+## 42. Scope proof — which allowlisted paths were modified: **none**
+
+`PARTICIPATION_PATHS_V1` (`scripts/compute-candidate-identity.mjs:45-67`) contains 21 paths. None of the files this unit was allowed to write is a member: `CHANGELOG.md`, `RELEASING.md`, `docs/architecture/program-lock-facts.md` (only the `.json` is a member), and the three artifacts under `openspec/changes/pi-recovery-release-readiness/`. Members verbatim from the source: `ROADMAP.md`, `__tests__/{capability-manifest,lock-facts,release-verify-workflow}.test.ts`, `capability-manifest.yaml`, `contracts/{README.md,SHA256SUMS.json,package-contract.md,runtime-dependency.md}`, `docs/architecture/program-lock-facts.json`, the seven `openspec/changes/pi-sdd-010-participation/**` artifacts, `openspec/config.yaml`, `package.json`, `scripts/{compute-candidate-identity,verify-capability-manifest}.mjs`.
+
+The empirical half of the proof:
+
+```text
+$ git status --porcelain -- docs/architecture/program-lock-facts.json package.json capability-manifest.yaml \
+      openspec/config.yaml contracts __tests__ scripts
+[empty]
+
+$ sha256sum openspec/config.yaml
+270e0122903bdbd5fdafff95b2326028dbb0e513bebae36f18a8f3a7b7b50ecf  openspec/config.yaml
+270e0122903bdbd5fdafff95b2326028dbb0e513bebae36f18a8f3a7b7b50ecf  ← same file, hashed before the proof
+```
+
+The transient proof perturbation in §36 is therefore **net-zero at the byte level**, which is the only thing membership depends on: the same raw bytes produce the same `git diff --quiet HEAD --` verdict, hence the same identity. Baseline `git status --short` at the start of this unit was `?? .pi/` only.
+
+## 43. Verification set — verbatim
+
+```text
+$ bun test
+ 773 pass
+ 0 fail
+ 3732 expect() calls
+ Ran 773 tests across 52 files. [10.46s]
+exit=0
+
+$ bun run typecheck
+$ tsc --noEmit
+exit=0
+
+$ bun run verify:capability
+$ node scripts/verify-capability-manifest.mjs
+verify-capability-manifest: OK
+exit=0
+
+$ bun run verify:style
+$ node scripts/verify-style.mjs
+verify-style: OK (diff-scoped · 109 owned files · 4 rules)
+exit=0
+
+$ node scripts/refresh-program-lock-facts.mjs --check
+refresh-program-lock-facts: FAILED: program lock facts are stale; run bun run refresh:lock-facts
+exit=1
+
+$ git status --short
+ M CHANGELOG.md
+ M docs/architecture/program-lock-facts.md
+ M openspec/changes/pi-recovery-release-readiness/design.md
+ M openspec/changes/pi-recovery-release-readiness/tasks.md
+?? .pi/
+```
+
+(`bun test` output ANSI-stripped; `773/0/52` matches the counts recorded in §28.4, so this repair does not disturb `DR-6`'s recorded evidence. The `--check` failure is the pre-existing condition of §44 — **not** a regression, and not caused by any file this unit wrote: the complete prospective-vs-committed diff of the lock facts is **two** fields, `headSha` and the `candidateIdentity` derived from it, both driven by `HEAD`.)
+
+**Post-record re-run.** The whole set was run once more on the finished tree, with this record written: `bun test` → `773 pass / 0 fail / 3732 expect() calls / Ran 773 tests across 52 files`; `bun run typecheck` → exit 0; `bun run verify:capability` → `OK`; `bun run verify:style` → `OK (diff-scoped · 109 owned files · 4 rules)`; `--check` → unchanged; and `git status --short` shows the same four files **plus this record** and `?? .pi/`. Nothing this unit wrote is an input to any of the gates above (`§42`).
+
+## 44. NEW FINDING D-5 (HIGH for the tree; not introduced here) — the committed tree ships stale lock facts
+
+```text
+$ node --input-type=module -e '… deriveProgramLockFacts(process.cwd()) → diff committed vs prospective'
+  L5  - "headSha": "2c74ee2423d069208347d536749e8e5b20f07cbb"
+      + "headSha": "edcdeed2a72dcf4503e67dbeca70dffb4b12f686"
+  L6  - "candidateIdentity": "dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce"
+      + "candidateIdentity": "dirty-sha256:04886d35d0cc61c871f45432cfc9a56c1b380f3f10fcf624056f7ea821c02c22"
+differing lines: 2
+$ git rev-parse HEAD            → edcdeed2a72dcf4503e67dbeca70dffb4b12f686
+$ recorded headSha              → 2c74ee2423d069208347d536749e8e5b20f07cbb   (= the Slice 2 commit `2c74ee2`)
+```
+
+**What it means.** `edcdeed` committed the Slice 3 work while `docs/architecture/program-lock-facts.json` still recorded the Slice 2 `headSha` and the dirty candidate identity computed at that moment. Advancing `HEAD` is itself one of the documented trigger classes, so the mandatory sequence is owed **once more** — `node scripts/refresh-program-lock-facts.mjs --check`, a command this repository's own release records cite, exits 1 at the committed tree.
+
+**Why this unit did not repair it.** The repair *is* the recovery pair, and it writes `docs/architecture/program-lock-facts.json` and the `openspec/config.yaml` mirror — both explicitly outside this unit's allowed writes and both `PARTICIPATION_PATHS_V1` members. Repairing it here would have forced the indivisible pair, the full verification set and a second mirror rewrite, i.e. exactly the scope the prompt excluded. **Owning route: the parent** — this is the same pair the archive step forces anyway (`tasks.md:171`), so running it once there covers both.
+
+**Not self-healed by the doc repair.** The files this unit wrote are not inputs to the facts (§42), so no edit inside this unit's mandate can move `--check` to green.
+
+## 45. Recovery pair — not forced, demonstrated rather than assumed
+
+The unit wrote **no** `PARTICIPATION_PATHS_V1` path (§42), so no pair is owed: `openspec/config.yaml` is byte-identical to its pre-unit state (sha256 `270e0122…`), and every member path is clean in `git status --porcelain`. Both halves of the proof were re-run anyway, because they are cheap and they are the only valid evidence of a consistent tree: `bun run verify:capability` → `OK`; `node scripts/refresh-program-lock-facts.mjs --check` → **stale, for the pre-existing reason in §44**. Had this unit touched a member path, the four-step indivisible block would have been run and said so; it did not.
+
+## 46. Files this unit wrote
+
+| File | Write | `PARTICIPATION_PATHS_V1` member? |
+| --- | --- | --- |
+| `docs/architecture/program-lock-facts.md` | step-2 command → shell-safe function form; step-3 comment; `**Why the order matters.**` paragraph rewritten (20 insertions / 9 deletions) | not a member (only the `.json` is) |
+| `CHANGELOG.md` | 4-space dedent, lines 75 and 77–106 (26 in / 26 out, indentation only) | not a member |
+| `RELEASING.md` | **nothing** — verified, byte-identical | not a member |
+| `openspec/changes/pi-recovery-release-readiness/tasks.md` | command block: step-1 command + step-2 comment (7 insertions / 3 deletions) | not a member |
+| `openspec/changes/pi-recovery-release-readiness/design.md` | one marked measurement note at §8.2 (16 insertions / 0 deletions) | not a member |
+| `openspec/changes/pi-recovery-release-readiness/apply-progress.md` | appended this section (§35–§48); §1–§34 preserved byte-for-byte | not a member |
+
+**Nothing else.** No source, no test, no `contracts/**`, no `package.json`, no `capability-manifest.yaml`, no `openspec/config.yaml`, no `docs/architecture/program-lock-facts.json`, no script. No `git add`/`commit`/`push`, no branch, tag or PR.
+
+## 47. Workload / PR boundary
+
+```text
+$ git diff --numstat -- CHANGELOG.md docs/architecture/program-lock-facts.md \
+      openspec/changes/pi-recovery-release-readiness/tasks.md openspec/changes/pi-recovery-release-readiness/design.md
+26 26 CHANGELOG.md
+20 9 docs/architecture/program-lock-facts.md
+16 0 openspec/changes/pi-recovery-release-readiness/design.md
+7 3 openspec/changes/pi-recovery-release-readiness/tasks.md
+
+$ git diff --numstat -- openspec/changes/pi-recovery-release-readiness/apply-progress.md
+<n> 0 openspec/changes/pi-recovery-release-readiness/apply-progress.md   ← 0 deletions: a pure append
+```
+
+**107 changed lines** of repair surface (26+26 for the mechanical dedent, 20+9 for the canonical document, 16 for the design note, 7+3 for the command block) plus this section, which is **append-only** — its deletion count is 0, so §1–§34 are provably intact and no byte of the earlier record was rewritten. (The record's own insertion count `n` is measured at the time of writing and grows with any later in-place correction — this section needed three such corrections while the measurements above were being pinned down, which is itself why only the four repair files are quoted by exact count.) That is comfortably inside the 400-line reviewer budget, so the parent's commit boundary can take it as one reviewable slice of the existing `feature-branch-chain`. Most of the count is the `CHANGELOG.md` dedent, which is one mechanical edit expressed as 26 rewritten lines. **Rollback:** `git checkout -- CHANGELOG.md docs/architecture/program-lock-facts.md openspec/changes/pi-recovery-release-readiness/tasks.md openspec/changes/pi-recovery-release-readiness/design.md` — no allowlisted path, no generated artefact and no recorded count is involved, so rollback forces no recovery pair and invalidates no digest.
+
+## 48. Risks and notes for verify
+
+| # | Note | Severity |
+| --- | --- | --- |
+| 1 | **D-5 (new):** the committed tree's lock facts are stale (`headSha` records the Slice 2 commit, `HEAD` is the Slice 3 commit), so `node scripts/refresh-program-lock-facts.mjs --check` exits 1 at `HEAD`. Repair = the recovery pair on member paths, i.e. the parent's route (and the archive step forces it anyway). Not caused by, and not fixable inside, this unit. | **High** |
+| 2 | The executed D-1 proof perturbed the mirror to make the documented command fire, then restored it byte-identically (sha256 `270e0122…`, verified). A reviewer who prefers no write to a member path even transiently should note that the file is byte-identical, `git status` for every member path is empty, and the pair's two halves were re-run. | Low |
+| 3 | `RELEASING.md`'s "the normalization exemption that makes that write safe" is a compressed form of the D-2 premise, left as-is because the file restates no command and explicitly delegates the rationale (§39). Flagged for the reviewer's judgement. | Low |
+| 4 | The design record still contains the unsafe command (lines 119, 477) and the falsified comment (line 479), by instruction; only a pointer note was added (§40). A reader who does not read the note will see the old form. | Medium |
+| 5 | The `CHANGELOG.md` diff reads as 26 changed lines for a 4-space dedent; the content is unchanged. Render confirmed with `marked` (§38). | Low |
+| 6 | `bun run verify:style` is diff-scoped (`109 owned files`), so it does not adjudicate `CHANGELOG.md`/`design.md` prose; the markdown lint and the `marked` render are this unit's prose evidence. | Low |
+
+## 49. Skill resolution (Slice 3b)
+
+- `skills/drenyra-sdd/SKILL.md` — **present and read** (injected path). Its FSD framing (fail-closed gates, "a material action needs its evidence") shaped the decision to run the D-1 command rather than assert it, and to refuse the `--check` clause instead of paraphrasing it green.
+- `skills/cognitive-doc-design/SKILL.md` — **NOT loaded: the injected path does not exist in this repository** (`/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi/skills/cognitive-doc-design/SKILL.md` → no such file; a directory listing of `skills/` shows no `cognitive-doc-design`). Reported as unavailable, **not** substituted from another checkout, exactly as the prompt instructed.
+
+`skill_resolution`: **fallback-path** — one injected project path existed and was read; the second injected path does not exist and is reported unavailable. No registry discovery and no substitution from another repository were performed.

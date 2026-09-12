@@ -485,6 +485,22 @@ bun run typecheck && bun run test && bun run verify:style && bun run verify:capa
 
 **Never** hand-edit `candidateIdentity`, `checksums.*`, `capabilityStates.digestSha256`, or `headSha`.
 
+> **Measurement note — two premises of this block were falsified during apply (repair unit 3b).** The design
+> above is **not** rewritten; it is the record of what was designed, not of what was measured. (1) The step-1
+> `node -e "…'$1'+id…"` form is **not shell-safe**: inside a double-quoted shell string `$1` is a positional
+> parameter, so the backreference is lost and the whole match — the `candidate_identity:` key and its indentation —
+> is replaced by a bare value, leaving `openspec/config.yaml` invalid YAML. The canonical document now uses a
+> **single-quoted** payload with the replacement supplied as a **function**, so no dollar pattern can be
+> interpreted by the shell or by `String.replace`. (2) "the checkpoint is current **and** the mirror write did not
+> move the identity" is true of the mirror's *value* only: membership is decided by `workingTreeChanged()` →
+> `git diff --quiet HEAD -- <path>` over raw bytes, so when the mirror write is `openspec/config.yaml`'s **only**
+> change the identity moves with it and `refresh → mirror → --check` cannot converge in one pass. The corrected rule
+> is to iterate to the fixed point: refresh **again** once the mirror line exists, then `--check`.
+>
+> Both corrections are normative in
+> [docs/architecture/program-lock-facts.md](../../../docs/architecture/program-lock-facts.md), which is the single
+> canonical statement of the sequence, the shell-safe command, and the ordering rule.
+
 ### 8.3 The trap, stated explicitly
 
 **A partial refresh — facts written, mirror not — leaves `verify:capability` red with no other symptom.**
