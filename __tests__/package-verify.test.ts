@@ -16,7 +16,13 @@
  */
 
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -188,6 +194,12 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 			covered,
 		});
 		expect(errors).toEqual([]);
+	});
+
+	it("pins the frozen contract-family documentation by its exact README digest", () => {
+		const manifest = readManifest(join(REPO_ROOT, MANIFEST_REL_PATH));
+		const readme = readFileSync(join(REPO_ROOT, "contracts/README.md"));
+		expect(manifest.files["contracts/README.md"]).toBe(sha256Hex(readme));
 	});
 
 	it("flags content drift when a covered file changes", async () => {

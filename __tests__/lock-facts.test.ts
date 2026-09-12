@@ -390,28 +390,27 @@ describe("program-lock-facts.json (design §6)", () => {
 	});
 
 	it("re-derives the recorded candidate identity via the CLI", async () => {
-		// Pre-commit the CLI fingerprints the dirty candidate; once the candidate
-		// is committed (delivered baseline) the CLI exits non-zero because no
-		// allowlisted candidate change remains — the delivered candidate is then
-		// identified by the commit itself (facts.headSha).
+		// A clean delivered baseline may lack an allowlisted dirty candidate. Only
+		// that documented CLI failure is tolerated; assertion failures propagate.
+		let stdout: string;
 		try {
-			const { stdout } = await execFileAsync(
-				process.execPath,
-				[IDENTITY_SCRIPT],
-				{ cwd: REPO_ROOT },
-			);
-			const derived = stdout.trim();
-			expect(derived).toMatch(/^dirty-sha256:[0-9a-f]{64}$/);
-			expect(derived).toBe(facts.candidateIdentity);
-		} catch {
+			({ stdout } = await execFileAsync(process.execPath, [IDENTITY_SCRIPT], {
+				cwd: REPO_ROOT,
+			}));
+		} catch (error) {
+			const stderr = (error as { stderr?: string }).stderr ?? "";
+			expect(stderr).toContain("no allowlisted candidate change exists");
 			const headCheck = spawnSync(
 				"git",
 				["merge-base", "--is-ancestor", facts.headSha, "HEAD"],
 				{ cwd: REPO_ROOT, encoding: "utf8" },
 			);
 			expect(headCheck.status).toBe(0);
-			expect(facts.candidateIdentity).toMatch(/^dirty-sha256:[0-9a-f]{64}$/);
+			return;
 		}
+		const derived = stdout.trim();
+		expect(derived).toMatch(/^dirty-sha256:[0-9a-f]{64}$/);
+		expect(derived).toBe(facts.candidateIdentity);
 	});
 
 	it("produces a stable identity across two CLI runs", async () => {
@@ -423,8 +422,9 @@ describe("program-lock-facts.json (design §6)", () => {
 					{ cwd: REPO_ROOT },
 				);
 				return stdout.trim();
-			} catch {
-				// committed baseline: deterministic non-zero exit
+			} catch (error) {
+				const stderr = (error as { stderr?: string }).stderr ?? "";
+				expect(stderr).toContain("no allowlisted candidate change exists");
 				return "no-allowlisted-candidate-change";
 			}
 		}
