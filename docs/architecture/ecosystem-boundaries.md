@@ -270,8 +270,8 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
   remain frozen at v0.1. The implemented evidence, authority, receipt, and
   mission schema families are also frozen at Pi-local v0.1 as consumption and
   adaptation boundaries; their existing schema bytes did not require a version
-  bump or migration. Release cadence remains pre-alpha
-  (`drenyra-pi@0.0.1-prealpha.1`).
+  bump or migration. Release cadence remains pre-release, with the produced contracts frozen at v0.1
+  (`drenyra-pi@0.1.0`).
 - Future slices continue to land as vertical PRs on released, pinned versions of
   `drenyra-ai` — never a checkout.
 

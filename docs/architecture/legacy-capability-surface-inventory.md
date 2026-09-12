@@ -96,9 +96,9 @@ recorded for later bounded review. Two properties make the bar strictly harder f
 - **Identity-input candidates.** A3, B4, D2 and A4's guard coupling touch `capability-manifest.yaml`,
   `scripts/verify-capability-manifest.mjs`, and `__tests__/capability-manifest.test.ts`, all members of
   the candidate-identity participation set. Any future change that mutates them additionally
-  invalidates `docs/architecture/program-lock-facts.json` and must run the refresh sequence
-  (`bun run refresh:lock-facts` → rewrite the identity-normalized field in `openspec/config.yaml` →
-  `node scripts/refresh-program-lock-facts.mjs --check`) before claiming a green suite.
+  invalidates `docs/architecture/program-lock-facts.json` and must run the mandatory recovery sequence —
+  stated once, with its trigger set and ordering rationale, in
+  [program-lock-facts.md](program-lock-facts.md).
 
 ## Negative verification — nothing was deleted
 

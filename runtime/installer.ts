@@ -125,8 +125,11 @@ function defaultVerify(
  * The "released" branch installs the exact pinned version package-local
  * (drenyra-pi never trusts an ambient binary) and then runs the same doctor()
  * used by /drenyra:doctor — the install is only accepted when the verdict is
- * "verified". Until the first real drenyra-ai release this branch is exercised
- * only through test fixtures; the pending-release branch below is live today.
+ * "verified". The released path is the one in force: `DEFAULT_PIN.state` is
+ * "released" in `runtime/pin.ts`, with the entry-artifact checksum pinned, so
+ * this function installs the pinned runtime for real. The pending-release branch
+ * below is a retained fallback for a pin with no published artifact — its notice
+ * is covered by tests — and it is not the live path.
  */
 export async function runInstaller(options: {
   pin: RuntimePin;

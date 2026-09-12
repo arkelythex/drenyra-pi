@@ -28,8 +28,9 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
     command, and the money/SQL/RUC write guards — registered from the single
     `register.js` entrypoint. The money guard evaluates only introduced text
     (newText), never replaced oldText (false-positive fix).
-  - `themes/Drenyra.json`; `typebox` added as a devDependency for tool
-    schemas.
+  - `themes/fiscal-operator/fiscal-operator-light.json` and
+    `themes/fiscal-operator/fiscal-operator-dark.json` (the two Pi themes declared in
+    `package.json#pi.themes`); `typebox` added as a devDependency for tool schemas.
   - Verification: `verify:package` entry list extended for `fiscal-guard.js`;
     capability-manifest and program-lock-facts refreshed (703 tests, 44 files).
 
