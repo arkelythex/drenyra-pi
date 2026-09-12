@@ -1,11 +1,11 @@
 # Apply Progress — pi-recovery-release-readiness
 
 **Change:** `pi-recovery-release-readiness` (local SDD 6 of 6)
-**Phase:** apply — **Slice 1 only** (U2 + U3 + U5 + U5b, documentation)
+**Phase:** apply — **Slices 1 and 2**. Slice 1 (U2 + U3 + U5 + U5b, documentation) is recorded in §1–§11 exactly as written; Slice 2 (D5, the `postinstall` warning, `REQ-REL-004`) is appended in §12–§25.
 **Store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
 **Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
 **Branch:** `feat/sdd-6-recovery-release-readiness`
-**Authority:** `design.md` (the authority for this phase), `tasks.md` (Slice 1 rows), `specs/release-readiness/spec.md` (`REQ-REL-001`, `REQ-REL-002`, `REQ-REL-005`).
+**Authority:** `design.md` (the authority for this phase), `tasks.md` (Slice 1 and Slice 2 rows), `specs/release-readiness/spec.md` (`REQ-REL-001`, `REQ-REL-002`, `REQ-REL-005` for Slice 1; `REQ-REL-004` for Slice 2).
 **Committed / branched / pushed by this phase:** **no.** No `git add`, `git commit`, `git push`, branch, or PR was run.
 **Child subagents launched:** none.
 
@@ -337,3 +337,363 @@ No `- [ ]` Slice 1 row remains. The parent owns commit/push, bounded review, and
 - `skills/cognitive-doc-design/SKILL.md` — **path injected but not present** (`ENOENT: no such file or directory`). This is a project skill path that does not exist in this repository. Fallback was **not** triggered for additional skill discovery; the phase proceeded with the injected `drenyra-sdd` skill plus the design/tasks/spec artifacts.
 
 `skill_resolution`: **paths-injected** (one injected path resolved, one injected in-repo path was absent; no registry fallback was used).
+
+---
+
+# Slice 2 — D5, the `postinstall` warning (`REQ-REL-004`). Strict TDD; recovery pair FORCED
+
+**Run scope:** Slice 2 only (7 implementation rows, `T-S2-001` … `T-S2-007`). Slice 3 (`T-S3-*`) was not started. Slice 1's record above (§1–§11) is preserved byte-for-byte.
+**Committed / branched / pushed by this run:** **no.** No `git add`, `git commit`, `git push`, branch, tag, or PR. No child subagent.
+
+## 12. Status and action context consumed (Slice 2)
+
+Structured SDD status injected by the parent (`gentle-pi.sdd-status`, schemaVersion 1), consumed before any edit:
+
+- `changeName`: `pi-recovery-release-readiness`; `artifactStore`: `openspec`; `isNonAuthoritative`: `false`; `nextRecommended`: `sdd-apply`.
+- `applyState`: `ready`; `blockedReasons`: `[]`; `deferredParentActions`: 0/0.
+- `actionContext.mode`: `repo-local`; `workspaceRoot`: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; `allowedEditRoots`: `[/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi]`; **`warnings`: `[]`**.
+- `taskProgress` at start: 26 implementation rows, 9 complete (Slice 1), 17 remaining (Slice 2 + Slice 3).
+- **Owner markers:** every Slice 2 row carries a terminal `<!-- sdd-owner: implementation -->`; no parent-owned row and no malformed `sdd-owner` marker exists. Only implementation-owned rows were selected, checked, and reported.
+
+### Review Workload Gate (from `tasks.md`, unchanged)
+
+```text
+Decision needed before apply: No
+Chained PRs recommended: Yes
+Chain strategy: feature-branch-chain
+400-line budget risk: Medium
+```
+
+`auto-chain` + `feature-branch-chain` were already resolved in session preflight, so the chained path was taken; this run implemented only the assigned Slice 2 work-unit slice. PR boundary in §23.
+
+## 13. Completed tasks and persisted checkbox updates
+
+All seven Slice 2 rows are now `- [x]` in `openspec/changes/pi-recovery-release-readiness/tasks.md`, persisted and re-verified by re-read:
+
+```text
+checked   S1: 9
+unchecked S1: 0
+checked   S2: 7
+unchecked S2: 0
+unchecked S3: 10   (not this run; unchanged)
+```
+
+| Task | Persisted checkbox | Deliverable |
+| --- | --- | --- |
+| `T-S2-001` | `- [x]` | `__tests__/postinstall-hook.test.ts` created; case 1 RED captured verbatim (§16) |
+| `T-S2-002` | `- [x]` | `package.json#scripts.postinstall` one-liner: stderr warning + `process.exit(0)`, path literal inline once |
+| `T-S2-003` | `- [x]` | Triangulation: failing fixture installer propagates status `3` (§17) |
+| `T-S2-004` | `- [x]` | `runHook()` spawn-and-capture helper extracted; typed, no assertion weakened |
+| `T-S2-005` | `- [x]` | Environment-faithful npm 10.9.0 harness check + default-npm regression check (§18) |
+| `T-S2-006` | `- [x]` | Recovery pair run as one indivisible block; all four steps recorded (§19) |
+| `T-S2-007` | `- [x]` | This evidence record |
+
+## 14. Files changed (Slice 2)
+
+`git diff --numstat` plus the new untracked test file:
+
+```text
+132     0       __tests__/postinstall-hook.test.ts   (new)
+2       2       docs/architecture/program-lock-facts.json
+1       1       openspec/config.yaml
+1       1       package.json
+7       7       openspec/changes/pi-recovery-release-readiness/tasks.md
+```
+
+| File | Change |
+| --- | --- |
+| `package.json` | `scripts.postinstall` replaced whole (one value, one line): `const t='dist/scripts/install-drenyra-ai.js'` + `if(!existsSync(t)){console.warn(...);process.exit(0);}` + unchanged `process.exit(spawnSync(process.execPath,[t],{stdio:'inherit'}).status??1)`. The literal path appears **inline exactly once** (measured), so `scripts/verify-package-files.mjs:242-246` still holds. |
+| `__tests__/postinstall-hook.test.ts` | **New.** Reads `scripts.postinstall` from `package.json` and executes that exact shell command through `sh -c` in a `mkdtempSync(join(tmpdir(), "pi-postinstall-"))` cwd, capturing `status`/`stdout`/`stderr`. Three behavioural cases (absent / present / failing). |
+| `docs/architecture/program-lock-facts.json` | Generator output only (`bun run refresh:lock-facts`, twice — see §19). Two changed lines: `headSha`, `candidateIdentity`. Never hand-edited. |
+| `openspec/config.yaml` | The normalization-exempt mirror field only (`current_test_state.candidate_identity`). No count, version, date, or classification field was touched in this slice (`DR-6` is Slice 3's). |
+| `tasks.md`, this file | This change's own artifacts. |
+
+**Not touched (confirmed by `git status`):** `contracts/**`, `openspec/specs/**`, `capability-manifest.yaml`, `extensions/**`, `scripts/**`, `docs/**` (other than the generated lock facts), `.github/workflows/**`, `ROADMAP.md`, `README.md`, `RELEASING.md`. The only untracked entries are `?? .pi/` (pre-existing) and the new test file.
+
+## 15. TDD Cycle Evidence
+
+| Task | Test file | Layer | Safety net | RED | GREEN | TRIANGULATE | REFACTOR |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `T-S2-001` / `T-S2-002` / `T-S2-003` | `__tests__/postinstall-hook.test.ts` | Integration — executes the real manifest value through the real lifecycle shell | pre-change full suite 767/767 green (`bun test`), so the RED is attributable to the new behaviour | `bun test __tests__/postinstall-hook.test.ts` → **1 fail / 2 pass**: case 1 `expect(received).toMatch(/WARNING/i)` → `Received: ""` (hook exited 0 silently) | same file → **3 pass / 0 fail**, 11 `expect()` calls | case 3: present fixture that exits `3` must propagate `3`, proving the `?? 1` fallback does not swallow a real failure | `runHook(cwd): HookResult` extracted; re-run **3 pass / 0 fail**, 11 `expect()` calls — no assertion weakened or removed |
+
+`strict_tdd: true` (`openspec/config.yaml`) ⇒ RED → GREEN → TRIANGULATE → REFACTOR, all four recorded below.
+
+## 16. RED evidence (verbatim, ANSI stripped)
+
+`bun test __tests__/postinstall-hook.test.ts` with all three cases present and `package.json` **unmodified**:
+
+```text
+bun test v1.4.0 (34cbb9a40)
+
+__tests__/postinstall-hook.test.ts:
+77 |   expect(result.status).toBe(0);
+78 |   expect(result.stderr).toMatch(WARNING_PATTERN);
+                                 ^
+error: expect(received).toMatch(expected)
+
+Expected substring or pattern: /WARNING/i
+Received: ""
+
+      at <anonymous> (/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi/__tests__/postinstall-hook.test.ts:78:25)
+✗ package.json postinstall hook > warns on stderr and still exits 0 when the compiled installer is absent [93.56ms]
+✓ package.json postinstall hook > runs the compiled installer, propagates success, and prints no warning [151.18ms]
+✓ package.json postinstall hook > propagates a failing installer's exit status instead of the ?? 1 fallback [135.80ms]
+
+ 2 pass
+ 1 fail
+ 7 expect() calls
+Ran 3 tests across 1 file. [429.00ms]
+```
+
+Exit status `1`. This is exactly the design's predicted RED: `status === 0` already held, and `stderr === ""` — the old absence branch yielded `undefined` and exited 0 with **no output**.
+
+## 17. GREEN and TRIANGULATE evidence (verbatim, ANSI stripped)
+
+After the `package.json` write — `bun test __tests__/postinstall-hook.test.ts`:
+
+```text
+bun test v1.4.0 (34cbb9a40)
+
+__tests__/postinstall-hook.test.ts:
+✓ package.json postinstall hook > warns on stderr and still exits 0 when the compiled installer is absent [93.35ms]
+✓ package.json postinstall hook > runs the compiled installer, propagates success, and prints no warning [149.59ms]
+✓ package.json postinstall hook > propagates a failing installer's exit status instead of the ?? 1 fallback [154.04ms]
+
+ 3 pass
+ 0 fail
+ 11 expect() calls
+Ran 3 tests across 1 file. [456.00ms]
+```
+
+Exit status `0`. The single RED assertion (`/WARNING/i` on stderr) is GREEN, the present path is unchanged (installer runs, marker on stdout, no warning), and the triangulated case propagates the fixture's `3` rather than the `?? 1` fallback.
+
+**Refactor re-run (T-S2-004):** `runHook(cwd): HookResult` extracted (typed, no `any`), all three cases call it → `3 pass / 0 fail`, `11 expect() calls`, exit `0`. Assertion count is unchanged before and after the refactor, evidencing that nothing was weakened.
+
+## 18. T-S2-005 — Environment-faithful verification (where D5 actually failed)
+
+Harness rebuilt/confirmed: `/tmp/npm10shim/npm --version` → `10.9.0`.
+
+```text
+$ /tmp/npm10shim/npm --version
+10.9.0
+$ PATH=/tmp/npm10shim:$PATH node scripts/verify-packed-install.mjs
+pack: npm pack
+install: npm install --no-save the tgz into a clean dir
+packed-install: pi manifest present with a ./dist/extensions entry — OK
+packed-install: extension factory resolves — OK
+packed-install: postinstall ran under Node, runtime verified — OK
+verify-packed-install: OK
+exit=0
+```
+
+Default-npm regression check (no `PATH` override):
+
+```text
+$ node scripts/verify-packed-install.mjs      # npm 11.19.0
+verify-packed-install: OK
+exit=0
+```
+
+**Diagnostics not disturbed (T-S2-007 item).** `grep -c "WARNING"` on both captured logs → `0` for each. The packed artifact **contains** `dist/scripts/install-drenyra-ai.js` (it is in `package.json#files`), so both the npm install path and the direct-invocation probe take the **present** branch: no warning is emitted, npm's captured `stdout`/`stderr` stay uncorrupted, and the `out.includes("verified")` assertion still holds (B3's repair intact).
+
+> **Shim rebuild note:** the npm 10.9.0 harness lives under `/tmp` (`/tmp/npm10`, `/tmp/npm10shim`). **If `/tmp` is cleared, rebuild it** with the three commands in `tasks.md` `T-S2-005` before re-running this check.
+>
+> **No recovery-pair interaction:** the first attempt of this check failed on the *forced pair* (§19) — `lock-facts.test.ts` re-derived `95a1b43c…` vs the recorded `70ca1dfa…` — not on npm 10.9. `npm@10.9.0`'s postinstall path is green once the checkpoint converged.
+
+## 19. T-S2-006 — The recovery pair as one indivisible block
+
+`package.json` is a `PARTICIPATION_PATHS_V1` member, so the pair was forced. Recorded in order:
+
+| Step | Command | Result |
+| --- | --- | --- |
+| 0 | `bun run refresh:lock-facts` (pass A) | `refreshed docs/architecture/program-lock-facts.json` (exit 0). `packageVersion` unchanged (`0.0.1-prealpha.1` — Slice 3 owns it), `candidateIdentity = dirty-sha256:ce409bb2…`, `headSha = 604332ee…` |
+| 1 | mirror write | **First attempt corrupted the file** (defect D-1, §20). Corrected with the fixed-point write from `node scripts/compute-candidate-identity.mjs` → mirror `dirty-sha256:48af05da…` |
+| 1b | `bun run refresh:lock-facts` (pass B, required — defect D-2) | `refreshed …`; `candidateIdentity = dirty-sha256:48af05da…` = the mirror value |
+| 2 | `node scripts/refresh-program-lock-facts.mjs --check` | `program lock facts are current`, **exit 0**; re-run immediately → still `current`, exit 0 (idempotent, so the mirror write did not move the identity at the fixed point) |
+| 3 | full verification | see the table below, all exit 0 |
+
+**Final candidate identity:** `dirty-sha256:48af05dafe98033853e207da673ca053e46a2c563b9018e502b120e0286cbb36` — identical in `docs/architecture/program-lock-facts.json#/candidateIdentity` and `openspec/config.yaml#/current_test_state/candidate_identity`.
+
+### Step 3 — full verification set (verbatim results)
+
+```text
+$ bun run typecheck
+$ tsc --noEmit
+typecheck exit=0
+
+$ bun run test                      # vitest run
+ Test Files  51 passed (51)
+      Tests  770 passed (770)
+test exit=0
+
+$ bun test                          # the recorded `test_command`
+ 770 pass
+ 0 fail
+ 3726 expect() calls
+Ran 770 tests across 51 files. [13.42s]
+exit=0
+
+$ bun run verify:style
+verify-style: OK (diff-scoped · 108 owned files · 4 rules)
+verify:style exit=0
+
+$ bun run verify:capability
+verify-capability-manifest: OK
+verify:capability exit=0
+
+$ bun run verify:package
+verify-package-files: vendored runtime drenyra-ai@0.4.1 reconciled with the pin (entry artifact package/dist/cmd/cli.js sha256 09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600)
+verify-package-files: OK (dist tree + packaged files + content hashes reconciled)
+verify:package exit=0
+
+$ node scripts/verify-packed-install.mjs
+verify-packed-install: OK
+exit=0
+```
+
+Post-tooling re-check (the design's third trap — a formatter/build pass after the block re-classifies an allowlisted file):
+
+```text
+$ node scripts/refresh-program-lock-facts.mjs --check
+program lock facts are current          exit 0
+$ bun run verify:capability
+verify-capability-manifest: OK          exit 0
+```
+
+### The trap, demonstrated rather than asserted (`--check` alone is never evidence)
+
+Reproduced on purpose with the facts recording `ce409bb2…` while `openspec/config.yaml` was byte-identical to HEAD (mirror left at the old value `70ca1dfa…`):
+
+```text
+$ node scripts/refresh-program-lock-facts.mjs --check
+program lock facts are current
+--check exit=0
+```
+
+```text
+$ bun run verify:capability
+verify-capability-manifest: FAILED
+  conflicting current snapshot identity in openspec/config.yaml: dirty-sha256:70ca1dfa4faf05c7190400ba52d95c3c9e3852feb00c9ff6f4ddb0a13b0cd45d != dirty-sha256:ce409bb20a41496cb70f4af74e18eab4a393484cdb5e690b91249c5416683a18
+verify:capability exit=1
+```
+
+Step 2 and step 3 are the two halves of the proof, exactly as the canonical document states. The tree was restored to the converged state (§19 final identity) immediately afterwards, and both commands were re-run green.
+
+**Never hand-edited:** `candidateIdentity`, `checksums.*`, `capabilityStates.digestSha256`, `headSha`. `docs/architecture/program-lock-facts.json` was written **only** by `bun run refresh:lock-facts`; the single manual write in the pair was the documented mirror field in `openspec/config.yaml`.
+
+## 20. Deviations from design — four, each forced and evidenced
+
+### D-1 (HIGH, cross-slice defect): the prescribed mirror command is not shell-safe
+
+`design.md` §8.2 step 1 / `tasks.md` "indivisible command block" step 1 — and therefore `docs/architecture/program-lock-facts.md` step 2, authored by Slice 1 and **already committed** in `604332e` — presents this inside a `sh` fence:
+
+```sh
+node -e "...before.replace(/^(\s*candidate_identity:\s*).*$/m,'$1\"'+id+'\"');..."
+```
+
+Run as written in a shell, **`$1` is expanded by the shell** (positional parameter, empty), so the replacement string loses its backreference and the whole match — including the `candidate_identity:` key and its indentation — is replaced by the bare quoted value. Measured result:
+
+```text
+$ git diff -- openspec/config.yaml
+-      candidate_identity: "dirty-sha256:70ca1dfa4faf05c7190400ba52d95c3c9e3852feb00c9ff6f4ddb0a13b0cd45d"
++"dirty-sha256:ce409bb20a41496cb70f4af74e18eab4a393484cdb5e690b91249c5416683a18"
+```
+
+`openspec/config.yaml` became invalid YAML (the editor lint reported `L41: Implicit map keys need to be followed by map values`) and the mirror key was gone. This is precisely the defect class the change exists to remove: **the canonical recovery sequence, followed literally, breaks the file it is meant to repair** (it also interacts with `REQ-REL-001` scenario 4 in spirit, though no trust anchor is hand-edited).
+
+- **Deviation taken here:** the mirror was repaired with a reviewable targeted edit and the pair was completed with a shell-safe write (`node -e '…'` in single quotes, replacement supplied as a **function**, so no `$`-pattern can be interpreted by either the shell or `String.replace`).
+- **Escalated, not fixed:** the source of the defect is `docs/architecture/program-lock-facts.md` step 2 (also mirrored in `RELEASING.md` step 7 by reference). That file is **outside this slice's exhaustive allowlist**, so it was not touched. **It needs a follow-up edit** (e.g. drop `\"`-escaping by single-quoting the `node -e` payload, or use `\$1`), otherwise the next operator who follows the canonical sequence reproduces this corruption. Owning slice: a Slice 1 correction or the parent, by decision.
+
+### D-2 (HIGH, design premise falsified): the mirror write *can* move the candidate identity
+
+`design.md` §8.3 / §3.3(a) assert "the mirror is normalization-exempt, so rewriting it does not itself move the candidate identity". Measurement shows the premise is **conditionally false**:
+
+| State | `openspec/config.yaml` vs HEAD | In the participation manifest? | Derived identity |
+| --- | --- | --- | --- |
+| Step 0 output written into the mirror (`ce409bb2…`) | modified | **yes** — `M 100644 e31ce0fd…` | `48af05da…` |
+| Mirror left at the old value (`70ca1dfa…`) | byte-identical | **no** | `ce409bb2…` |
+
+`computeCandidateIdentity` decides membership with `workingTreeChanged()` → `git diff --quiet HEAD -- <path>` over **raw bytes**; the normalizer (`normalizeConfigYaml`) only makes the *digest* value-independent, never the membership. So when the mirror is `openspec/config.yaml`'s **only** change — which is exactly the Slice 2 case — the one-pass sequence `refresh → mirror → --check` can never converge: `--check` reports `program lock facts are stale; run bun run refresh:lock-facts` (exit 1).
+
+- **Deviation taken here (forced):** iterate to the fixed point — run the refresh **again** after the mirror line exists, so the facts record the identity computed *with* `config.yaml` modified, then write that value into the mirror (a no-op for the digest, since it is normalization-exempt). Two refreshes, one mirror write, then `--check` → `current`. This is the parent prompt's route ("write the derived identity from `node scripts/compute-candidate-identity.mjs`").
+- **Consequence for Slice 3 (`U4`):** `DR-6` also edits `openspec/config.yaml`, so `config.yaml` is modified for reasons other than the mirror and the design's one-pass order does converge there. The defect is specific to a mirror-only change, but the documented sequence should still say so.
+- **Not fixed:** the affected prose lives in `docs/architecture/program-lock-facts.md` (outside this slice's allowlist) and in `design.md`/`tasks.md` (authoring artifacts owned by earlier phases). Escalated.
+
+### D-3 (MEDIUM): the designed one-liner's backticks are command-substituted by the lifecycle shell
+
+`design.md` §6.1's literal warning text is ``Run `bun run build`, then re-run your install.`` Inside the double-quoted `node -e "…"` shell command, the backticks are **command substitution**. Measured with the design's string verbatim:
+
+```text
+status=0  stdout=[]
+stderr verbatim:
+error: Script not found "build"
+drenyra-pi: WARNING — dist/scripts/install-drenyra-ai.js is missing, so the pinned Drenyra AI runtime was NOT installed. Run , then re-run your install.
+stderr line count (non-empty)=2
+```
+
+Two defects in one: the remedy text is destroyed (`Run , then re-run your install.`), and an **unrequested `bun run build` executes during postinstall** — on a real source clone that would run a build from inside the install hook.
+
+- **Deviation taken (minimal):** the two backticks were removed from the warning prose; the remedy is still named (`bun run build`), which is the property `design.md` §6.1 requires. Every other property of the designed one-liner is byte-identical to the design (stderr-only via `console.warn`, one line, `process.exit(0)` in the absence branch, the inline path literal appearing once, unchanged `spawnSync(...).status ?? 1` + `process.exit`).
+- **Test strengthened at the same time (not weakened):** case 1 now also asserts the warning is **one bounded line** (`stderr` non-empty lines `toHaveLength(1)`), the property that just failed and that `REQ-REL-004` scenario 4 states ("the warning remains a single bounded line that does not corrupt the captured npm diagnostics").
+
+### D-4 (LOW): the test drives the hook through `sh -c`, not `node -e <value>`
+
+`design.md` §6.2 says the test "spawns `node -e <that string>`". The stored value is not a bare JS body — it is the shell command `node -e "…"` — so spawning `node -e <value>` double-wraps it (and under `bun test` `process.execPath` is bun, which has no CommonJS `require` in `-e`: measured exit `1` for all three cases). The faithful invocation is npm's POSIX lifecycle shell.
+
+- **Deviation taken:** the test executes the manifest value through `sh -c` — the shell npm itself uses for lifecycle scripts. This is the same execution model that exposes D-3, which a `node -e` wrapper would have hidden. Also a `HOOK_RUNTIME = "sh"` constant documents why the test-runner's `process.execPath` is not used.
+
+No requirement-affecting deviation beyond these four. All constraints the design calls "forced, not preferences" hold: exit 0 preserved, the inline path literal present exactly once, no warning on the present path, and the packed-install diagnostics uncorrupted.
+
+## 21. Count drift — reported, deliberately NOT synced
+
+The new test file changes the live counts:
+
+| Record | Recorded (as of this change) | Live after Slice 2 |
+| --- | --- | --- |
+| `openspec/config.yaml#/current_test_state` | `files: 50`, `tests: 767` | 51 files / 770 tests |
+| `capability-manifest.yaml#/evidenceSnapshot` | `"767 passed, 0 failed"` + `note` "767 tests across 50 files" | 770 passed / 0 failed |
+
+**No guard broke on this drift.** `bun run test` (770/770), `bun test` (770/0), `bun run typecheck`, `bun run verify:style`, `bun run verify:capability`, `bun run verify:package`, and both `verify-packed-install.mjs` runs are all exit 0. `scripts/verify-capability-manifest.mjs:838-870` compares the two *recorded* records with each other, not with a live test run, and the lock-facts refresh preserves `tests.*` (hand-authored). Per the design's `DR-6` ordering (and the prompt), the sync belongs to **Slice 3 before its refresh**; it was **not** performed here, and no check was weakened to accommodate the drift.
+
+**`bun test` end state: 770 pass / 0 fail / 3726 expect() calls, 51 files.**
+
+## 22. Remaining tasks (exact unchecked lines, none of them Slice 2)
+
+None of Slice 2 remains. 10 implementation rows remain, all Slice 3, all still `- [ ]` (verbatim from `tasks.md`):
+
+- [ ] T-S3-001 — **RED ① (`REQ-REL-003` scenario 2, captured on purpose).** Set **only** `package.json#/version` to `0.1.0`, then run `bun run verify:capability` → `repository version 0.0.1-prealpha.1 does not match package.json version 0.1.0`, and `bun test __tests__/lock-facts.test.ts` → `packageVersion must equal package.json version (0.1.0)`. Record both verbatim as the fail-closed evidence for a partial bump; do **not** leave the tree in this state. <!-- sdd-owner: implementation -->
+- [ ] T-S3-002 — **RED ② (the D11 guard).** Create `__tests__/harness-version.test.ts` per `design.md` §5.3: it imports `drenyraPiExtension` from `../extensions/register.js` and `FISCAL_GUARD_VERSION` from `../extensions/fiscal-guard.js`, reads `pkg.version` from `package.json`, and asserts `drenyraPiExtension.version === pkg.version` and `FISCAL_GUARD_VERSION === pkg.version` via **real imports** — never the literal `0.1.0`, never prose, never a regex over `.ts` source (so it cannot false-RED on the next legitimate bump). Run it; record RED for C4 (`expected 0.0.1-prealpha.1 to be 0.1.0`), then extend it for C5 and record RED because the module exposes no `FISCAL_GUARD_VERSION`. <!-- sdd-owner: implementation -->
+- [ ] T-S3-003 — **GREEN.** Edit C2 `capability-manifest.yaml#/repository/version` → `0.1.0`; C4 `extensions/register.ts:95` `DRENYRA_PI_VERSION` → `0.1.0`; C5 `extensions/fiscal-guard.ts:49` — rename to an additive `export const FISCAL_GUARD_VERSION` with value `0.1.0` and update its single internal use (`extensions/fiscal-guard.ts:235`), leaving its session-status output unchanged; C6 `__tests__/configurator.test.ts:26` — replace the `PACKAGED_VERSION` literal with an import of the real `drenyraPiExtension.version`. Leave C3 to the generator. Run the focused guard and `bun test __tests__/configurator.test.ts`; record GREEN. <!-- sdd-owner: implementation -->
+- [ ] T-S3-004 — **TRIANGULATE.** Factor the comparison into a local `versionViolations(version: string): string[]` helper and assert it returns a violation for a synthetic `"9.9.9"` and none for `pkg.version` — proving the guard is a detector, not a tautology. <!-- sdd-owner: implementation -->
+- [ ] T-S3-005 — **REFACTOR.** Extract the `readPackageVersion()` helper in the test file; typed, no `any`. The guard covers only C4/C5 — C2's equality is owned by `verify:capability` and C3's by `__tests__/lock-facts.test.ts`; re-asserting them here would create a third failure site for the same invariant. Name that ownership split in the test header. <!-- sdd-owner: implementation -->
+- [ ] T-S3-006 — **`DR-6` count sync — BEFORE the refresh (design correction; ordering is load-bearing).** This change adds two test files, so `openspec/config.yaml#/current_test_state` (`files`, `tests`, `evidence_date`; lines 33-41) and `capability-manifest.yaml#/evidenceSnapshot` (`result`, `date`, and the two numbers inside `note`) record a tree that will no longer exist. Sync them using the counts observed in the final full `bun run test`. Constraints enforced by `scripts/verify-capability-manifest.mjs:838-870`: `config.yaml`'s `command`, `evidence_date`, and `classification` must equal the manifest's, and the normalized `completeResult(files.tests, files.failed)` must equal `evidenceSnapshot.result`. The live projection markers (`README.md:47`, `ROADMAP.md:12`, `docs/architecture/capability-conformance-matrix.md:15-16`) are the delegation form, so **no projection surface is edited**. These edits **must precede** `refresh:lock-facts`, because both files participate in the identity and editing them afterwards invalidates `capabilityStates.digestSha256` and the mirror in one step. <!-- sdd-owner: implementation -->
+- [ ] T-S3-007 — `CHANGELOG.md`: add the `0.1.0` entry recording the version bump and the D2 rationale, stating that **publication remains off**, and noting that it supersedes the earlier "verification-only posture, version stays pre-alpha" note whose reasoning D2 overrode. It must **not** claim that a package was released (`REQ-REL-003` scenario 4; constraint 6.8). <!-- sdd-owner: implementation -->
+- [ ] T-S3-008 — **Recovery pair (indivisible) after the allowlisted writes.** With C1, C2, C4, C5, C6, the guard, the `CHANGELOG.md` entry, and `DR-6` all in place, run the four steps of the indivisible block in order. Required outcomes: `--check` exits 0, C3 regenerated by the generator (never hand-edited), the mirror carries the value the refresh produced, and `bun run verify:capability` exits 0. Record each result and the final candidate identity. <!-- sdd-owner: implementation -->
+- [ ] T-S3-009 — Record U4's exit evidence in `apply-progress.md`: the three surfaces read `0.1.0`; RED ① and RED ② verbatim; the guard green; the pair's four results; and the full verification set green — `bun run typecheck`, `bun run test`, `bun run verify:style`, `bun run verify:capability`, `bun run verify:package`, `node scripts/verify-packed-install.mjs`. <!-- sdd-owner: implementation -->
+- [ ] T-S3-010 — **`REQ-REL-006` boundary check.** Confirm the final diff adds no `publishConfig`, no publish step or job, and no registry publication command; `.github/workflows/release-verify.yml` is byte-identical; `grep -n "Package released" ROADMAP.md` still shows the item unchecked; and no file under `contracts/**`, `openspec/specs/**`, `scripts/compute-candidate-identity.mjs`, or `PARTICIPATION_PATHS_V1` was modified. `git diff --stat` is the evidence. <!-- sdd-owner: implementation -->
+
+## 23. Workload / PR boundary
+
+- **Slice 2 changed lines:** 132 new test lines + 1 `package.json` line + 1 mirror line + 2 generated lock-fact lines = **~136 changed lines**. Under the 400-line reviewer budget on its own, so the commit boundary is a single reviewable unit.
+- **Delivery shape:** Slice 2 of three, `feature-branch-chain` (each PR targets the accumulating feature branch). This run did **not** commit, branch, tag, or open a PR — the parent owns the commit/push route, bounded review, and the archive step (which itself forces the pair). Unit bound is 2000 changed lines for the branch cumulative change; the reviewer budget of 400 applies at the commit boundary, which the parent owns.
+- **Rollback:** restore the one-line `postinstall` and re-run the pair. That restores the previously accepted fail-open (a known state, not a regression). Keep the new test file (it will then RED, which is the point) or delete it; the generated `docs/architecture/program-lock-facts.json` and the mirror must be re-derived together — never hand-edited to a previous value.
+
+## 24. Risks and notes for verify
+
+| # | Note | Severity |
+| --- | --- | --- |
+| 1 | **D-1:** `docs/architecture/program-lock-facts.md` step 2 (committed in `604332e`) prescribes a `node -e` command whose `$1` is expanded by the shell, deleting the `candidate_identity:` key and corrupting `openspec/config.yaml`. Outside this slice's allowlist — **needs a follow-up edit**. | High |
+| 2 | **D-2:** the design's "the mirror write does not move the identity" premise is false when the mirror is `config.yaml`'s only change (membership is raw-git-byte based). The one-pass sequence cannot converge; a second refresh after the mirror write is required. Documented sequence should say so. | High |
+| 3 | **D-3:** the design's warning prose used backticks, which the lifecycle shell substitutes (destroys the remedy text, executes `bun run build`). Backticks removed; the one-line assertion now guards the class. Any future edit to the warning must keep it shell-safe (no backticks, no `$`). | Medium |
+| 4 | **D-4:** the test uses `sh -c`, not `node -e <value>`; a reviewer comparing the test to `design.md` §6.2 will see the deviation, justified in §20. | Low |
+| 5 | Count drift (51/770 vs recorded 50/767) is real and intentional — `DR-6` owns it in Slice 3, **before** its refresh. Do not sync it in a Slice 2 review. | Low |
+| 6 | The npm 10.9.0 harness is `/tmp`-resident; if `/tmp` is cleared the check must be rebuilt (three commands in `T-S2-005`) before it can be cited. | Low |
+| 7 | Slice 1's recorded `--check` staleness note (§7) is now superseded: after this slice the checkpoint is **current** at `48af05da…`, and it will go stale again the moment HEAD advances or any other participation path is written. | Low |
+
+## 25. Skill resolution (Slice 2)
+
+- `skills/drenyra-sdd/SKILL.md` — **present and read** (project skill, injected path).
+- `skills/evidence-citation/SKILL.md` — **present and read** (project skill, injected path). Its citation rule was applied to this record: every claim above carries a command, a `path:line`, or a verbatim output; nothing is asserted without one.
+- No project/user registry discovery was performed; no skill path resolved by fallback.
+
+`skill_resolution`: **paths-injected** (both injected in-repo paths existed and were read; no registry or path fallback used).
