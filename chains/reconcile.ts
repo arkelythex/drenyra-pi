@@ -28,7 +28,11 @@
 import { AUTHORITY_MODE } from "../runtime/context.js";
 import { EDA_PHASE, type EdaPhase } from "../lib/accounting-status.js";
 import type { ExplicitMaterialityRequest } from "../lib/authority-gates.js";
-import { sha256Canonical } from "../lib/canonicalization.js";
+import {
+	computeReferenceDifferences,
+	normalizeReferencedAmounts,
+	toBigIntCents as normalizeBigIntCents,
+} from "../lib/accounting-semantics.js";
 import {
 	EVIDENCE_NODE_KIND,
 	EVIDENCE_RELATION,
@@ -92,9 +96,6 @@ const MAX_MANIFEST_ENTRIES = 500;
 /** Safe evidence record ids (letters, digits, dot, underscore, colon, slash, dash). */
 const REFERENCE_RE = /^[A-Za-z0-9._:/-]{1,256}$/;
 
-/** Integer decimal money at the boundary (JSON integer or decimal string). */
-const INTEGER_RE = /^-?\d+$/;
-
 const SOURCE_SNAPSHOT_RE = /^[0-9a-f]{64}$/;
 
 /**
@@ -103,25 +104,7 @@ const SOURCE_SNAPSHOT_RE = /^[0-9a-f]{64}$/;
  * decimal strings are the only accepted forms.
  */
 export function toBigIntCents(value: number | string): bigint {
-	if (typeof value === "number") {
-		if (!Number.isInteger(value)) {
-			throw new Error(
-				`reconcile: float money rejected at the manifest boundary (${value}) — use integer cents or an integer decimal string`,
-			);
-		}
-		return BigInt(value);
-	}
-	if (typeof value === "bigint") {
-		throw new Error(
-			"reconcile: money at the JSON boundary must be integer cents or an integer decimal string — bigint is not a JSON type; convert with BigInt() after parsing",
-		);
-	}
-	if (typeof value !== "string" || !INTEGER_RE.test(value)) {
-		throw new Error(
-			`reconcile: money must be integer cents or an integer decimal string (got ${String(value)})`,
-		);
-	}
-	return BigInt(value);
+	return normalizeBigIntCents(value, "reconcile");
 }
 
 /** Validate one entry list; returns the entries with unknown props rejected. */
@@ -186,9 +169,7 @@ export function parseReconcileManifest(json: string): ReconcileSourceManifest {
 	const record = parsed as Record<string, unknown>;
 	for (const key of Object.keys(record)) {
 		if (key !== "bank" && key !== "ledger" && key !== "sourceSnapshot") {
-			throw new Error(
-				`reconcile: manifest unknown property "${key}" is rejected`,
-			);
+			throw new Error(`reconcile: manifest unknown property "${key}" is rejected`);
 		}
 	}
 	const bank = parseEntryList(record.bank, "bank");
@@ -214,12 +195,7 @@ export function parseReconcileManifest(json: string): ReconcileSourceManifest {
 function normalizedEntries(
 	entries: readonly ReconcileManifestEntry[],
 ): ReadonlyArray<{ reference: string; amountCents: bigint }> {
-	return [...entries]
-		.map((entry) => ({
-			reference: entry.reference,
-			amountCents: toBigIntCents(entry.amountCents),
-		}))
-		.sort((a, b) => a.reference.localeCompare(b.reference));
+	return normalizeReferencedAmounts(entries, "reconcile");
 }
 
 /**
@@ -230,40 +206,11 @@ function normalizedEntries(
 export function computeReconcileDifferences(
 	manifest: ReconcileSourceManifest,
 ): ReconcileDifference[] {
-	const bank = new Map<string, bigint>(
-		normalizedEntries(manifest.bank).map((entry) => [
-			entry.reference,
-			entry.amountCents,
-		]),
-	);
-	const ledger = new Map<string, bigint>(
-		normalizedEntries(manifest.ledger).map((entry) => [
-			entry.reference,
-			entry.amountCents,
-		]),
-	);
-	const references = new Set<string>([...bank.keys(), ...ledger.keys()]);
-	const differences: ReconcileDifference[] = [];
-	for (const reference of [...references].sort()) {
-		const bankCents = bank.get(reference) ?? 0n;
-		const ledgerCents = ledger.get(reference) ?? 0n;
-		const differenceCents = bankCents - ledgerCents;
-		if (differenceCents !== 0n) {
-			differences.push({
-				reference,
-				bankCents,
-				ledgerCents,
-				differenceCents,
-				payloadHash: sha256Canonical({
-					reference,
-					bankCents,
-					ledgerCents,
-					differenceCents,
-				}),
-			});
-		}
-	}
-	return differences;
+	return computeReferenceDifferences({
+		bank: manifest.bank,
+		ledger: manifest.ledger,
+		consumer: "reconcile",
+	});
 }
 
 /** True when a bank-statement evidence node covers the reference. */
@@ -296,8 +243,7 @@ async function evidenceConfirms(
 			typeof node.payload === "object" &&
 			node.payload !== null &&
 			(node.payload as Record<string, unknown>).kind === "bank-statement" &&
-			(node.payload as Record<string, unknown>).reference ===
-				difference.reference,
+			(node.payload as Record<string, unknown>).reference === difference.reference,
 	);
 	if (statement === undefined) {
 		return false;

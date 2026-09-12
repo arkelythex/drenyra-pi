@@ -21,6 +21,7 @@
 
 import { AUTHORITY_MODE } from "../runtime/context.js";
 import type { EdaPhase } from "../lib/accounting-status.js";
+import { AuthorityStore } from "../lib/authority-store.js";
 import {
   EVIDENCE_NODE_KIND,
   EVIDENCE_RELATION,
@@ -33,6 +34,10 @@ import type {
   ChainStepContext,
   ChainStepOutcome,
 } from "../lib/chain-pipeline.js";
+import {
+  projectEvidenceProvenance,
+  type EvidenceProvenanceProjection,
+} from "../lib/evidence-projection.js";
 import { parseJsonOrThrow } from "../lib/parse.js";
 
 /** One bounded evidence op envelope (the command boundary). */
@@ -56,7 +61,8 @@ export type EvidenceOp =
       };
     }
   | { op: "query-node"; nodeId: string }
-  | { op: "query-lineage"; nodeId: string };
+  | { op: "query-lineage"; nodeId: string }
+  | { op: "query-provenance"; nodeId: string };
 
 /** Chain input: the target mission plus one bounded op per invocation. */
 export interface EvidenceChainInput {
@@ -75,6 +81,8 @@ export interface EvidenceRunOutput {
   queriedNode?: EvidenceNode;
   /** Present for `query-lineage` outcomes. */
   lineage?: Awaited<ReturnType<EvidenceGraphStore["lineage"]>>;
+  /** Present for read-only `query-provenance` audit/review outcomes. */
+  provenance?: EvidenceProvenanceProjection;
 }
 
 /** Safe record ids (letters, digits, dot, underscore, colon, slash, dash). */
@@ -84,7 +92,13 @@ const RECORD_ID_RE = /^[A-Za-z0-9._:/-]{1,256}$/;
 const INTEGER_RE = /^-?\d+$/;
 
 /** The op kinds the chain accepts (fail closed on anything else). */
-const OP_KINDS = ["add-node", "add-edge", "query-node", "query-lineage"] as const;
+const OP_KINDS = [
+  "add-node",
+  "add-edge",
+  "query-node",
+  "query-lineage",
+  "query-provenance",
+] as const;
 
 function assertRecordId(value: unknown, label: string): string {
   if (typeof value !== "string" || !RECORD_ID_RE.test(value)) {
@@ -97,10 +111,16 @@ function assertRecordId(value: unknown, label: string): string {
 
 /** Reject float money and unknown properties inside a node payload. */
 function validatePayload(payload: unknown): void {
-  if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    Array.isArray(payload)
+  ) {
     throw new Error("evidence: a node payload object is required");
   }
-  for (const [key, value] of Object.entries(payload as Record<string, unknown>)) {
+  for (const [key, value] of Object.entries(
+    payload as Record<string, unknown>,
+  )) {
     if (key === "amountCents" || key.endsWith("Cents")) {
       if (typeof value === "number") {
         if (!Number.isInteger(value)) {
@@ -151,7 +171,10 @@ export function parseEvidenceOp(json: string): {
     throw new Error("evidence: missionId must be a non-empty string");
   }
   const opKind = record.op;
-  if (typeof opKind !== "string" || !(OP_KINDS as readonly string[]).includes(opKind)) {
+  if (
+    typeof opKind !== "string" ||
+    !(OP_KINDS as readonly string[]).includes(opKind)
+  ) {
     throw new Error(
       `evidence: unsupported op "${String(opKind)}" — expected one of ${OP_KINDS.join(", ")}`,
     );
@@ -171,7 +194,9 @@ export function parseEvidenceOp(json: string): {
       const nodeRecord = node as Record<string, unknown>;
       for (const key of Object.keys(nodeRecord)) {
         if (key !== "id" && key !== "nodeKind" && key !== "payload") {
-          throw new Error(`evidence: node unknown property "${key}" is rejected`);
+          throw new Error(
+            `evidence: node unknown property "${key}" is rejected`,
+          );
         }
       }
       const id = assertRecordId(nodeRecord.id, "node id");
@@ -214,8 +239,15 @@ export function parseEvidenceOp(json: string): {
       }
       const edgeRecord = edge as Record<string, unknown>;
       for (const key of Object.keys(edgeRecord)) {
-        if (key !== "id" && key !== "from" && key !== "to" && key !== "relation") {
-          throw new Error(`evidence: edge unknown property "${key}" is rejected`);
+        if (
+          key !== "id" &&
+          key !== "from" &&
+          key !== "to" &&
+          key !== "relation"
+        ) {
+          throw new Error(
+            `evidence: edge unknown property "${key}" is rejected`,
+          );
         }
       }
       const id = assertRecordId(edgeRecord.id, "edge id");
@@ -238,13 +270,15 @@ export function parseEvidenceOp(json: string): {
             id,
             from,
             to,
-            relation: relation as (typeof EVIDENCE_RELATION)[keyof typeof EVIDENCE_RELATION],
+            relation:
+              relation as (typeof EVIDENCE_RELATION)[keyof typeof EVIDENCE_RELATION],
           },
         },
       };
     }
     case "query-node":
-    case "query-lineage": {
+    case "query-lineage":
+    case "query-provenance": {
       for (const key of Object.keys(record)) {
         if (key !== "op" && key !== "missionId" && key !== "nodeId") {
           throw new Error(`evidence: unknown property "${key}" is rejected`);
@@ -268,7 +302,9 @@ async function executeOp(
   graph: EvidenceGraphStore,
   missionId: string,
   op: EvidenceOp,
-): Promise<Pick<EvidenceRunOutput, "node" | "queriedNode" | "lineage">> {
+): Promise<
+  Pick<EvidenceRunOutput, "node" | "queriedNode" | "lineage" | "provenance">
+> {
   switch (op.op) {
     case "add-node": {
       const { id, nodeKind, payload } = op.node;
@@ -319,7 +355,9 @@ async function executeOp(
       const loaded = await graph.load(missionId);
       const node = loaded.nodes.find((candidate) => candidate.id === op.nodeId);
       if (node === undefined) {
-        throw new Error(`evidence: unknown node "${op.nodeId}" in mission ${missionId}`);
+        throw new Error(
+          `evidence: unknown node "${op.nodeId}" in mission ${missionId}`,
+        );
       }
       return { queriedNode: node };
     }
@@ -327,6 +365,47 @@ async function executeOp(
       const lineage = await graph.lineage(missionId, op.nodeId);
       return { lineage };
     }
+    case "query-provenance": {
+      const loaded = await graph.load(missionId);
+      const validation = await graph.validate(missionId);
+      return {
+        provenance: projectEvidenceProvenance({
+          graph: loaded,
+          validation,
+          terminalNodeId: op.nodeId,
+        }),
+      };
+    }
+  }
+}
+
+async function assertProvenanceMissionInBoundScope(
+  context: ChainStepContext<EvidenceChainInput>,
+  targetMissionId: string,
+): Promise<void> {
+  const targetMission = await context.stores.store.findById(targetMissionId);
+  const missionScopeMatches =
+    targetMission?.companyId === context.binding.scope.company &&
+    targetMission.fiscalPeriod === context.binding.scope.fiscalPeriod;
+  if (!missionScopeMatches) {
+    throw new Error(
+      `evidence: mission ${targetMissionId} is outside the active bound scope — provenance query rejected`,
+    );
+  }
+
+  const authorizations = await new AuthorityStore(
+    context.stores.root,
+  ).listAuthorizations(targetMissionId);
+  const hasBoundAuthorization = authorizations.some(
+    (record) =>
+      record.decision === "GRANTED" &&
+      record.scopeHash === context.binding.scopeHash &&
+      record.actorId === context.binding.scope.actor,
+  );
+  if (!hasBoundAuthorization) {
+    throw new Error(
+      `evidence: mission ${targetMissionId} is outside the active bound scope — provenance query rejected`,
+    );
   }
 }
 
@@ -336,7 +415,14 @@ async function runStep(
 ): Promise<ChainStepOutcome<EvidenceRunOutput>> {
   const { graph, mission, phase, input } = context;
   const targetMissionId = input.missionId ?? mission.id;
-  const { node, queriedNode, lineage } = await executeOp(graph, targetMissionId, input.op);
+  if (input.op.op === "query-provenance") {
+    await assertProvenanceMissionInBoundScope(context, targetMissionId);
+  }
+  const { node, queriedNode, lineage, provenance } = await executeOp(
+    graph,
+    targetMissionId,
+    input.op,
+  );
   return {
     output: {
       op: input.op.op,
@@ -344,12 +430,16 @@ async function runStep(
       ...(node === undefined ? {} : { node }),
       ...(queriedNode === undefined ? {} : { queriedNode }),
       ...(lineage === undefined ? {} : { lineage }),
+      ...(provenance === undefined ? {} : { provenance }),
     },
   };
 }
 
 /** The evidence chain definition (intent `evidence`; design §11.5; REQ-CHAIN-004). */
-export const evidenceChain: ChainDefinition<EvidenceChainInput, EvidenceRunOutput> = {
+export const evidenceChain: ChainDefinition<
+  EvidenceChainInput,
+  EvidenceRunOutput
+> = {
   name: "evidence",
   intent: "evidence",
   requiredMode: AUTHORITY_MODE.ANALYZE,
