@@ -33,13 +33,15 @@ try {
   pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 } catch (error) {
   console.error("verify-packed-install: FAILED");
-  console.error(`  - repository package.json is missing or malformed: ${error.message}`);
+  console.error(
+    `  - repository package.json is missing or malformed: ${error.message}`,
+  );
   process.exit(1);
 }
 // The build has already run when this script executes, so the compiled pin is
 // readable; its state decides what the postinstall must print.
 const { DEFAULT_PIN, RUNTIME_VERSION } = await import(
-  pathToFileURL(join(root, "dist", "runtime", "pin.js")).href,
+  pathToFileURL(join(root, "dist", "runtime", "pin.js")).href
 );
 const tgzName = `drenyra-pi-${pkg.version}.tgz`;
 const work = mkdtempSync(join(tmpdir(), "drenyra-pi-pack-"));
@@ -48,7 +50,10 @@ const failures = [];
 
 try {
   console.log("pack: npm pack");
-  execSync(`npm pack --pack-destination ${work}`, { cwd: root, stdio: "inherit" });
+  execSync(`npm pack --pack-destination ${work}`, {
+    cwd: root,
+    stdio: "inherit",
+  });
 
   console.log("install: npm install --no-save the tgz into a clean dir");
   try {
@@ -57,7 +62,9 @@ try {
       { cwd: root, stdio: "pipe" },
     );
   } catch (error) {
-    failures.push("npm install of the packed tgz failed (postinstall or dependency error)");
+    failures.push(
+      "npm install of the packed tgz failed (postinstall or dependency error)",
+    );
     // npm's own diagnostics are the only way to tell a postinstall failure
     // from a dependency error or a registry problem. The captured streams are
     // surfaced verbatim, because a gate that reports a cause it cannot name
@@ -69,7 +76,12 @@ try {
   }
 
   // (a) the pi manifest is present in the INSTALLED package.json.
-  const installedPkgPath = join(installDir, "node_modules", "drenyra-pi", "package.json");
+  const installedPkgPath = join(
+    installDir,
+    "node_modules",
+    "drenyra-pi",
+    "package.json",
+  );
   try {
     const installedPkg = JSON.parse(readFileSync(installedPkgPath, "utf8"));
     if (
@@ -77,9 +89,13 @@ try {
       !Array.isArray(installedPkg.pi.extensions) ||
       !installedPkg.pi.extensions.some((e) => e.startsWith("./dist/extensions"))
     ) {
-      failures.push("installed package.json lacks a pi.extensions entry under ./dist/extensions");
+      failures.push(
+        "installed package.json lacks a pi.extensions entry under ./dist/extensions",
+      );
     } else {
-      console.log("packed-install: pi manifest present with a ./dist/extensions entry — OK");
+      console.log(
+        "packed-install: pi manifest present with a ./dist/extensions entry — OK",
+      );
     }
   } catch {
     failures.push("installed package.json not readable");
@@ -96,8 +112,7 @@ try {
     "register.js",
   );
   try {
-    const probe =
-      `node -e "import('file://${extPath}').then(m => { if (typeof m.default !== 'function') process.exit(1); console.log('packed-install: extension factory resolves — OK'); }).catch(e => { console.error(e); process.exit(1); })"`;
+    const probe = `node -e "import('file://${extPath}').then(m => { if (typeof m.default !== 'function') process.exit(1); console.log('packed-install: extension factory resolves — OK'); }).catch(e => { console.error(e); process.exit(1); })"`;
     execSync(probe, { cwd: installDir, stdio: "inherit" });
   } catch {
     failures.push("packed extension factory did not resolve under Node");
@@ -116,16 +131,17 @@ try {
     "scripts",
     "install-drenyra-ai.js",
   );
-  if (!existsSync(postinstallPath)) {
-    failures.push("installed package lacks dist/scripts/install-drenyra-ai.js");
-  } else {
+  if (existsSync(postinstallPath)) {
     try {
       const out = execSync(`node ${postinstallPath}`, {
         cwd: installDir,
         stdio: "pipe",
       }).toString();
       if (DEFAULT_PIN.state === "pending-release") {
-        if (!out.includes("pending-release") || !out.includes(`drenyra-ai@${RUNTIME_VERSION}`)) {
+        if (
+          !out.includes("pending-release") ||
+          !out.includes(`drenyra-ai@${RUNTIME_VERSION}`)
+        ) {
           failures.push(
             `installed postinstall did not print the pending-release notice (state ${DEFAULT_PIN.state})`,
           );
@@ -134,16 +150,20 @@ try {
             "packed-install: postinstall ran under Node, pending-release notice printed — OK",
           );
         }
-      } else if (!out.includes("verified")) {
+      } else if (out.includes("verified")) {
+        console.log(
+          "packed-install: postinstall ran under Node, runtime verified — OK",
+        );
+      } else {
         failures.push(
           `installed postinstall did not confirm a verified runtime (state ${DEFAULT_PIN.state})`,
         );
-      } else {
-        console.log("packed-install: postinstall ran under Node, runtime verified — OK");
       }
     } catch {
       failures.push("installed postinstall exited non-zero under Node");
     }
+  } else {
+    failures.push("installed package lacks dist/scripts/install-drenyra-ai.js");
   }
 } finally {
   rmSync(work, { recursive: true, force: true });
