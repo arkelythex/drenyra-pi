@@ -697,3 +697,249 @@ None of Slice 2 remains. 10 implementation rows remain, all Slice 3, all still `
 - No project/user registry discovery was performed; no skill path resolved by fallback.
 
 `skill_resolution`: **paths-injected** (both injected in-repo paths existed and were read; no registry or path fallback used).
+
+---
+
+# Slice 3 — U4, version `0.1.0` at D11 width (TDD; recovery pair FORCED once for the unit)
+
+**Run scope:** Slice 3 only (`T-S3-001` … `T-S3-010`). §1–§25 (Slice 1 and Slice 2) are preserved byte-for-byte; this section is appended, never a rewrite.
+
+**Attribution — read this first.** This completion pass did **not** author the substantive work of Slice 3. A previous run of this same work unit performed the implementation (carrier edits, the guard, `DR-6`, the `CHANGELOG.md` entry, and the indivisible recovery pair) and then **stalled before reporting**: it persisted no Slice 3 section here and left all ten `T-S3-*` rows `- [ ]`. Every item below is therefore labelled (a) **inherited bytes, re-verified by this pass**, (b) **written by this pass** — only the prose verdict, the task checkboxes, and this record — or (c) **inherited-but-missing evidence**, disclosed rather than reconstructed.
+
+**Committed / branched / pushed by this run:** **no.** No `git add`, `git commit`, `git push`, branch, tag, or PR. No child subagent. **Prose, source and test bytes written by this pass: none** (see §32).
+
+## 26. Item 1 — version-status prose re-check (verdict: no edit was needed, none was invented)
+
+The premise handed to this pass — *“Slice 1 updated `README.md`, `docs/intended-usage.md` and `docs/architecture/ecosystem-boundaries.md` to describe the version as current, so the bump makes all three stale”* — **does not hold**. Slice 1 (`604332e`) wrote the **target** version into those three files, not the then-current one; `git show 604332e -- <those files>` shows `0.0.1-prealpha.1 → 0.1.0` as the Slice 1 edit itself.
+
+Measured now, all three already read `0.1.0` and are **byte-identical to `HEAD`**:
+
+| File | Current-fact version statement | Verdict |
+| --- | --- | --- |
+| `README.md:7`, `:11` | ``> **Status: contracts frozen, pre-release (`v0.1.0`).**`` … ``which is the `0.1.0` step of the version policy`` | already `0.1.0` — **no edit** |
+| `docs/intended-usage.md:27` | ``Status is **pre-release**: contracts are frozen at v0.1 and the package version is `0.1.0`.`` | already `0.1.0` — **no edit** |
+| `docs/architecture/ecosystem-boundaries.md:274` | ``(`drenyra-pi@0.1.0`).`` | already `0.1.0` — **no edit** |
+
+```
+$ git diff --stat README.md docs/intended-usage.md docs/architecture/ecosystem-boundaries.md docs/architecture/capability-conformance-matrix.md
+(empty — all four unmodified against HEAD)
+```
+
+Because the files are byte-unchanged, their `conformance:` markers (`README.md:45-46`) were never at risk: nothing was written in their vicinity.
+
+**`docs/architecture/capability-conformance-matrix.md` — does it state the version as a current fact? Answer: no.** A case-insensitive search for `version`, `0.1.0`, `pre-release`, `pre-alpha` over the file returns **nothing**, and the file states the delegation itself at `:20-22`:
+
+> *“This matrix restates none of those values, so it cannot drift from them.”*
+
+Its only version-shaped content is a **labeled historical** snapshot identity (`:24-27`, `dirty-sha256:38ee713f…`, evidence date 2026-09-09). No edit was made and none is needed.
+
+Also inspected, reported, **not** edited (neither is a current-fact claim; the second is outside every allowlist in this change):
+
+- `RELEASING.md:35` — the version **policy** (“Until the first contract is frozen, releases use **`0.0.1-prealpha.x`**”). A rule for future releases, not a status claim about this tree.
+- `__tests__/extension-mission-status.test.ts:147`, `:158`, `:170` — `"0.0.1-prealpha.1"` is an arbitrary synthetic input passed to `renderCapabilitiesView` and echoed back by the assertion; it claims nothing about the real harness version.
+- `__tests__/capability-manifest.test.ts:269`, `:310` — synthetic temp-root manifests in an identity-allowlisted file (tasks.md guard 3: do not edit).
+
+## 27. Item 2 — persisted task checkboxes (done)
+
+All ten Slice 3 rows were flipped `- [ ]` → `- [x]` in `openspec/changes/pi-recovery-release-readiness/tasks.md` (lines 144-153), each keeping its terminal `<!-- sdd-owner: implementation -->` marker. Re-read **after** the edit:
+
+| Check | Command | Result |
+| --- | --- | --- |
+| zero unchecked rows | `grep -c "^- \[ \]" tasks.md` | **0** |
+| completed rows | `grep -c "^- \[x\]" tasks.md` | **26** |
+| terminal implementation markers | `grep -c "<!-- sdd-owner: implementation -->$" tasks.md` | **26** (26 of 26) |
+| `sdd-owner: parent` rows | `grep -n "sdd-owner: parent" tasks.md` | **none** (no parent-owned row exists in this change) |
+| malformed markers | markers not matching the terminal form | **none** |
+
+`tasks.md` is **not** a `PARTICIPATION_PATHS_V1` member (the list at `scripts/compute-candidate-identity.mjs:45-67` names only `pi-sdd-010-*` artifacts), so this write cannot move the candidate identity — confirmed by re-running `--check` afterwards (§30).
+
+## 28. Item 3 — U4 exit evidence
+
+### 28.1 Carrier census — all five, plus the mirror elimination
+
+| # | Carrier | Value now | Measured evidence |
+| --- | --- | --- | --- |
+| C1 | `package.json#/version` | `0.1.0` | `package.json:3` `"version": "0.1.0",` |
+| C2 | `capability-manifest.yaml#/repository/version` | `0.1.0` | `capability-manifest.yaml:7` `version: 0.1.0` |
+| C3 | `docs/architecture/program-lock-facts.json#/packageVersion` — **generated, never hand-edited** | `0.1.0` | `program-lock-facts.json:7`; `--check` → `program lock facts are current` |
+| C4 | `extensions/register.ts` `DRENYRA_PI_VERSION` | `0.1.0` | `extensions/register.ts:95`, consumed at `:195`, `:497`, `:546`, `:569`, `:648` |
+| C5 | `extensions/fiscal-guard.ts` `FISCAL_GUARD_VERSION` | `0.1.0` | `extensions/fiscal-guard.ts:53` (`export const FISCAL_GUARD_VERSION = "0.1.0";`), single internal use at `:239` (`drenyra-pi v${FISCAL_GUARD_VERSION}`), session-status output unchanged |
+| C6 | `__tests__/configurator.test.ts` `PACKAGED_VERSION` | **mirror eliminated** | `:31` `const PACKAGED_VERSION = drenyraPiExtension.version;` — header at `:27-29` records that a literal is no longer mirrored |
+
+**Line-citation drift vs `design.md`** (content-identical, no requirement affected): the design cites `extensions/fiscal-guard.ts:49` and its internal use at `:235`; the tree has `:53` and `:239` because the rename moved them. Design cites `__tests__/configurator.test.ts:26`; the tree has `:31`.
+
+### 28.2 TDD Cycle Evidence (version unit)
+
+Strict TDD is declared for this unit by `tasks.md` ("TDD; pair FORCED once for the unit") and by `openspec/config.yaml`'s `tdd_discipline`. Steps 1-2 were executed by the **inherited** run; steps 3-5 are re-verified here.
+
+| Step | Task | Required by the task row | Status in this tree |
+| --- | --- | --- | --- |
+| **RED ①** | T-S3-001 | set **only** `package.json#/version` to `0.1.0`; `verify:capability` → `repository version 0.0.1-prealpha.1 does not match package.json version 0.1.0`; `lock-facts` test → `packageVersion must equal package.json version (0.1.0)` | **INHERITED, NOT PERSISTED — gap E-1 (§31).** Both detectors exist at the exact cited sites: `scripts/verify-capability-manifest.mjs:991-994` emits that message verbatim, `__tests__/lock-facts.test.ts:156-158` emits the other. Neither *executed* RED output survives in any artifact I can read. |
+| **RED ②** | T-S3-002 | guard RED for C4 (`expected 0.0.1-prealpha.1 to be 0.1.0`), then C5 (module exposes no `FISCAL_GUARD_VERSION`) | **INHERITED, NOT PERSISTED — gap E-1 (§31).** The guard file exists with the designed real-import assertions (`__tests__/harness-version.test.ts:23-24` import `drenyraPiExtension` and `FISCAL_GUARD_VERSION`; `readPackageVersion()` reads `package.json`). No literal `0.1.0`, no prose, no regex over `.ts` source. |
+| **GREEN** | T-S3-003 | C2/C4/C5 hand-edited, C6 mirror eliminated, C3 left to the generator | **Verified green** (§28.1 + §28.3): `bun test __tests__/harness-version.test.ts` → `3 pass / 0 fail`; `bun test __tests__/configurator.test.ts` passes inside the full `bun test` (773/0). |
+| **TRIANGULATE** | T-S3-004 | `versionViolations("9.9.9")` returns a violation; none for `pkg.version` — detector, not tautology | **Verified green, and this is the present-tense substitute for the missing RED:** test name `detects a mismatching version instead of being a tautology` passes (§28.3). The helper is at `__tests__/harness-version.test.ts:37+`. |
+| **REFACTOR** | T-S3-005 | typed `readPackageVersion()` helper; ownership split named in the test header | **Verified in the file:** `readPackageVersion(): string` at `__tests__/harness-version.test.ts:27-33`, no `any` anywhere in the file; the header at `:1-21` names the split (C2 → `verify:capability`, C3 → `__tests__/lock-facts.test.ts`, C4/C5 → this guard) and states why a third failure site was deliberately avoided. |
+
+**Why RED cannot be recovered now.** Re-capturing RED ① means writing `package.json#version` — an identity-allowlisted path — which would force the indivisible recovery pair, and the pass instruction forbids re-running the pair. Re-capturing RED ② would require reverting C4/C5 within a dirty tree. Both are out of this pass's authority; the gap is reported instead of fabricated. It is **not** a code defect: the detectors are present, cited, and currently green, and the triangulation case (T-S3-004) proves the guard discriminates.
+
+### 28.3 Verbatim gates re-run by this pass (ANSI stripped; Slice 3 tree)
+
+```
+$ bun test
+
+ 773 pass
+ 0 fail
+ 3730 expect() calls
+Ran 773 tests across 52 files. [10.06s]
+
+$ bun run typecheck
+$ tsc --noEmit
+(exit 0, no diagnostics)
+
+$ bun run verify:capability
+$ node scripts/verify-capability-manifest.mjs
+verify-capability-manifest: OK
+
+$ bun run verify:style
+$ node scripts/verify-style.mjs
+verify-style: OK (diff-scoped · 109 owned files · 4 rules)
+
+$ node scripts/refresh-program-lock-facts.mjs --check
+program lock facts are current
+
+$ bun test __tests__/harness-version.test.ts
+__tests__/harness-version.test.ts:
+✓ harness version agreement > reports the package version as the extension version [0.08ms]
+✓ harness version agreement > reports the package version as the fiscal guard version [0.04ms]
+✓ harness version agreement > detects a mismatching version instead of being a tautology [0.10ms]
+
+ 3 pass
+ 0 fail
+ 4 expect() calls
+Ran 3 tests across 1 file. [149.00ms]
+
+$ bun run verify:package
+verify-package-files: vendored runtime drenyra-ai@0.4.1 reconciled with the pin (entry artifact package/dist/cmd/cli.js sha256 09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600)
+verify-package-files: OK (dist tree + packaged files + content hashes reconciled)
+
+$ node scripts/verify-packed-install.mjs
+npm notice package size: 1.1 MB
+npm notice total files: 297
+drenyra-pi-0.1.0.tgz
+install: npm install --no-save the tgz into a clean dir
+packed-install: pi manifest present with a ./dist/extensions entry — OK
+packed-install: extension factory resolves — OK
+packed-install: postinstall ran under Node, runtime verified — OK
+verify-packed-install: OK
+
+$ git status --short
+ M CHANGELOG.md
+ M __tests__/configurator.test.ts
+ M capability-manifest.yaml
+ M docs/architecture/program-lock-facts.json
+ M extensions/fiscal-guard.ts
+ M extensions/register.ts
+ M openspec/config.yaml
+ M package.json
+?? .pi/
+?? __tests__/harness-version.test.ts
+```
+
+Note the packed artifact name `drenyra-pi-0.1.0.tgz` — the bump is visible at the pack boundary, and publication surfaces are still absent (§28.6).
+
+### 28.4 `DR-6` count sync (T-S3-006) — verified consistent
+
+| Record | Value measured | Constraint (`scripts/verify-capability-manifest.mjs:838-870`) | Holds |
+| --- | --- | --- | --- |
+| `openspec/config.yaml#/current_test_state` | `files: 52`, `tests: 773`, `passing: true`, `failed: 0`, `command: bun test`, `classification: dirty-candidate`, `evidence_date: 2026-09-12` | `command`, `evidence_date`, `classification` must equal the manifest's | ✅ |
+| `capability-manifest.yaml#/evidenceSnapshot` | `command: "bun test"`, `result: "773 passed, 0 failed"`, `date: "2026-09-12"`, `classification: dirty-candidate`, `note` → “`bun test` ran 773 tests across 52 files with 0 failures … 2026-09-12” | `completeResult(773, 0)` must equal `evidenceSnapshot.result` | ✅ |
+
+The observed `bun test` counts in §28.3 are exactly the recorded ones (773/52/0), so the sync does **not** go stale as the tree stands. No projection surface was edited: `README.md:46`, `ROADMAP.md:12` and `docs/architecture/capability-conformance-matrix.md:15-16` are the delegation form and remain untouched (the matrix's `git diff` is empty, §26). Ordering was load-bearing and was honoured: both records were written **before** `refresh:lock-facts`; editing them afterwards would have changed `capability-manifest.yaml` bytes and invalidated `capabilityStates.digestSha256` and the mirror in one step.
+
+### 28.5 T-S3-008 — the requirement pair for identity recovery: it was run, and both of its halves are green now
+
+**Explicit statement.** The **indivisible recovery pair for U4 was run** — by the inherited run of this unit, in the mandated order (`bun run refresh:lock-facts` → mirror rewrite → `--check` → full verification set). **This pass did not re-run it**, because it wrote **no** identity-allowlisted path (§32): `README.md`, `docs/intended-usage.md`, `docs/architecture/ecosystem-boundaries.md`, `docs/architecture/capability-conformance-matrix.md`, `tasks.md` and `apply-progress.md` are all outside `scripts/compute-candidate-identity.mjs:45-67`. What this pass did do is re-run **both halves of the proof**, which are the only valid evidence of recovery:
+
+| Half | Command | Result |
+| --- | --- | --- |
+| 1 — the checkpoint is current | `node scripts/refresh-program-lock-facts.mjs --check` | `program lock facts are current` |
+| 2 — the mirror did not conflict | `bun run verify:capability` | `verify-capability-manifest: OK` |
+
+| Identity fact | Value |
+| --- | --- |
+| mirror `openspec/config.yaml:41` `candidate_identity` | `"dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce"` |
+| generated `docs/architecture/program-lock-facts.json:6` `candidateIdentity` | `dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce` |
+| agreement | **equal** — the mirror carries the value the refresh produced |
+| C3 regenerated by the generator | `program-lock-facts.json:7` `"packageVersion": "0.1.0"`, and `--check` reports **current** — so the file matches generator output, never a hand edit |
+
+The **trap is stated, and it did not fire:** a refresh *without* the mirror rewrite leaves `--check` reporting `current` while `bun run verify:capability` goes red with `conflicting current snapshot identity in openspec/config.yaml: <old> != <new>` (source at `scripts/verify-capability-manifest.mjs:866`; the same conflict fails `__tests__/capability-manifest.test.ts` inside `bun run test`). Here **both halves are green simultaneously**, which is precisely what distinguishes a completed recovery from the trap. No second-pass discrepancy was observed at this tree; Slice 2's D-2 note about needing a second refresh after the mirror write is not re-observed here.
+
+### 28.6 T-S3-010 — `REQ-REL-006` boundary check (evidence: the diff itself)
+
+| Boundary | Command | Result |
+| --- | --- | --- |
+| no `publishConfig` / no publish command added to the manifest | `git diff -U0 -- package.json` piped through `grep -i publish` | **no matches** |
+| no publish step or job in the workflow | `git status --porcelain .github/workflows/release-verify.yml` | **empty — byte-identical, unmodified** |
+| the roadmap's npm item is still unchecked | `grep -n "Package released" ROADMAP.md` | line 54 — `- [ ] Package released as drenyra-pi on npm with pinned drenyra-ai` (checkbox still unchecked) |
+| no frozen/authority path touched | `git status --porcelain -- contracts openspec/specs scripts/compute-candidate-identity.mjs` | **empty** |
+
+```
+$ git diff --stat
+ CHANGELOG.md                              | 33 +++++++++++++++++++++++++++++--
+ __tests__/configurator.test.ts            |  9 +++++++--
+ capability-manifest.yaml                  |  8 ++++----
+ docs/architecture/program-lock-facts.json |  8 ++++----
+ extensions/fiscal-guard.ts                |  8 ++++++--
+ extensions/register.ts                    |  2 +-
+ openspec/config.yaml                      | 10 +++++-----
+ package.json                              |  2 +-
+ 8 files changed, 59 insertions(+), 21 deletions(-)
+```
+
+Plus one untracked file, `__tests__/harness-version.test.ts` (65 lines), which `git diff --stat` cannot show. No `contracts/**`, `openspec/specs/**`, `MASTER_CAPABILITIES`, capability-count, `PARTICIPATION_PATHS_V1` or `scripts/compute-candidate-identity.mjs` change exists in the diff.
+
+## 29. `DR-6` / ordering trap walked once more — this pass's own writes are identity-neutral
+
+The two files this pass wrote (`tasks.md`, this record) are outside `PARTICIPATION_PATHS_V1`, so the candidate identity and the mirror are unchanged by them. Proven, not assumed: `--check` → `program lock facts are current` and `verify:capability` → `OK`, both re-run **after** the checkbox flips (§28.3, §30). Nothing here requires the pair.
+
+## 30. Confirmation that the persisted artifacts and the tree agree
+
+Re-read after all writes: `tasks.md` shows 26 `- [x]` and 0 `- [ ]`; the eight modified files and two untracked paths are the inherited set plus nothing else; `--check` and `verify:capability` are green. Nothing reported as complete in this section is reflected only in this file.
+
+Diff-shape proof that §1–§25 survived: `git diff --numstat` over the two artifacts this pass wrote reports `242 0` for this file (**242 insertions, 0 deletions** — a pure append) and `10 10` for `tasks.md` (exactly the ten checkbox flips).
+
+**Post-write re-run.** The whole gate set in §28.3 was run again after the final write to this record, on the finished tree, with identical results: `bun test` → `773 pass / 0 fail / 3730 expect() calls / Ran 773 tests across 52 files`; `bun run typecheck` → clean; `bun run verify:capability` → `verify-capability-manifest: OK`; `bun run verify:style` → `verify-style: OK (diff-scoped · 109 owned files · 4 rules)`; `node scripts/refresh-program-lock-facts.mjs --check` → `program lock facts are current`; `git status --short` → the eight inherited modified files, this change's two artifacts, and `?? .pi/` + `?? __tests__/harness-version.test.ts` (`.pi/` is pre-existing local state, not written by this pass).
+
+## 31. Deviations, inherited defects and open items (reported, not repaired)
+
+| # | Item | Severity | Detail and exact repair |
+| --- | --- | --- | --- |
+| **E-1** | **RED ① and RED ② outputs were never persisted** by the stalled run, and cannot be re-captured inside this pass's authority (`package.json` is identity-allowlisted; re-running the pair is forbidden). | **High for evidence quality; not a code defect** | Repairs available only by a wider mandate: (a) accept §28.2's present-tense substitute (guard green + triangulation case + both detectors cited at `scripts/verify-capability-manifest.mjs:991-994`, `__tests__/lock-facts.test.ts:156-158`), or (b) authorise a fresh RED capture, which forces the indivisible pair. |
+| **E-2** | **`CHANGELOG.md` indentation defect (introduced by the inherited run).** The new entry — and two **pre-existing** lines — carry four leading spaces, so the whole block renders as a **code block**, not markdown: `CUR 75:[    upcoming SDD-020/030 slices.]`, `CUR 77:[    ## 0.1.0 — 2026-09-12]`, `CUR 106:[    ## 0.0.1-prealpha.1 — 2026-08-01]` (both headings were at column 0 at `HEAD`, lines 75 and 77). | **High (document integrity)** | T-S3-007's *content* contract is met (bump + D2 rationale + “publication remains off” + supersession note; no “released” claim), but the `0.1.0` heading is not a heading and the historical `0.0.1-prealpha.1` heading was demoted too. **Not repaired: `CHANGELOG.md` is outside this pass's allowed writes** (it *is* within tasks.md's global apply surface, and it is **not** a `PARTICIPATION_PATHS_V1` member, so a dedent-by-4-spaces of lines 75 and 77-106 forces **no** recovery pair and moves **no** identity). |
+| **E-3** | Slice 2's **D-1** (canonical doc step 2 prescribes a shell-unsafe `node -e` command) and **D-2** (the mirror write can itself move the identity) remain open exactly as recorded in §20/§24. Nothing in Slice 3 changed them. | High (inherited) | Unchanged from the Slice 2 record; the canonical statement lives in `docs/architecture/program-lock-facts.md`. |
+| **E-4** | Line-citation drift in the task rows vs the tree (`fiscal-guard.ts:49→:53`, `:235→:239`; `configurator.test.ts:26→:31`). | Low | Informational; the cited constructs all exist, content-identical. |
+| **E-5** | This pass's own inheritance: a prior run of this unit stalled mid-report, so this record is a **merge-and-verify** pass, not a fresh implementation run. | Low | Disclosure only; the tree it verified is the tree that exists. |
+
+## 32. Files this pass wrote
+
+| File | Write | Allowlisted? |
+| --- | --- | --- |
+| `openspec/changes/pi-recovery-release-readiness/tasks.md` | 10 checkbox flips `- [ ]` → `- [x]` (lines 144-153) | not a `PARTICIPATION_PATHS_V1` member |
+| `openspec/changes/pi-recovery-release-readiness/apply-progress.md` | appended this section (§26–§32); §1–§25 preserved byte-for-byte | not a member |
+
+**Nothing else.** No prose file, no source file, no test file, no config, no lock fact, no contract. No `git add`, `git commit`, `git push`, branch, tag or PR.
+
+## 33. Workload / PR boundary
+
+- **Slice 3 changed lines:** `git diff --stat` for the slice's eight tracked files = **59 insertions / 21 deletions = 80 changed lines**, plus the untracked `__tests__/harness-version.test.ts` (**65 lines**) → **≈145 changed lines** for the unit.
+- **Budget:** well under the 400-line reviewer budget on its own, so the unit is a single reviewable commit boundary. Aggregate change size across the three slices is the reason the change is `auto-chain` / `feature-branch-chain`; the parent owns the commit boundary.
+- **This pass's own diff:** 10 checkbox bytes + this record. It is inside Slice 3's boundary, not a new work unit.
+- **Rollback:** per `tasks.md` — edit C1/C2 back and re-run the **full** pair; never hand-edit `candidateIdentity` to a previous value. `DR-6` rollback is restoring the recorded counts (fails nothing). Guard rollback is deleting `__tests__/harness-version.test.ts` and recording the silent drift as the accepted cost.
+
+## 34. Skill resolution (Slice 3)
+
+- `skills/drenyra-sdd/SKILL.md` — **present and read** (injected project path). Its FSD gate vocabulary (phase/gate framing, fail-closed reasoning) framed the version-unit reading here.
+- `skills/evidence-citation/SKILL.md` — **present and read** (injected project path). Its citation rule was applied to this record: every claim carries a command, a `path:line`, or a verbatim output. In particular, no claim of “RED recorded” is made anywhere, because no evidence node supports it (E-1).
+- Unlike Slice 1, **both** injected paths existed this run; no registry or path fallback was used.
+
+`skill_resolution`: **paths-injected** (both injected in-repo paths existed and were read; no registry or path fallback used).

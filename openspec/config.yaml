@@ -31,18 +31,18 @@ conventions:
       testing: vitest runner, fast suite (582 tests / ~1s), strict mode active
 
 current_test_state:
-      files: 50
-      tests: 767
+      files: 52
+      tests: 773
       passing: true
       failed: 0
       command: bun test
       classification: dirty-candidate
       evidence_scope: current
-      candidate_identity: "dirty-sha256:48af05dafe98033853e207da673ca053e46a2c563b9018e502b120e0286cbb36"
-      evidence_date: 2026-09-11
+      candidate_identity: "dirty-sha256:be3734cbf7bc8977af51f9e22a4aaf237ec8ca81fe7357a214c1431be7b11fce"
+      evidence_date: 2026-09-12
       evidence: >-
             PR 3 verified current snapshot. `bun test` from the canonical repository
-            root ran 767 tests across 50 files with 0 failures; the dirty candidate
+            root ran 773 tests across 52 files with 0 failures; the dirty candidate
             identity is re-derived by `node scripts/compute-candidate-identity.mjs`
             and generated into docs/architecture/program-lock-facts.json. This is the
             canonical current snapshot; preserved older snapshots are labeled

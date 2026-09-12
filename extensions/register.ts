@@ -92,7 +92,7 @@ import {
  * Drenyra Pi package version. Keep in sync with package.json — the pin's
  * version is the Drenyra AI runtime version, this is the harness version.
  */
-const DRENYRA_PI_VERSION = "0.0.1-prealpha.1";
+const DRENYRA_PI_VERSION = "0.1.0";
 
 /**
  * Pi extension registration model (verified against the installed gentle-pi):

@@ -1,6 +1,6 @@
 {
   "name": "drenyra-pi",
-  "version": "0.0.1-prealpha.1",
+  "version": "0.1.0",
   "description": "Pi-native Accounting Operations Harness — consumes a pinned, verified, package-local Drenyra AI runtime. Zero runtime dependencies.",
   "type": "module",
   "engines": {
