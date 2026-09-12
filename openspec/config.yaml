@@ -31,16 +31,22 @@ conventions:
       testing: vitest runner, fast suite (582 tests / ~1s), strict mode active
 
 current_test_state:
-      files: 37
-      tests: 582
+      files: 50
+      tests: 767
       passing: true
       failed: 0
       command: bun test
-      candidate_identity: "dirty-sha256:b73d5e0848a307719656490d20dab5f77c1da4a54fe9257f4b6328fbce06d03a"
-      evidence_date: 2026-08-14
+      classification: dirty-candidate
+      evidence_scope: current
+      candidate_identity: "dirty-sha256:70ca1dfa4faf05c7190400ba52d95c3c9e3852feb00c9ff6f4ddb0a13b0cd45d"
+      evidence_date: 2026-09-11
       evidence: >-
-            pi-sdd-010-participation final-candidate verification; see
-            docs/architecture/program-lock-facts.json and the change verify report
+            PR 3 verified current snapshot. `bun test` from the canonical repository
+            root ran 767 tests across 50 files with 0 failures; the dirty candidate
+            identity is re-derived by `node scripts/compute-candidate-identity.mjs`
+            and generated into docs/architecture/program-lock-facts.json. This is the
+            canonical current snapshot; preserved older snapshots are labeled
+            historical in capability-manifest.yaml and program-lock-facts.json.
 
 phases:
       - proposal
