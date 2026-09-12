@@ -27,10 +27,11 @@
       "./prompts"
     ],
     "skills": [
-      "./skills"
+      "./skills/*/SKILL.md"
     ],
     "themes": [
-      "./themes"
+      "./themes/fiscal-operator/fiscal-operator-light.json",
+      "./themes/fiscal-operator/fiscal-operator-dark.json"
     ]
   },
   "exports": {
@@ -47,7 +48,8 @@
     "verify:capability": "node scripts/verify-capability-manifest.mjs",
     "verify:style": "node scripts/verify-style.mjs",
     "prepack": "bun run verify:package",
-    "prepublishOnly": "bun run typecheck && bun run verify:package && node scripts/verify-packed-install.mjs"
+    "prepublishOnly": "bun run typecheck && bun run verify:package && node scripts/verify-packed-install.mjs",
+    "refresh:lock-facts": "node scripts/refresh-program-lock-facts.mjs"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"

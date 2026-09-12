@@ -1,16 +1,16 @@
 # themes/
 
-Pi themes for Drenyra Pi, declared via the `pi.themes` manifest entry
-(REQ-SKPT-003).
+Pi themes for Drenyra Pi, declared as explicit JSON file paths in the
+`pi.themes` package manifest entry (REQ-SKPT-003).
+
+Pi loads every discovered JSON file as a complete theme, so this directory
+contains no JSON metadata or variant manifest. Each JSON file independently
+satisfies the Pi theme schema with `name` and `colors`.
 
 ## fiscal-operator
 
-Exactly one theme with light and dark variants in one manifest-resolved
-asset:
-
 ```text
 themes/fiscal-operator/
-  manifest.json                 # name + light/dark variant resolution
   fiscal-operator-light.json    # light palette (Pi theme schema)
   fiscal-operator-dark.json     # dark palette (Pi theme schema)
 ```

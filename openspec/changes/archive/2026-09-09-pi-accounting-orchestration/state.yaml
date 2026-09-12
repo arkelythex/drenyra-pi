@@ -1,0 +1,106 @@
+change: pi-accounting-orchestration
+created: 2026-09-09
+store_mode: hybrid
+session_preflight:
+  execution_mode: auto
+  delivery_strategy: auto-chain
+  review_budget_lines: 400
+  chain_strategy: stacked-to-main
+links:
+  master_program: dominion
+  served_capabilities: [SDD-030]
+decisions:
+  scope: two_of_three_modalities_live
+  scope_reason: >-
+    User chose to wire only "direct" into a real production port (durable
+    already has one) and track "delegated" as an explicit follow-up, since
+    real agent-dispatch semantics require a design decision out of scope for
+    this change. Mirrors SDD #1's pattern of not bundling everything into
+    one change.
+phases:
+  explore:
+    status: done
+    artifact: exploration.md
+  research:
+    status: unselected
+    note: purely internal architecture question (wiring an existing port interface); no external prior-art question exists, unlike SDD #1's maturity-taxonomy research
+  proposal:
+    status: done
+    artifact: proposal.md
+  specs:
+    status: done
+    corrected: true
+    note: >-
+      Gatekeeper found real drift vs design.md: (1) spec REQ-ROUTE-001/
+      SC-ROUTE-001 requires executeRoutingWork to run unconditionally on
+      every /drenyra:status call, but design found every reachable
+      runChainStep path writes to the mission store, so design gated it
+      behind an explicit opt-in flag to keep the command read-only by
+      default. (2) spec REQ-ROUTE-004/SC-ROUTE-006 requires a NEW
+      routing-adapter row in capability-manifest.yaml, but design found
+      MASTER_CAPABILITIES is a closed validator-enforced 10-name list and
+      folded evidence into the existing drenyra-commands row instead.
+      Re-running sdd-spec once with corrective feedback per gatekeeper
+      protocol (spec ran before design in parallel and lacked these two
+      findings).
+  design:
+    status: done
+    artifact: design.md
+  tasks:
+    status: done
+    total: 15
+    pr_split:
+      PR1: 5
+      PR2: 10
+    flag_decision: "positional subcommand 'route' (/drenyra:status route), matches existing house convention"
+  apply:
+    status: done
+    artifact: apply-progress.md
+    tasks_completed: "15/15"
+    note: >-
+      PR1 (direct-port.ts + tests) and PR2 (statusHandler opt-in wiring +
+      manifest/matrix evidence fold) both applied via genuine RED-GREEN TDD.
+      Orchestrator independently re-verified: 738/738 tests, typecheck,
+      verify:capability, verify:style all pass; confirmed via diff that
+      missionHandler/coordinator.advance() is byte-unchanged. Two disclosed
+      findings from apply itself: (1) verifyChain's intent "verify" differs
+      from an operator's real mission intent, so /drenyra:status route will
+      typically fail closed with AMBIGUOUS_INPUT against a real mission --
+      honest, non-crashing, consistent with "not validated-end-to-end"; (2)
+      PR2 diff (381 lines) exceeded design's own ~121-line estimate, flagged
+      for size:exception at commit time. Orchestrator also found and fixed
+      recurring program-lock-facts.json drift a 3rd time (activeChanges,
+      capabilityStates.digestSha256, candidateIdentity, tests count) --
+      caught one over-correction of tests.command back to literal "bun test"
+      matching the test's fixed string expectation. Native ledger required a
+      second budget-block reset this SDD (5038 lines vs 500 budget, ledger
+      counts the whole dirty tree not just this work unit) -- same pattern
+      as SDD #1, again resolved only after fresh, explicit, honest user
+      authorization (not self-authorized), reset reason correctly attributed.
+    attempt_token: "sha256:573d180fa2287f945ff7ccfe46431a0ea123de04bcf714aea9d1bf31ed833d6f"
+    attempt_settled: true
+  verify:
+    status: done
+    artifact: verify-report.md
+    verdict: pass_with_warnings
+    requirements: "5/5"
+    scenarios: "8/8"
+    attempt_settled: true
+notes: >-
+  Major finding: lib/routing/ (preflight -> Core-delegated route decision ->
+  bounded executor with real BudgetLedger enforcement) is architecturally
+  sound and unit/contract-tested (62 tests), but is NOT wired into any live
+  /drenyra:* command today. Only the "durable" modality has a production
+  port (createDurableMissionRoutingPort in lib/mission-commands.ts); "direct"
+  and "delegated" ports have zero real implementations anywhere, only test
+  stubs. No command handler ever calls executeRoutingWork/runRoutingPreflight.
+  "Agents and models connected with budgets" is not met by any mechanism:
+  BudgetLedger is real but only instantiated in tests; agents/ has zero
+  code-level budget linkage; model-routing registry is advisory-only
+  (confirmed in SDD #1). Recommended approach: wire only the "direct" port
+  into one existing read-only command (2-of-3 modalities live), leave
+  "delegated" as an explicit tracked follow-up requiring an agent-dispatch
+  design decision. Open scope decision before propose: does the acceptance
+  bar require all 3 modalities live in this one change, or is 2-of-3 +
+  tracked follow-up acceptable (mirrors SDD #1's pattern of not bundling
+  everything into one change)?

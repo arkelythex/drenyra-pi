@@ -1,11 +1,11 @@
 # Harness Draft Conformance — "SDD-050 — Drenyra Pi" (historical draft)
 
-> **Last updated:** 2026-08-18 (reconciliation + fresh verification evidence).
+> **Last updated:** 2026-09-09 (historical snapshot disclaimer).
 > **Status:** delivered — the historical Drenyra Pi harness draft maps to the
-> implemented harness in this repository. This record is the requirement →
-> evidence conformance mapping, the SDD-050 numbering reconciliation, and the
-> fresh verification snapshot. Documentation-only change; no source code was
-> modified.
+> implemented harness in this repository. This record preserves the requirement →
+> evidence mapping, SDD-050 numbering reconciliation, and verification snapshot
+> observed on 2026-08-18. It is not the current capability-status source; use the
+> [capability conformance snapshot](capability-conformance-matrix.md).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents;
 > no float is ever used for money; version/sequence numbers are JSON integers,
@@ -34,7 +34,7 @@ The master catalog remains authoritative. This repository never re-numbers or
 re-defines a master SDD; the draft is treated here as the historical
 requirement set, and this record maps each requirement to delivered evidence.
 
-## 2. Verification evidence (fresh, 2026-08-18)
+## 2. Historical verification evidence (observed 2026-08-18)
 
 | Check | Command | Result |
 | --- | --- | --- |
@@ -46,6 +46,11 @@ requirement set, and this record maps each requirement to delivered evidence.
 
 Baseline: `HEAD` = `1eec8e9` (docs: model routing, Engram boundary, host
 strategy).
+
+This 44-file / 703-test run is preserved as historical evidence and is not
+relabeled. A later independently verified baseline records 47 files / 717
+passing tests; the current point-in-time identity, limitations, and citations
+are in [`capability-conformance-matrix.md`](capability-conformance-matrix.md).
 
 ## 3. Requirement → evidence matrix
 
@@ -106,7 +111,7 @@ persona with an on/off toggle. Two-mode persona is not shipped (see §5).
 | 2 | `drenyra-engram-pi` strictly read-mostly: session context only, never materiality/review decisions | `docs/architecture/trust-model.md` ("Memory informs; it never authorizes"); `runtime/context.ts` reads at the memory boundary; capability manifest `engram-integration: partial` with `REQ-BOUND-001` (dev-grade local store; canonical Engram integration later) | PASS (partial integration) |
 | 3 | Every mission requires an explicit tenant (RUC) before `RUNNING` — fail-closed | `ScopeGuard` (`extensions/scope-guard.ts`): 10-element canonical scope with tenant as element 1, pre-scope policy; `__tests__/extension-scope-guard.test.ts`; `__tests__/extension-mission-commands.test.ts` (SC-CMD-002: mission creation requires complete scope) | PASS |
 | 4 | Per-intent agents are 1:1 with the frozen `IntentHandler`s; no new intents without `mission-protocol` contract | `agents/README.md` maps roles to Design 03 ecosystem roles; `openspec/specs/mission-protocol/spec.md` REQ-MISS-005 fixes the 5 canonical intents; `__tests__/agents.test.ts` | PASS |
-| 5 | Conformance test: full cycle (`mission start` → `candidate` → `gate` → `receipt`) using only the public `drenyra-ai` surface | `__tests__/adapter-boundary-replacement.test.ts` — full monthly-close fixture through public entry points (`/missions`, `/candidates`, `/gates`, `/receipts`) projected to `drenyra.authority-projection.v1` and compared for exact equivalence; `chains/__tests__/monthly-close-flow.test.ts` (T-S5B-003: bound → ingest → reconcile → evidence → proposal → human approval → signed receipt → export); `__tests__/extension-mission-commands.test.ts` imports only public `drenyra-ai` entry points | PASS |
+| 5 | Conformance test: full cycle (`mission start` → `candidate` → `gate` → `receipt`) using only the public `drenyra-ai` surface | `__tests__/adapter-boundary-replacement.test.ts` — full monthly-close fixture through public entry points (`/missions`, `/candidates`, `/gates`, `/receipts`) projected to `drenyra.authority-projection.v1` and compared for exact equivalence; `chains/__tests__/monthly-close-flow.test.ts` (T-S5B-003: bound → ingest → evidence → proposal → human approval → signed receipt → export — RECONCILE completes as the no-op phase-only fallback in this fixture, since no `reconcileManifest` is supplied); `chains/__tests__/monthly-close-reconcile-flow.test.ts` (bound → ingest → **real** reconciliation over a deliberate bank-vs-ledger anomaly, calling `chains/reconcile.ts`'s `computeReconcileDifferences` from inside the monthly-close RECONCILE phase → evidence → proposal → human approval, including the R2-gate fail-closed negative case → signed receipt → verify); `__tests__/extension-mission-commands.test.ts` imports only public `drenyra-ai` entry points | PASS |
 
 ### Draft §8 — Roadmap phases
 
@@ -134,17 +139,17 @@ persona with an on/off toggle. Two-mode persona is not shipped (see §5).
 | Engram integration | Dev-grade local JSON store | Canonical Engram MCP integration deferred (REQ-BOUND-001) |
 | Two-mode persona | Not shipped | Open product decision |
 | Guardian Angel wiring at `AWAITING_APPROVAL` | Role exists, integration pending | SDD-090 master-gated |
-| Product contracts (`package-contract`, `runtime-dependency`) | Still `0.1-draft` | ROADMAP Phase 1 contract freeze pending |
+| Product contracts (`package-contract`, `runtime-dependency`) | Historical 2026-08-18 assertion: `0.1-draft`; superseded | Current contract index records Frozen v0.1; see `contracts/README.md` |
 | Additional hosts (Claude Code) | Planned | README "Host strategy" |
 
-## 6. Result contract
+## 6. Historical result contract (recorded 2026-08-18; superseded as status source)
 
 - `status`: `completed` — reconciliation + verification (documentation-only;
   no source code changed; no commit created).
 - `executive_summary`: mapped the historical "SDD-050 — Drenyra Pi" harness
   draft to the delivered implementation; resolved the SDD-050 numbering
   conflict (master owns `sdd-050-monthly-close`; the harness was delivered as
-  `pi-sdd-010-participation` + extraction); recorded fresh verification
+  `pi-sdd-010-participation` + extraction); recorded the then-current verification
   evidence (703/44 tests, typecheck, package/capability/style gates green);
   corrected stale command/agent counts in `ecosystem-boundaries.md` and the
   README command reference; listed the honest open/partial items.

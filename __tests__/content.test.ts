@@ -182,24 +182,20 @@ describe("T-S6-003 fiscal-operator theme (REQ-SKPT-003; SC-SKPT-003)", () => {
     expect(themeDirs).toEqual(["fiscal-operator"]);
   });
 
-  it("declares light and dark variants in one manifest that resolve to real files", () => {
-    const manifest = JSON.parse(
-      readFileSync(join(THEMES_DIR, "fiscal-operator", "manifest.json"), "utf8"),
-    ) as { name?: string; variants?: Record<string, string> };
-    expect(manifest.name).toBe("fiscal-operator");
-    expect(manifest.variants).toBeDefined();
-    for (const [variant, file] of Object.entries(manifest.variants ?? {})) {
-      expect(variant, "variants must be light/dark").toMatch(/^(light|dark)$/);
-      const full = join(THEMES_DIR, "fiscal-operator", file);
-      expect(readFileSync(full, "utf8").length, `${file} must exist`).toBeGreaterThan(0);
-    }
+  const themeFiles = [
+    "fiscal-operator-light.json",
+    "fiscal-operator-dark.json",
+  ] as const;
+
+  it("ships only the two Pi-loadable theme JSON files", () => {
+    const jsonFiles = readdirSync(join(THEMES_DIR, "fiscal-operator"))
+      .filter((entry) => entry.endsWith(".json"))
+      .sort();
+    expect(jsonFiles).toEqual([...themeFiles].sort());
   });
 
-  it("light and dark variants satisfy the Pi theme schema (name + colors)", () => {
-    const manifest = JSON.parse(
-      readFileSync(join(THEMES_DIR, "fiscal-operator", "manifest.json"), "utf8"),
-    ) as { variants?: Record<string, string> };
-    for (const file of Object.values(manifest.variants ?? {})) {
+  it("light and dark themes satisfy the Pi theme schema (name + colors)", () => {
+    for (const file of themeFiles) {
       const theme = JSON.parse(
         readFileSync(join(THEMES_DIR, "fiscal-operator", file), "utf8"),
       ) as { name?: string; colors?: Record<string, unknown> };
@@ -211,11 +207,12 @@ describe("T-S6-003 fiscal-operator theme (REQ-SKPT-003; SC-SKPT-003)", () => {
     }
   });
 
-  it("resolves through the pi manifest entry", () => {
+  it("declares only the two theme files in the pi package manifest", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
       pi?: { themes?: unknown };
     };
-    expect(Array.isArray(pkg.pi?.themes)).toBe(true);
-    expect((pkg.pi?.themes as string[]).includes("./themes")).toBe(true);
+    expect(pkg.pi?.themes).toEqual(
+      themeFiles.map((file) => `./themes/fiscal-operator/${file}`),
+    );
   });
 });

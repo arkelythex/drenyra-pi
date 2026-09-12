@@ -212,6 +212,59 @@ describe("evaluateScopeGuard — fail-closed scope policy", () => {
   });
 });
 
+describe("selector/canonical consistency guard", () => {
+  it("rejects a persisted legacy/canonical mismatch without a binding", () => {
+    const { store, dir } = makeTempStore();
+    try {
+      writeFileSync(
+        join(dir, "context.json"),
+        JSON.stringify({
+          company: { ruc: "20512345671" },
+          period: { period: "202507" },
+          canonical: makeCanonicalScope(),
+        }),
+        "utf8",
+      );
+      const outcome = new ScopeGuard(store).evaluate("drenyra:mission");
+      expect(outcome.ok).toBe(false);
+      expect(outcome.error).toMatch(/complete|missing|re-bind/i);
+      expect(outcome.binding).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects protected work after a real selector change", () => {
+    const { store, dir } = makeTempStore();
+    try {
+      store.setCanonicalScope(makeCanonicalScope());
+      store.setPeriod("202508");
+      const outcome = new ScopeGuard(store).evaluate("drenyra:evidence");
+      expect(outcome.ok).toBe(false);
+      expect(outcome.error).toMatch(/complete|missing|re-bind/i);
+      expect(outcome.binding).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves the matching canonical binding across same-value selectors", () => {
+    const { store, dir } = makeTempStore();
+    try {
+      const canonical = makeCanonicalScope();
+      store.setCanonicalScope(canonical);
+      const before = new ScopeGuard(store).evaluate("drenyra:mission");
+      store.setCompany(canonical.company);
+      store.setPeriod(canonical.fiscalPeriod);
+      const after = new ScopeGuard(store).evaluate("drenyra:mission");
+      expect(after.ok).toBe(true);
+      expect(after.binding?.scopeHash).toBe(before.binding?.scopeHash);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("ScopeGuard class wrapper", () => {
   it("loads scope from the injected store and applies the command policy", () => {
     const { store, dir } = makeTempStore();

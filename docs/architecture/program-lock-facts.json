@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "858c0df78aa49602ac81bf2d3de0ec98b1fc55d2",
-  "candidateIdentity": "dirty-sha256:f0abe87103fd286c227352d47dcba1dea22979d1c20c1bfb1271499f5eecb5a8",
+  "headSha": "deddc86090d1914781ebf3c071a1de91f3c089fd",
+  "candidateIdentity": "dirty-sha256:70ca1dfa4faf05c7190400ba52d95c3c9e3852feb00c9ff6f4ddb0a13b0cd45d",
   "packageVersion": "0.0.1-prealpha.1",
   "contracts": {
     "consumed": [
@@ -45,27 +45,37 @@
   },
   "tests": {
     "command": "bun test",
-    "files": 44,
-    "total": 700,
-    "passed": 700,
+    "files": 48,
+    "total": 738,
+    "passed": 738,
     "failed": 0
   },
   "checksums": {
     "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
     "contentManifest": {
       "path": "contracts/SHA256SUMS.json",
-      "sha256": "f2cea66e14687e52e4f38450958449900339ef01115ca083275a1202517f788a"
+      "sha256": "bd6471a7d896aa28813a1e4a6a7892965ca4427cae6fff9f126e0ff1afd7de4b"
     }
   },
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "1a6166f87c7b7eaa3a6d3edbba2f82d2c606e99cf680cc16c5a82acb271f477f"
+    "digestSha256": "1ad1c4413cba95788146af3eb734175e2e36d26d0d976a96b0b782232e748e83"
   },
   "activeChanges": [
-    "pi-program-status-reconciliation"
+    "pi-recovery-release-readiness"
   ],
-  "evidenceDate": "2026-08-15",
+  "snapshotRecord": {
+    "evidenceScope": "historical",
+    "evidenceSource": "openspec/changes/archive/2026-09-09-pi-accounting-orchestration/verify-report.md",
+    "labelledFields": [
+      "tests",
+      "evidenceDate",
+      "derivationCommands"
+    ],
+    "note": "`tests`, `evidenceDate`, and the older `derivationCommands` describe their recorded evidence date (2026-09-09, 48 files / 738 tests) and are preserved verbatim by scripts/refresh-program-lock-facts.mjs. They do not claim current test counts. `candidateIdentity` is generated and does identify the live dirty candidate; the canonical current snapshot is published in openspec/config.yaml#/current_test_state."
+  },
+  "evidenceDate": "2026-09-09",
   "derivationCommands": [
     "git rev-parse HEAD",
     "node scripts/compute-candidate-identity.mjs",

@@ -1,0 +1,123 @@
+change: pi-monthly-close-journey
+created: 2026-09-09
+store_mode: hybrid
+session_preflight:
+  execution_mode: auto
+  delivery_strategy: auto-chain
+  review_budget_lines: 400
+  chain_strategy: stacked-to-main
+links:
+  master_program: dominion
+  served_capabilities: []
+  referenced_only: [SDD-050]
+decisions:
+  sdd_050_framing: pi_local_rda_v2_composition_only
+  sdd_050_framing_reason: >-
+    SDD-050 is master-owned-only; this change composes existing SDD-040
+    RDA-v2 chain tooling into one operator journey, never claims SDD-050
+    delivery.
+  scope: wire_reconcile_plus_one_test
+  scope_reason: >-
+    User chose to wire real reconcile.ts logic into monthly-close's
+    RECONCILE phase (the single most damaging gap) plus one genuine
+    multi-chain integration test, deferring exceptions/candidates/dossier
+    assembly as explicit tracked follow-ups since they may be kernel-owned
+    concepts not to be invented locally.
+phases:
+  explore:
+    status: done
+    artifact: exploration.md
+  verify:
+    status: done
+    verdict: pass_after_remediation
+    note: >-
+      First verify pass found 1 CRITICAL (apply-progress.md was reported in
+      chat by sdd-apply but never persisted to disk -- strict_tdd:true makes
+      it mandatory). Orchestrator reconstructed the file faithfully from the
+      apply agent's own already-verified reported evidence (not fabricated).
+      Native ledger required a proper remediation flow: settle the failed
+      attempt honestly (outcome=failed, real evidence_revision), rescope to
+      a narrower verify-remediation work unit (safe -- rescope cannot
+      increase any budget/attempt limit, unlike reset), re-verify from
+      scratch. Remediation re-run PASSED (0 CRITICAL, 1 disclosed WARNING:
+      SOURCE-node amountCents skips normalizedEntries() bigint
+      normalization -- non-blocking, tracked follow-up). Orchestrator
+      independently reconfirmed 745/745 after the remediation too. Ledger
+      settled clean, citing --remediates-evidence-revision to close the
+      loop honestly.
+  research:
+    status: unselected
+    note: purely internal architecture question (wiring two existing local chains together); no external prior-art question exists
+  proposal:
+    status: done
+    artifact: proposal.md
+  specs:
+    status: done
+    note: "no delta needed -- verified chains/spec.md's REQ-CHAIN-001/SC-CHAIN-001/SC-CHAIN-004 already cover this change's WHAT; the gap is implementation-vs-spec conformance, not missing spec text"
+  design:
+    status: done
+    artifact: design.md
+    note: >-
+      Direct import of reconcile.ts's pure computeReconcileDifferences into
+      a new RECONCILE case in monthly-close.ts's advance() switch; RECONCILE
+      always completes and attaches an ERROR blocker on anomalies (no halt
+      precedent exists in this hand-rolled state machine); 2-PR split
+      recommended. Design could not run bun test on the 3 uncommitted-
+      dependency suites (no Bash tool in its context) -- orchestrator ran
+      them directly: 3 files, 18/18 tests pass. Safe to build on.
+apply:
+  status: done
+  tasks_completed: "20/20"
+  note: >-
+    RECONCILE phase wired to real reconcile.ts logic via runReconcilePhase(),
+    backward-compatible (reconcileManifest optional, falls back to prior
+    no-op). Orchestrator independently re-verified: 745/745 tests (after
+    running the concurrent session's new bun run refresh:lock-facts tool --
+    fixed the recurring program-lock-facts.json drift bug systemically at
+    last), typecheck, verify:capability, verify:style all pass; hand-reviewed
+    the monthly-close.ts diff, confirmed other phases untouched. Ledger
+    settled cleanly on first attempt with generous 8000-line budget (no
+    reset needed this time).
+  attempt_settled: true
+phases_tasks:
+  status: done
+  total: 20
+  pr_split:
+    PR1: "~15 (RECONCILE wiring + unit test)"
+    PR2: "~9 (multi-chain integration test + doc/manifest corrections, depends on PR1)"
+caution: >-
+  chains/reconcile.ts, lib/accounting-semantics.ts, and lib/evidence-projection.ts
+  are currently UNCOMMITTED work from the concurrent session (not committed
+  in any of this orchestrator's 3 SDD commits). Wiring monthly-close.ts to
+  call reconcile.ts's real logic means this change's eventual commit will
+  need to also commit those files (and their tests) as a package, since a
+  commit that calls into uncommitted code would be broken/incomplete on its
+  own. Must verify their current test suite passes and reconcile with the
+  other session (or just commit them together with clear attribution) at
+  apply/commit time -- flagged now so it isn't a surprise later.
+
+notes: >-
+  Critical finding: SDD-050 (monthly close) is master-owned-only per README's
+  Dominion Program table (same bucket as SDD-070/080/090/110) -- a change
+  literally named pi-monthly-close-journey risks implying SDD-050 delivery,
+  which the repo explicitly forbids (harness-draft-conformance.md: "this
+  repository never re-numbers or re-defines a master SDD"). Must frame as
+  Pi-local RDA-v2/SDD-040 chain-composition tooling, never SDD-050 delivery.
+  Second critical finding: chains/monthly-close.ts's RECONCILE phase is a
+  no-op (falls through to phase-only completion with zero domain computation)
+  -- it never calls chains/reconcile.ts's real bank-vs-ledger logic, despite
+  both existing and being individually well-tested. Reconciliation and
+  monthly-close are two disconnected chains today, not stages of one
+  pipeline. "Exceptions" and "candidates" have no first-class representation
+  anywhere (CandidateLifecycle exists in drenyra-ai but has zero usage in
+  this repo). The final export artifact is a minimal pointer record, not an
+  assembled dossier/expediente. monthly-close-flow.test.ts IS genuine
+  real-runtime integration evidence for monthly-close in isolation (real
+  MissionRuntime/ApprovalGate/receipts, not mocks) but never exercises
+  reconciliation, exceptions, or dossier assembly. Recommended approach: wire
+  real reconcile into monthly-close's RECONCILE phase (the single most
+  damaging gap) plus one genuine multi-chain test, with candidates/
+  exceptions/dossier assembly explicitly named as tracked follow-ups, not
+  invented under time pressure (candidates/exceptions may be kernel-owned
+  concepts, per the same caution pi-skills-memory-integration already
+  raised for a different domain).

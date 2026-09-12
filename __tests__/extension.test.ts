@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  existsSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -308,6 +309,45 @@ describe("entrypoint packaging (T-S4A-004)", () => {
   });
 });
 
+describe("selector-change isolation at protected command handlers", () => {
+  it.each([
+    ["company", "20512345671"],
+    ["period", "202508"],
+  ] as const)("blocks mission and evidence mutation after a real %s change", async (selector, value) => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-selector-isolation-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      const command = (name: string) => registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
+      const canonical = makeCanonicalScope();
+      const bindOutput = await runHandler(
+        command("scope"),
+        `set ${canonical.tenant} ${canonical.organization} ${canonical.company} ` +
+          `${canonical.fiscalPeriod} ${canonical.ledgerBook} ${canonical.operationType} ` +
+          `${canonical.sourceSnapshot} ${canonical.policyVersion} ${canonical.actor} ${canonical.authorityLevel}`,
+      );
+      expect(bindOutput).toContain("scopeHash");
+      await runHandler(command(selector), value);
+      expect(existsSync(join(root, ".local"))).toBe(false);
+
+      const missionOutput = await runHandler(command("mission"), "monthly-close");
+      const evidenceOutput = await runHandler(
+        command("evidence"),
+        JSON.stringify({
+          op: "add-node",
+          node: { id: "src-isolated", nodeKind: "source", payload: { reference: "B001" } },
+        }),
+      );
+      expect(missionOutput).toMatch(/complete|missing|re-bind/i);
+      expect(evidenceOutput).toMatch(/complete|missing|re-bind/i);
+      expect(existsSync(join(root, ".local"))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () => {
   it("registers the 15 intended commands plus company, context, install and sync (19 commands)", () => {
     const { pi, registered } = makeMockPi();
@@ -555,13 +595,17 @@ describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", ()
       expect(entries.length, `pi.${key} must declare entries`).toBeGreaterThan(
         0,
       );
-      for (const entry of entries) {
-        const resolved = join(process.cwd(), entry.replace(/^\.\//, ""));
-        expect(
-          statSync(resolved).isDirectory(),
-          `${entry} must resolve to a directory`,
-        ).toBe(true);
-      }
+        for (const entry of entries) {
+          const resourcePath = entry
+            .replace(/^\.\//, "")
+            .replace(/[*?[{].*$/, "")
+            .replace(/\/$/, "");
+          const resolved = statSync(join(process.cwd(), resourcePath));
+          expect(
+            resolved.isFile() || resolved.isDirectory(),
+            `${entry} must resolve to existing packaged content`,
+          ).toBe(true);
+        }
     }
     // Concrete content counts (REQ-SKPT-001/002/003).
     expect(
@@ -587,15 +631,10 @@ describe("T-S6-004 packaged operating content (REQ-AGENT-009; REQ-SKPT-007)", ()
       "ruc-scope",
       "scope-discipline",
     ]);
-    const themeManifest = JSON.parse(
-      readFileSync(
-        join(process.cwd(), "themes", "fiscal-operator", "manifest.json"),
-        "utf8",
-      ),
-    ) as { variants?: Record<string, string> };
-    expect(Object.keys(themeManifest.variants ?? {})).toEqual([
-      "light",
-      "dark",
+    const themeEntries = (pkg.pi as { themes?: string[] } | undefined)?.themes;
+    expect(themeEntries).toEqual([
+      "./themes/fiscal-operator/fiscal-operator-light.json",
+      "./themes/fiscal-operator/fiscal-operator-dark.json",
     ]);
   });
 });
@@ -753,5 +792,83 @@ describe("fiscal guard money write (fiscal-guard.ts)", () => {
       input: { content: "total in cents: 1500n" },
     });
     expect(result).toBeUndefined();
+  });
+});
+
+describe("REQ-ROUTE-001 /drenyra:status routing-adapter wiring (pi-accounting-orchestration)", () => {
+  it("default /drenyra:status surfaces routing.preflight additively, keeps pre-existing fields, and performs zero mission-store writes (SC-ROUTE-008)", async () => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-status-routing-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      const command = (name: string) =>
+        registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
+      store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "EXECUTE" }));
+
+      const missionOutput = await runHandler(command("mission"), "monthly-close");
+      const startedMachine = parseMachineOutput(missionOutput) as {
+        missionId: string;
+      };
+      const missionId = startedMachine.missionId;
+      const snapshotPath = join(root, ".local", "missions", "snapshots", `${missionId}.json`);
+      const before = { content: readFileSync(snapshotPath, "utf8"), mtime: statSync(snapshotPath).mtimeMs };
+
+      // The plain invocation (no "route" token) — the pre-existing behavior.
+      const output = await runHandler(command("status"), "");
+      const machine = parseMachineOutput(output) as {
+        mission?: { id: string };
+        routing?: { preflight: { ok: boolean }; execution?: unknown };
+      };
+
+      // Pre-existing field unchanged: the reported mission is still surfaced.
+      expect(machine.mission?.id).toBe(missionId);
+      // New, additive field: routing.preflight is present; execution never ran.
+      expect(machine.routing).toBeDefined();
+      expect(machine.routing?.preflight).toBeDefined();
+      expect(machine.routing?.execution).toBeUndefined();
+
+      const after = { content: readFileSync(snapshotPath, "utf8"), mtime: statSync(snapshotPath).mtimeMs };
+      expect(after.content).toBe(before.content);
+      expect(after.mtime).toBe(before.mtime);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("/drenyra:status route on a fresh mission (no bound QUERY authorization) fails closed at stagePermissions with POLICY_BLOCKED, never silently grants", async () => {
+    const root = mkdtempSync(join(tmpdir(), "drenyra-status-routing-"));
+    try {
+      const { pi, registered } = makeMockPi();
+      const store = new ScopeContextStore(join(root, "context.json"));
+      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      const command = (name: string) =>
+        registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
+      store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "EXECUTE" }));
+
+      // A mission started only through /drenyra:mission has no bound QUERY
+      // authorization on disk (EdaMissionCoordinator never calls
+      // boundAuthorizationFor) — a genuinely "fresh" mission for this check.
+      await runHandler(command("mission"), "monthly-close");
+
+      const output = await runHandler(command("status"), "route");
+      const machine = parseMachineOutput(output) as {
+        routing?: {
+          preflight: { ok: boolean; stage?: string; reason?: { kind: string } };
+          execution?: { attempted: false; reason: string } | { ok: boolean };
+        };
+      };
+
+      expect(machine.routing?.preflight.ok).toBe(false);
+      expect(machine.routing?.preflight.stage).toBe("permissions");
+      expect(machine.routing?.preflight.reason?.kind).toBe("POLICY_BLOCKED");
+      // Execution never dispatched a real port call: it is either absent or an
+      // explicit "did not attempt" marker — never a silently granted result.
+      if (machine.routing?.execution !== undefined && "ok" in machine.routing.execution) {
+        expect(machine.routing.execution.ok).toBe(false);
+      }
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

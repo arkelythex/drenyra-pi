@@ -110,6 +110,32 @@ describe("loadCanonicalScope (REQ-SCOPE-007; SC-SCOPE-006)", () => {
     expect(empty.complete).toBe(false);
     expect(empty.missing).toHaveLength(10);
   });
+
+  it.each([
+    ["company", { company: { ruc: OTHER_VALID_RUC }, canonical: fullScope() }, { company: OTHER_VALID_RUC }],
+    ["period", { period: { period: "202608" }, canonical: fullScope() }, { fiscalPeriod: "202608" }],
+  ] as const)("rejects a canonical/legacy %s mismatch without projecting a hybrid scope", (_kind, context, projected) => {
+    const report = loadCanonicalScope(context);
+    expect(report.complete).toBe(false);
+    expect(report.scope).toEqual(projected);
+    expect(report.missing).toContain("tenant");
+    expect(report.missing).toContain("authorityLevel");
+  });
+
+  it("rejects an invalid canonical company before comparing selector identity", () => {
+    const invalidCompany = "20123456789";
+    const canonical = fullScope();
+    canonical.company = invalidCompany;
+    const report = loadCanonicalScope({
+      company: { ruc: invalidCompany },
+      period: { period: PERIOD },
+      canonical,
+    });
+    expect(report.complete).toBe(false);
+    expect(report.scope).toEqual({ fiscalPeriod: PERIOD });
+    expect(report.missing).toContain("company");
+    expect(report.missing).toContain("tenant");
+  });
 });
 
 describe("assertMissionScopeReady (REQ-SCOPE-009)", () => {

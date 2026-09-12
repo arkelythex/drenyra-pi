@@ -39,6 +39,7 @@ import {
   type EvidenceStatusView,
 } from "../lib/accounting-status.js";
 import { loadEvidenceStatus } from "../lib/evidence-status.js";
+import { projectEvidenceProvenance } from "../lib/evidence-projection.js";
 import { renderStatusView } from "../extensions/mission-status.js";
 import {
   registerDrenyraPiExtension,
@@ -112,8 +113,16 @@ function makeMockPi(): { pi: PiExtensionApi; registered: RegisteredCommand[] } {
         handler: options.handler,
       });
     },
-    on(_event: string, _handler: (event: unknown, ctx: unknown) => void): void {},
-    registerTool(_tool: { name: string; description: string; parameters: unknown; execute(toolCallId: string, params: Record<string, unknown>): unknown }): void {},
+    on(
+      _event: string,
+      _handler: (event: unknown, ctx: unknown) => void,
+    ): void {},
+    registerTool(_tool: {
+      name: string;
+      description: string;
+      parameters: unknown;
+      execute(toolCallId: string, params: Record<string, unknown>): unknown;
+    }): void {},
   };
   return { pi, registered };
 }
@@ -283,6 +292,15 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
     });
     expect(view.conclusionIds).toEqual(["c1"]);
     expect(view.actionIds).toEqual(["a1"]);
+    expect(view.provenance).toHaveLength(1);
+    expect(view.provenance?.[0]?.terminal.nodeId).toBe("a1");
+    expect(view.provenance?.[0]?.nodes.map((node) => node.id)).toEqual([
+      "s1",
+      "t1",
+      "c1",
+      "a1",
+    ]);
+    expect(view.provenance?.[0]?.receiptEvidenceHash).toMatch(/^[0-9a-f]{64}$/);
     expect(view.summary).toContain("4 node(s) verified");
     expect(view.summary).toContain("1 conclusion(s)");
     expect(view.summary).toContain("1 action(s)");
@@ -328,6 +346,31 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
     expect(view.integrity).toBe("unavailable");
   });
 
+  it("fails closed when an attached provenance projection is blocked despite valid graph validation", () => {
+    const graph = { missionId: MISSION, nodes: [], edges: [] };
+    const validation = { valid: true, tamperedNodeIds: [], errors: [] };
+    const provenance = [
+      projectEvidenceProvenance({
+        graph,
+        validation,
+        terminalNodeId: "missing-terminal",
+      }),
+    ];
+
+    const view = projectEvidenceStatus({
+      missionId: MISSION,
+      graph,
+      validation,
+      provenance,
+    });
+
+    expect(view.available).toBe(false);
+    expect(view.integrity).toBe("unavailable");
+    expect(view.nodeIds).toBeUndefined();
+    expect(view.provenance).toEqual(provenance);
+    expect(view.reason).toMatch(/missing-terminal|does not exist/i);
+  });
+
   it("fails closed on an integrity-invalid graph and reports the validation reason", async () => {
     const root = tempRoot();
     const store = new EvidenceGraphStore(root);
@@ -348,6 +391,7 @@ describe("projectEvidenceStatus — truthful verified projection (design §7/§9
     expect(view.available).toBe(false);
     expect(view.integrity).toBe("unavailable");
     expect(view.reason).toMatch(/hash|tamper/i);
+    expect(view.provenance).toEqual([]);
   });
 
   it("surfaces a load error as unavailable with the reason", () => {
@@ -407,6 +451,8 @@ describe("loadEvidenceStatus — read-only, fail-closed loader (design §7)", ()
     expect(input.graph?.nodes).toHaveLength(4);
     expect(input.graph?.edges).toHaveLength(3);
     expect(input.validation?.valid).toBe(true);
+    expect(input.provenance).toHaveLength(1);
+    expect(input.provenance?.[0]?.validationState).toBe("verified");
   });
 });
 

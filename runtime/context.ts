@@ -127,33 +127,47 @@ export function isValidCanonicalScopeValue(scope: CanonicalScope): boolean {
   return true;
 }
 
+/** True only when canonical scope is valid and agrees with every selector. */
+function hasConsistentCanonicalScope(
+  context: ScopeContext,
+): context is ScopeContext & { canonical: CanonicalScope } {
+  const canonical = context.canonical;
+  if (canonical === undefined || !isValidCanonicalScopeValue(canonical)) {
+    return false;
+  }
+  if (
+    context.company !== undefined &&
+    (!isValidRuc(context.company.ruc) || context.company.ruc !== canonical.company)
+  ) {
+    return false;
+  }
+  if (
+    context.period !== undefined &&
+    (!isValidPeriod(context.period.period) ||
+      context.period.period !== canonical.fiscalPeriod)
+  ) {
+    return false;
+  }
+  return true;
+}
+
 /**
- * Load legacy company/period context into the canonical scope model. A bound
- * full canonical scope maps all 10 elements; legacy values fill in when the
- * full scope is absent (or a legacy element is missing). Valid values map to
- * the `company` and `fiscalPeriod` elements; everything else is reported
- * missing until explicitly bound.
+ * Load legacy company/period context into the canonical scope model. Canonical
+ * data is projected only when valid and consistent with every legacy selector.
+ * Otherwise only independently valid selectors are projected, keeping the
+ * report incomplete and preventing a hybrid scope.
  */
 export function loadCanonicalScope(context: ScopeContext): CanonicalScopeReport {
   const scope: Partial<CanonicalScope> = {};
-  if (context.canonical !== undefined && isValidCanonicalScopeValue(context.canonical)) {
-    const canonical = context.canonical;
-    scope.tenant = canonical.tenant;
-    scope.organization = canonical.organization;
-    scope.company = canonical.company;
-    scope.fiscalPeriod = canonical.fiscalPeriod;
-    scope.ledgerBook = canonical.ledgerBook;
-    scope.operationType = canonical.operationType;
-    scope.sourceSnapshot = canonical.sourceSnapshot;
-    scope.policyVersion = canonical.policyVersion;
-    scope.actor = canonical.actor;
-    scope.authorityLevel = canonical.authorityLevel;
-  }
-  if (scope.company === undefined && context.company !== undefined && isValidRuc(context.company.ruc)) {
-    scope.company = context.company.ruc;
-  }
-  if (scope.fiscalPeriod === undefined && context.period !== undefined && isValidPeriod(context.period.period)) {
-    scope.fiscalPeriod = context.period.period;
+  if (hasConsistentCanonicalScope(context)) {
+    Object.assign(scope, context.canonical);
+  } else {
+    if (context.company !== undefined && isValidRuc(context.company.ruc)) {
+      scope.company = context.company.ruc;
+    }
+    if (context.period !== undefined && isValidPeriod(context.period.period)) {
+      scope.fiscalPeriod = context.period.period;
+    }
   }
   const missing = CANONICAL_SCOPE_ELEMENTS.filter(
     (element) => scope[element] === undefined,
@@ -201,13 +215,13 @@ export function isValidPeriod(period: string): boolean {
 
 /** Validate a full scope (both fields, when present). */
 export function isValidScope(scope: ScopeContext): boolean {
-  if (scope.canonical !== undefined && !isValidCanonicalScopeValue(scope.canonical)) {
-    return false;
-  }
   if (scope.company !== undefined && !isValidRuc(scope.company.ruc)) {
     return false;
   }
   if (scope.period !== undefined && !isValidPeriod(scope.period.period)) {
+    return false;
+  }
+  if (scope.canonical !== undefined && !hasConsistentCanonicalScope(scope)) {
     return false;
   }
   return true;
@@ -284,7 +298,11 @@ export class ScopeContextStore {
     if (!isValidRuc(ruc)) {
       throw new Error(`invalid RUC: "${ruc}" (must be 11 digits with a valid check digit)`);
     }
-    const next = { ...this.load(), company: { ruc } };
+    const current = this.load();
+    const retainCanonical =
+      hasConsistentCanonicalScope(current) && current.canonical.company === ruc;
+    const next: ScopeContext = { ...current, company: { ruc } };
+    if (!retainCanonical) delete next.canonical;
     this.save(next);
     return { ruc };
   }
@@ -294,7 +312,12 @@ export class ScopeContextStore {
     if (!isValidPeriod(period)) {
       throw new Error(`invalid period: "${period}" (must be YYYYMM with month 01-12)`);
     }
-    const next = { ...this.load(), period: { period } };
+    const current = this.load();
+    const retainCanonical =
+      hasConsistentCanonicalScope(current) &&
+      current.canonical.fiscalPeriod === period;
+    const next: ScopeContext = { ...current, period: { period } };
+    if (!retainCanonical) delete next.canonical;
     this.save(next);
     return { period };
   }
@@ -312,8 +335,11 @@ export class ScopeContextStore {
           "fiscalPeriod: YYYYMM, authorityLevel: ASK | ANALYZE | PREPARE | EXECUTE)",
       );
     }
-    const next = { ...this.load(), canonical: scope };
-    this.save(next);
+    this.save({
+      company: { ruc: scope.company },
+      period: { period: scope.fiscalPeriod },
+      canonical: scope,
+    });
     return scope;
   }
 }

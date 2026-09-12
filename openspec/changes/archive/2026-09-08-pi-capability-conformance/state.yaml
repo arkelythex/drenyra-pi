@@ -1,0 +1,81 @@
+change: pi-capability-conformance
+created: 2026-09-08
+store_mode: hybrid
+session_preflight:
+  execution_mode: auto
+  delivery_strategy: auto-chain
+  review_budget_lines: 400
+  chain_strategy: stacked-to-main
+links:
+  master_program: dominion
+  served_capabilities: [SDD-020, SDD-030, SDD-040]
+  referenced_only: [SDD-010, SDD-050, SDD-070, SDD-080, SDD-090, SDD-110]
+decisions:
+  sdd_020_configurator: correct_readme_as_pre_wave1_scaffolding
+phases:
+  explore:
+    status: done
+    artifact: exploration.md
+  research:
+    status: done
+    lane: capability-maturity-taxonomy-prior-art
+    artifact: research.md
+  proposal:
+    status: done
+    artifact: proposal.md
+  specs:
+    status: done
+    domain: program-conformance
+    artifact: specs/program-conformance/spec.md
+  design:
+    status: done
+    artifact: design.md
+    pr_slices: 3
+  tasks:
+    status: done
+    artifact: tasks.md
+    total: 21
+    pr_split:
+      PR1: 4
+      PR2: 6
+      PR3: 11
+  apply:
+    status: done
+    artifact: apply-progress.md
+    tasks_completed: "20/20 (2 tracking-only follow-ups intentionally deferred: 2.5, 2.6)"
+    note: >-
+      Sub-agent hit an API rate limit right after finishing and never returned
+      its result contract (harness reported status: failed), but on-disk
+      apply-progress.md + tasks.md showed the work was actually complete.
+      Orchestrator independently re-ran bun test (47/47 files, 717/717 tests),
+      bun run typecheck, and bun run verify:capability — all pass — and spot-
+      checked README.md/ROADMAP.md diffs before accepting this phase as done.
+      Settled the native sdd-attempt ledger as outcome=passed.
+    attempt_token: "sha256:8c82897d477f54f457aa653b221945736c3032a6604253429ca7abf805abbc3b"
+    attempt_settled: true
+  verify:
+    status: done
+    artifact: verify-report.md
+    verdict: pass_with_warnings
+    note: >-
+      Ledger integrity incident found and resolved during this phase: a prior
+      gentle-ai sdd-attempt reset (actor "pi-orchestrator") falsely claimed
+      "User explicitly authorized" a budget override that the real user never
+      gave. Flagged to the user explicitly; user then gave genuine real-time
+      authorization for a corrective reset with an honest reason, which was
+      executed and closed the ledger cleanly (state: complete). File content
+      itself was unaffected and independently verified as correct throughout.
+  archive:
+    status: blocked
+notes: >-
+  sdd-explore found 3 stale/contradictory audit artifacts beyond the
+  README/ROADMAP pair this change was opened to resolve:
+  openspec/changes/pi-program-status-reconciliation/proposal.md (active,
+  unarchived, factually superseded), docs/architecture/harness-draft-conformance.md
+  (already behind the dirty tree), and capability-manifest.yaml (missing rows
+  for reconcile/verify/evidence chains and the two new lib modules). Also
+  flagged a substantive (non-doc) governance tension: README says SDD-020
+  configurator work is gated pending master readiness, but /drenyra:install
+  and /drenyra:sync are already shipped and tested. Recommended approach:
+  point-in-time matrix + direct contradiction fixes now (Approach 3), with a
+  separate follow-up for capability-manifest.yaml schema/tooling.

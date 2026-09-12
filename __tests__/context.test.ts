@@ -17,12 +17,30 @@ import {
   ScopeContextStore,
   isValidPeriod,
   isValidScope,
+  type ScopeContext,
 } from "../runtime/context.js";
+import { bindScope } from "../lib/canonicalization.js";
 import { isValidRuc } from "../runtime/ruc.js";
+import { makeCanonicalScope } from "./helpers/authority-fixtures.js";
 
 function makeStore(): { store: ScopeContextStore; dir: string } {
   const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-context-"));
   return { store: new ScopeContextStore(join(dir, "context.json")), dir };
+}
+
+class RecordingStore extends ScopeContextStore {
+  loadCalls = 0;
+  saveCalls = 0;
+
+  override load(): ScopeContext {
+    this.loadCalls += 1;
+    return super.load();
+  }
+
+  override save(scope: ScopeContext): void {
+    this.saveCalls += 1;
+    super.save(scope);
+  }
 }
 
 describe("isValidRuc (SUNAT Módulo 11)", () => {
@@ -116,6 +134,102 @@ describe("ScopeContextStore", () => {
       expect(() => store.setCompany("20123456789")).toThrow(/invalid RUC/);
       expect(() => store.setPeriod("202613")).toThrow(/invalid period/);
       // Nothing persisted on failure.
+      expect(store.load()).toEqual({});
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("invalidates canonical scope after a real company or period change", () => {
+    for (const change of [
+      (store: ScopeContextStore) => store.setCompany("20512345671"),
+      (store: ScopeContextStore) => store.setPeriod("202608"),
+    ]) {
+      const { store, dir } = makeStore();
+      try {
+        store.setCanonicalScope(makeCanonicalScope());
+        change(store);
+        expect(store.load().canonical).toBeUndefined();
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("preserves canonical bytes and scope hash for matching selector values", () => {
+    const { store, dir } = makeStore();
+    try {
+      store.setCanonicalScope(makeCanonicalScope());
+      const before = store.load().canonical!;
+      const bytes = JSON.stringify(before);
+      const scopeHash = bindScope(before).scopeHash;
+      store.setCompany(before.company);
+      store.setPeriod(before.fiscalPeriod);
+      const after = store.load().canonical!;
+      expect(JSON.stringify(after)).toBe(bytes);
+      expect(bindScope(after).scopeHash).toBe(scopeHash);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects invalid selectors before loading or saving existing state", () => {
+    const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-recording-context-"));
+    const file = join(dir, "context.json");
+    const store = new RecordingStore(file);
+    try {
+      store.setCanonicalScope(makeCanonicalScope());
+      const before = readFileSync(file, "utf8");
+      store.loadCalls = 0;
+      store.saveCalls = 0;
+      expect(() => store.setCompany("20123456789")).toThrow(/invalid RUC/);
+      expect(() => store.setPeriod("202613")).toThrow(/invalid period/);
+      expect(store.loadCalls).toBe(0);
+      expect(store.saveCalls).toBe(0);
+      expect(readFileSync(file, "utf8")).toBe(before);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not resurrect canonical scope after changing away and back", () => {
+    const { store, dir } = makeStore();
+    try {
+      store.setCanonicalScope(makeCanonicalScope());
+      store.setCompany("20512345671");
+      store.setCompany(makeCanonicalScope().company);
+      expect(store.load().canonical).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("aligns legacy selectors when explicitly binding canonical scope", () => {
+    const { store, dir } = makeStore();
+    try {
+      store.setCompany("20512345671");
+      store.setPeriod("202608");
+      const canonical = makeCanonicalScope();
+      store.setCanonicalScope(canonical);
+      expect(store.load()).toEqual({
+        company: { ruc: canonical.company },
+        period: { period: canonical.fiscalPeriod },
+        canonical,
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects direct persistence of contradictory selectors and canonical scope", () => {
+    const { store, dir } = makeStore();
+    try {
+      expect(() =>
+        store.save({
+          company: { ruc: "20512345671" },
+          canonical: makeCanonicalScope(),
+        }),
+      ).toThrow(/invalid scope/i);
       expect(store.load()).toEqual({});
     } finally {
       rmSync(dir, { recursive: true, force: true });

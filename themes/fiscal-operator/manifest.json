@@ -1,7 +1,0 @@
-{
-  "name": "fiscal-operator",
-  "variants": {
-    "light": "fiscal-operator-light.json",
-    "dark": "fiscal-operator-dark.json"
-  }
-}

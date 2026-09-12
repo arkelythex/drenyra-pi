@@ -74,11 +74,20 @@ import {
   type PreparedStep,
 } from "../lib/accounting-status.js";
 import { createDurableMissionStores, type DurableMissionStores } from "../lib/mission-store.js";
-    import type { EvidenceNode } from "../lib/evidence-graph.js";
+    import {
+      EvidenceGraphStore,
+      EVIDENCE_NODE_KIND,
+      EVIDENCE_RELATION,
+      type EvidenceNode,
+    } from "../lib/evidence-graph.js";
     import { sha256Canonical, type ScopeBinding } from "../lib/canonicalization.js";
     import { ReceiptStore, type HarnessReceiptRecord } from "../lib/receipt-store.js";
     import { eachNdjsonLine, parseJsonOrThrow } from "../lib/parse.js";
 import { assertMissionScopeReady } from "../runtime/context.js";
+import {
+  computeReconcileDifferences,
+  type ReconcileSourceManifest,
+} from "./reconcile.js";
 
 /** Upper bound for `run()`: 13 phases plus gate/evidence resolution slack. */
 const MONTHLY_CLOSE_MAX_ADVANCES = 16;
@@ -95,6 +104,12 @@ export interface MonthlyCloseStartInput {
    * R2 floor (REQ-AUTH-005); a missing or incomplete input fails closed.
    */
   materiality: MaterialityInput;
+  /**
+   * Optional bounded bank-vs-ledger source manifest for the RECONCILE phase
+   * (design decision 1). When omitted, RECONCILE falls back to the prior
+   * no-op phase-only completion (fully backward compatible).
+   */
+  reconcileManifest?: ReconcileSourceManifest;
 }
 
 /** Input for one continuation of an existing monthly-close mission. */
@@ -221,6 +236,7 @@ export class MonthlyCloseChain {
   private readonly approvalGate: ApprovalGate;
   private readonly sourceRefsByMission = new Map<string, string[]>();
   private readonly materialityByMission = new Map<string, MaterialityInput>();
+  private readonly reconcileManifestByMission = new Map<string, ReconcileSourceManifest>();
   private approveGateBlocked = false;
   private lastReceipt?: SignedReceipt;
   private lastReceiptRecord?: HarnessReceiptRecord;
@@ -423,6 +439,9 @@ export class MonthlyCloseChain {
     });
     this.sourceRefsByMission.set(started.id, input.sourceRefs ?? []);
     this.materialityByMission.set(started.id, input.materiality);
+    if (input.reconcileManifest !== undefined) {
+      this.reconcileManifestByMission.set(started.id, input.reconcileManifest);
+    }
 
     // Plan injection: version bump + PROGRESS_UPDATE event keeps the durable
     // snapshot/event log consistent for recovery (design §8.3).
@@ -511,6 +530,10 @@ export class MonthlyCloseChain {
           ),
         );
         return this.resultFor(mission, EDA_PHASE.INGEST);
+      }
+      case EDA_PHASE.RECONCILE: {
+        const mission = await this.runReconcilePhase(snapshot);
+        return this.resultFor(mission, EDA_PHASE.RECONCILE);
       }
       case EDA_PHASE.PROPOSE: {
         const mission = await this.phaseOnlyUpdate(snapshot, (m) => ({
@@ -782,6 +805,109 @@ export class MonthlyCloseChain {
             mission.status !== AccountingMissionStatus.REJECTED,
         );
       }
+
+  /**
+   * RECONCILE phase (design decision 1-3): call `reconcile.ts`'s real,
+   * already-exported `computeReconcileDifferences` directly — no shared-module
+   * extraction. Appends SOURCE nodes for the bank/ledger manifest entries,
+   * then `anomaly-{reference}` CONCLUSION nodes (payload shape byte-identical
+   * to `reconcile.ts`'s own CONCLUSION nodes) cited via a `DERIVED_FROM` edge
+   * from the bank source. RECONCILE always completes: an ERROR blocker
+   * attaches only when differences exist, the mission never halts (design
+   * decision 3 — no precedent for a REQUIRED phase halting on its own domain
+   * logic). No manifest supplied falls back to the prior no-op completion,
+   * byte-identical to today (backward compatible).
+   */
+  private async runReconcilePhase(mission: MissionSnapshot): Promise<MissionSnapshot> {
+    const manifest = this.reconcileManifestByMission.get(mission.id);
+    if (manifest === undefined) {
+      return this.phaseOnlyUpdate(mission, (m) =>
+        completeStep(m, EDA_PHASE.RECONCILE, "COMPLETED"),
+      );
+    }
+
+    const graph = new EvidenceGraphStore(this.storesRoot);
+    const evidenceIds: string[] = [];
+    for (const entry of manifest.bank) {
+      const id = `src-bank-${entry.reference}`;
+      await graph.appendNode({
+        id,
+        missionId: mission.id,
+        nodeKind: EVIDENCE_NODE_KIND.SOURCE,
+        payload: {
+          kind: "bank-movement",
+          reference: entry.reference,
+          amountCents: entry.amountCents,
+        },
+      });
+      evidenceIds.push(id);
+    }
+    for (const entry of manifest.ledger) {
+      const id = `src-ledger-${entry.reference}`;
+      await graph.appendNode({
+        id,
+        missionId: mission.id,
+        nodeKind: EVIDENCE_NODE_KIND.SOURCE,
+        payload: {
+          kind: "ledger-entry",
+          reference: entry.reference,
+          amountCents: entry.amountCents,
+        },
+      });
+      evidenceIds.push(id);
+    }
+
+    const bankReferences = new Set(manifest.bank.map((entry) => entry.reference));
+    const differences = computeReconcileDifferences(manifest);
+    for (const difference of differences) {
+      const conclusionId = `anomaly-${difference.reference}`;
+      await graph.appendNode({
+        id: conclusionId,
+        missionId: mission.id,
+        nodeKind: EVIDENCE_NODE_KIND.CONCLUSION,
+        payload: {
+          kind: "discrepancy",
+          reference: difference.reference,
+          bankCents: difference.bankCents,
+          ledgerCents: difference.ledgerCents,
+          differenceCents: difference.differenceCents,
+          payloadHash: difference.payloadHash,
+        },
+      });
+      evidenceIds.push(conclusionId);
+      // The frozen bank source always exists when the reference appears on the
+      // bank side (design §7 lineage); the ledger-only case has no bank source
+      // to cite from and is left ungrounded-safe by simply not adding an edge.
+      if (bankReferences.has(difference.reference)) {
+        await graph.appendEdge({
+          id: `edge-src-bank-${difference.reference}-${conclusionId}`,
+          missionId: mission.id,
+          from: `src-bank-${difference.reference}`,
+          to: conclusionId,
+          relation: EVIDENCE_RELATION.DERIVED_FROM,
+        });
+      }
+    }
+
+    return this.phaseOnlyUpdate(mission, (m) => {
+      const stepped = completeStep(m, EDA_PHASE.RECONCILE, "COMPLETED", evidenceIds);
+      if (differences.length === 0) {
+        return stepped;
+      }
+      return {
+        ...stepped,
+        blockers: [
+          ...stepped.blockers,
+          {
+            id: `blk-reconcile-${m.version}`,
+            reason: `reconciliation discrepancy: ${differences.length} unresolved difference(s) require attention`,
+            severity: "ERROR" as const,
+            occurredAt: new Date().toISOString(),
+          },
+        ],
+      };
+    });
+  }
 
   private buildProposal(mission: MissionSnapshot): MissionSnapshot["proposal"] {
     const evidence = this.evidenceFor(mission.id);
