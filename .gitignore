@@ -30,3 +30,6 @@ coverage/
 
 # CodeGraph local index
 .codegraph/
+
+# Accidental literal-tilde artifacts (e.g. a misquoted cache path creating ./~)
+~*
