@@ -12,6 +12,7 @@
 | [`authority/`](authority/) | 0.1 (`schemaVersion: 1` where enveloped) | Frozen | Pi validation of canonical scope and authorization records |
 | [`receipts/`](receipts/) | 0.1 (`drenyra.receipt-binding.v1`; engine protocol `1.0`) | Frozen | Pi receipt binding, trusted-key registry, and validation of consumed signed receipts |
 | [`mission/`](mission/) | 0.1 | Frozen | Pi validation of mission snapshots, steps, events, and statuses consumed from the pinned runtime |
+| [engram-dependency](engram-dependency.md) | 0.2.1-SNAPSHOT-6a371a9 | Tracked, not frozen | Pinned, verified, package-local `drenyra-engram` binary and its read-only MCP consumption surface |
 
 ## Ownership boundary
 

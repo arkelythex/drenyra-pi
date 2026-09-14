@@ -4,6 +4,7 @@
 // This module registers the Drenyra Pi extension; it holds no money logic.
 
 import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -14,6 +15,7 @@ import {
   type CanonicalScope,
 } from "../runtime/context.js";
 import { doctor } from "../runtime/doctor.js";
+import { spawnEngramClient as defaultSpawnEngramClient } from "../runtime/engram-client.js";
 import { DEFAULT_PIN } from "../runtime/pin.js";
 import { status } from "../runtime/status.js";
 import type { MissionIntent, MissionSnapshot } from "drenyra-ai/missions";
@@ -243,6 +245,12 @@ export interface DrenyraPiExtensionDeps {
   contextStore?: ScopeContextStore;
   /** Durable mission/receipt store root (tests inject a temp dir; default cwd). */
   storesRoot?: string;
+  /**
+   * Overrides the Engram MCP client spawn used by `/drenyra:context`
+   * (REQ-ENG-003). Tests inject a fake client; production spawns the real
+   * pinned binary via `runtime/engram-client.js`.
+   */
+  spawnEngramClient?: typeof defaultSpawnEngramClient;
 }
 
 const SCOPE_USAGE =
@@ -388,6 +396,7 @@ export function registerDrenyraPiExtension(
   const contextStore = deps.contextStore ?? new ScopeContextStore();
   const storesRoot = deps.storesRoot ?? process.cwd();
   const scopeGuard = new ScopeGuard(contextStore);
+  const spawnEngramClientFn = deps.spawnEngramClient ?? defaultSpawnEngramClient;
     
   async function statusHandler(args: string, _ctx: PiCommandContext): Promise<void> {
     const outcome = scopeGuard.evaluate("drenyra:status");
@@ -633,6 +642,60 @@ export function registerDrenyraPiExtension(
 			`drenyra:context: company RUC ${company} | fiscal period ${period}`,
 		);
     console.log(JSON.stringify(scope, null, 2));
+
+    // REQ-ENG-003: read-only institutional-context addendum. Only attempted
+    // once a real RUC is already known from the local scope pointer — this
+    // never becomes the source of the pointer itself (design.md §6).
+    if (scope.company?.ruc === undefined) {
+      return;
+    }
+    const ruc = scope.company.ruc;
+    const result = await spawnEngramClientFn({
+      vendoredRoot: join(PACKAGE_ROOT, "vendored", "drenyra-engram"),
+      platform: process.platform,
+      arch: process.arch,
+      dbPath: join(homedir(), ".drenyra", "engram.db"),
+    });
+    if (result.status !== "healthy") {
+      console.log(
+        "drenyra:context: institutional context unavailable " +
+          `(${result.status === "verification-failed" ? result.report.verdict : result.status}).`,
+      );
+      return;
+    }
+    try {
+      // Peru's RUC uniquely identifies a company; Pi's single-tenant scope
+      // model has no separate organization/company id, so both are set to
+      // the same RUC — a deliberate, disclosed mapping (design.md §6), not
+      // an invented value.
+      const outcome = await result.client.callTool("engram_context", {
+        scope: {
+          kind: "company",
+          organizationId: ruc,
+          companyId: ruc,
+          ruc,
+          ...(scope.period?.period ? { period: scope.period.period } : {}),
+        },
+      });
+      if (outcome.isError) {
+        console.log(`drenyra:context: institutional context error: ${outcome.text}`);
+        return;
+      }
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(outcome.text);
+      } catch {
+        parsed = outcome.text;
+      }
+      if (Array.isArray(parsed) && parsed.length === 0) {
+        console.log("drenyra:context: no institutional context recorded yet.");
+        return;
+      }
+      console.log("drenyra:context: institutional context (Drenyra Engram):");
+      console.log(JSON.stringify(parsed, null, 2));
+    } finally {
+      await result.client.shutdown();
+    }
   }
 
 	async function capabilitiesHandler(
