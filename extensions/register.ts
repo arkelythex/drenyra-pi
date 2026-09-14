@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Type } from "typebox";
 import {
   AUTHORITY_MODE,
   CANONICAL_SCOPE_ELEMENTS,
@@ -693,6 +694,78 @@ export function registerDrenyraPiExtension(
       }
       console.log("drenyra:context: institutional context (Drenyra Engram):");
       console.log(JSON.stringify(parsed, null, 2));
+    } finally {
+      await result.client.shutdown();
+    }
+  }
+
+  /**
+   * `drenyra_institutional_memory` tool (REQ-ENG-005, REQ-ENG-006): lets
+   * `journal-candidate-agent` search Drenyra Engram's general institutional
+   * memory (`engram_search`, read-only) with its own query, scoped to the
+   * company RUC already known from the local pointer — the agent supplies
+   * only the query, never the scope. The result shapes which candidate the
+   * agent drafts; it is never wired to any gate, the materiality policy, or
+   * the agent's PREPARE authority ceiling.
+   */
+  async function institutionalMemoryExecute(
+    _toolCallId: string,
+    params: Record<string, unknown>,
+  ): Promise<{ content: Array<{ type: "text"; text: string }>; details: Record<string, unknown> }> {
+    const query = typeof params.query === "string" ? params.query : "";
+    const scope = contextStore.load();
+    const ruc = scope.company?.ruc;
+    if (ruc === undefined) {
+      return {
+        content: [
+          { type: "text", text: "No company scope is set yet — set it with /drenyra:company first." },
+        ],
+        details: { status: "no-scope-known" },
+      };
+    }
+
+    const result = await spawnEngramClientFn({
+      vendoredRoot: join(PACKAGE_ROOT, "vendored", "drenyra-engram"),
+      platform: process.platform,
+      arch: process.arch,
+      dbPath: join(homedir(), ".drenyra", "engram.db"),
+    });
+    if (result.status !== "healthy") {
+      const reason =
+        result.status === "verification-failed" ? result.report.verdict : result.status;
+      return {
+        content: [{ type: "text", text: `Institutional memory unavailable (${reason}).` }],
+        details: { status: "unavailable", reason },
+      };
+    }
+
+    try {
+      const outcome = await result.client.callTool("engram_search", {
+        query,
+        scope: { kind: "company", organizationId: ruc, companyId: ruc, ruc },
+      });
+      if (outcome.isError) {
+        return {
+          content: [{ type: "text", text: `Institutional memory search error: ${outcome.text}` }],
+          details: { status: "error", message: outcome.text },
+        };
+      }
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(outcome.text);
+      } catch {
+        parsed = outcome.text;
+      }
+      if (Array.isArray(parsed) && parsed.length === 0) {
+        return {
+          content: [{ type: "text", text: "No institutional context recorded for this query yet." }],
+          details: { status: "empty" },
+        };
+      }
+      return {
+        content: [{ type: "text", text: JSON.stringify(parsed, null, 2) }],
+        details: { status: "found", results: parsed },
+      };
     } finally {
       await result.client.shutdown();
     }
@@ -1431,6 +1504,18 @@ export function registerDrenyraPiExtension(
   pi.registerCommand("drenyra:context", {
     description: "Show the current company (RUC) and fiscal period context.",
     handler: contextHandler,
+  });
+  pi.registerTool({
+    name: "drenyra_institutional_memory",
+    label: "Drenyra Institutional Memory",
+    description:
+      "Search Drenyra Engram's institutional accounting memory (read-only) for the current company scope. Informs which candidate to propose; never authorizes anything and never changes review depth.",
+    parameters: Type.Object({
+      query: Type.String({
+        description: "Free-text query, e.g. a provider name or an account pattern to check for institutional precedent.",
+      }),
+    }),
+    execute: institutionalMemoryExecute,
   });
   pi.registerCommand("drenyra:capabilities", {
     description:

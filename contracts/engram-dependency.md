@@ -32,7 +32,7 @@ The pinned build (`0.2.1-SNAPSHOT-6a371a9`) is an explicit pre-release snapshot,
 
 5. **Verification.** Platform detection (`process.platform` + `process.arch`) selects the one artifact to verify; sha256 checksum match is required before spawning; any mismatch or unsupported platform fails closed — never a silent fallback to an unverified binary. See "Verification procedure" below.
 
-6. **Read-only consumption.** Pi calls only `engram_context` (an `engram_*` general tool, read-only) through the spawned MCP child process. It never calls any `accounting_*` tool and never calls a write-shaped `engram_*` tool (`engram_save`, `engram_reject`, `engram_void`, `engram_supersede`) — this pin's consumption surface is a strict subset of what the binary exposes, by design of this change (`proposal.md` §3, `design.md` §6), not a limitation of the binary itself.
+6. **Read-only consumption.** Pi calls only `engram_context` and `engram_search` (`engram_*` general tools, both read-only) through the spawned MCP child process. It never calls any `accounting_*` tool and never calls a write-shaped `engram_*` tool (`engram_save`, `engram_reject`, `engram_void`, `engram_supersede`) — this pin's consumption surface is a strict subset of what the binary exposes, by deliberate design (`pi-engram-integration` design.md §6; widened to include `engram_search` by `pi-engram-memory-reads` proposal.md §2), not a limitation of the binary itself.
 
 7. **Upgrade is explicit.** Changing the pinned build is a release of Drenyra Pi itself, following the same discipline `runtime-dependency.md` rule 6 requires: changelog entry, migration note, re-run of verification.
 
@@ -68,6 +68,6 @@ The pinned build (`0.2.1-SNAPSHOT-6a371a9`) is an explicit pre-release snapshot,
 | Package-local, never PATH | same module — resolves only `<packageRoot>/vendored/drenyra-engram/<artifact>`, never `PATH` |
 | Verification / fail-closed | same module — checksum mismatch, missing artifact, or unsupported platform all report a typed failure, never a silent pass |
 | Child-process lifecycle | `runtime/engram-client.ts` — spawn, `initialize` handshake, graceful shutdown (see `design.md` §6) |
-| Read-only consumption surface | `extensions/register.ts`'s `:context` handler — the only caller, calling only `engram_context` |
+| Read-only consumption surface | `extensions/register.ts`'s `:context` handler (`engram_context`) and `drenyra_institutional_memory` tool (`engram_search`, reachable only by `journal-candidate-agent`) — the only two callers |
 
 Conformance tests: `__tests__/engram-pin.test.ts`, `__tests__/engram-client.test.ts`.
