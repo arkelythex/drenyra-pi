@@ -101,7 +101,7 @@ These are **not** editable by this change. No task below proposes violating them
 
 **Prohibited:** `contracts/**` (incl. `SHA256SUMS.json`), `openspec/specs/**`, `MASTER_CAPABILITIES` and the 8/2/0 capability-state counts, `PARTICIPATION_PATHS_V1` and `scripts/compute-candidate-identity.mjs`, `scripts/verify-capability-manifest.mjs`, `__tests__/lock-facts.test.ts`, `__tests__/capability-manifest.test.ts`, `__tests__/release-verify-workflow.test.ts`, `.github/workflows/release-verify.yml`, `ROADMAP.md` (its npm item stays unchecked), any pin upgrade, any publication surface (`publishConfig`, publish step, dist-tag, tag), `pi-skills-memory-integration` and every archived change, `.git/**`. No U7, no vector runner, no `postinstall` fail-closed.
 
-**Not to be re-planned (already delivered — `design.md` §1):** PRs #70/#69 and merge `70d87ac`; the npm 10.9.x `--legacy-peer-deps` postinstall fix (`runtime/installer.ts:74-88`); the `scripts/verify-packed-install.mjs` diagnostics repair (`:64-77`); the `./~/` cleanup; the superseded-change archive. **No task exists for any of these.**
+**Not to be re-planned (already delivered — `design.md` §1):** PRs #70/#69 and merge `70d87ac`; the npm 10.9.x `--legacy-peer-deps` postinstall fix (`runtime/installer.ts:74-88`); the `scripts/verify-packed-install.mjs` diagnostics repair (`:64-77`); removal of the stray repository-root directory literally named with a single tilde character (a misquoted-shell-command artifact, not a home-directory reference); the superseded-change archive. **No task exists for any of these.**
 
 ---
 
@@ -162,7 +162,7 @@ These are **not** editable by this change. No task below proposes violating them
 
 ## Already-delivered and out-of-scope — no tasks
 
-No task exists for: PRs #70/#69 and merge `70d87ac`; the npm 10.9.x `--legacy-peer-deps` postinstall fix; the `scripts/verify-packed-install.mjs` diagnostics repair; the `./~/` cleanup; the `pi-skills-memory-integration` archive. No task builds a vector runner (D9), a docs-drift guard (U7 declined), publication (D8), a pin upgrade, a `contracts/**` change, a `MASTER_CAPABILITIES` or capability-count change, a `PARTICIPATION_PATHS_V1` rework, or anything touching the archived `pi-skills-memory-integration`. The falsification table (`exploration.md` §4) is binding: no task claims `verify:capability` or `--check` are ungoverned, that the pin or checksum is wrong, that the packed-install proof is aspirational, that `doctor` is not fail-closed, or that fiscal mission recovery is missing.
+No task exists for: PRs #70/#69 and merge `70d87ac`; the npm 10.9.x `--legacy-peer-deps` postinstall fix; the `scripts/verify-packed-install.mjs` diagnostics repair; removal of the stray repository-root directory literally named with a single tilde character; the `pi-skills-memory-integration` archive. No task builds a vector runner (D9), a docs-drift guard (U7 declined), publication (D8), a pin upgrade, a `contracts/**` change, a `MASTER_CAPABILITIES` or capability-count change, a `PARTICIPATION_PATHS_V1` rework, or anything touching the archived `pi-skills-memory-integration`. The falsification table (`exploration.md` §4) is binding: no task claims `verify:capability` or `--check` are ungoverned, that the pin or checksum is wrong, that the packed-install proof is aspirational, that `doctor` is not fail-closed, or that fiscal mission recovery is missing.
 
 ---
 
