@@ -20,7 +20,7 @@ Drenyra Pi does **not** contain the accounting engine. It **installs and consume
 - Packaged skills and RDA (Receipt-Driven Accounting) command chains.
 - Tool safety: broad-deny, narrow-allow permissions for fiscal actions.
 - Company & period context: RUC-scoped context threaded across tools and agents.
-- Drenyra Engram boundary: institutional memory may inform future proposals, but executable context/memory integration is not yet evidenced (memory never authorizes).
+- Drenyra Engram boundary: a pinned, fail-closed-verified `drenyra-engram` binary provides a read-only institutional-context addendum on `/drenyra:context` once a company RUC is already known (`pi-engram-integration`); institutional memory may still inform future proposals, but no command reads it to shape one yet (memory never authorizes).
 
 ## Explicit non-goals
 
@@ -243,7 +243,7 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
 | Direction | Party | Relation |
 | --------- | ----- | -------- |
 | Consumes | `drenyra-ai` | pinned, verified, package-local runtime (never `PATH`) |
-| Planned consumption | `drenyra-engram` | executable memory reads/context are not yet integrated; memory never authorizes |
+| Consumes (read-only) | `drenyra-engram` | pinned, verified, package-local binary; `/drenyra:context` reads institutional context for an already-known scope only; memory never authorizes |
 | Produces for | Pi users | the disciplined accounting operator experience |
 | Provides | `drenyra-pi` package | installable via `pi install npm:drenyra-pi` |
 
@@ -261,7 +261,9 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
   baseline, and current limitations. The manifest's embedded 44-file / 700-test
   `testState` is an older scoped snapshot; it is not the 47/717 baseline.
   Monthly-close evidence is an in-process fixture, not an operational E2E run,
-  and executable Engram integration remains incomplete.
+  and executable Engram integration remains partial: `/drenyra:context` reads
+  institutional context read-only once scope is known; no command reads
+  memory to shape a proposal yet.
 - **Historical harness draft conformance:** the early draft titled "SDD-050 —
   Drenyra Pi" maps to this implemented harness. Its 44-file / 703-test run was
   observed on 2026-08-18 and remains historical rather than being relabeled;

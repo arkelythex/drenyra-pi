@@ -38,6 +38,7 @@ import {
 import { ScopeContextStore } from "../runtime/context.js";
 import { makeCanonicalScope } from "./helpers/authority-fixtures.js";
 import { sha256Canonical } from "../lib/canonicalization.js";
+import type { EngramClientResult } from "../runtime/engram-client.js";
 
 interface RegisteredCommand {
   name: string;
@@ -870,5 +871,158 @@ describe("REQ-ROUTE-001 /drenyra:status routing-adapter wiring (pi-accounting-or
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("/drenyra:context — Engram-backed institutional context (REQ-ENG-003)", () => {
+  const VALID_RUC = "20123456786";
+  const VALID_PERIOD = "202601";
+
+  function healthyClientStub(text: string): EngramClientResult {
+    return {
+      status: "healthy",
+      client: {
+        pid: 1,
+        serverInfo: { name: "drenyra-engram", version: "0.3.0" },
+        isHealthy: () => true,
+        callTool: async () => ({ isError: false, text }),
+        shutdown: async () => {},
+      },
+    };
+  }
+
+  it("still reports RUC/period unchanged, plus institutional context, when Engram is healthy", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    store.setPeriod(VALID_PERIOD);
+    const { pi, registered } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () =>
+        healthyClientStub(
+          JSON.stringify([{ title: "IGV base rate", what: "18 percent" }]),
+        ),
+    });
+    const context = registered.find((c) => c.name === "drenyra:context");
+    const output = await runHandler(context!.handler, "");
+
+    expect(output).toContain(`company RUC ${VALID_RUC}`);
+    expect(output).toContain(`fiscal period ${VALID_PERIOD}`);
+    expect(output).toMatch(/institutional context/i);
+    expect(output).toContain("IGV base rate");
+    cleanupTempStore(store);
+  });
+
+  it("reports institutional context as unavailable, visibly, without failing the command, when Engram cannot be reached", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    store.setPeriod(VALID_PERIOD);
+    const { pi, registered } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({
+        status: "spawn-failed",
+        error: "binary not found in this sandbox",
+      }),
+    });
+    const context = registered.find((c) => c.name === "drenyra:context");
+    const output = await runHandler(context!.handler, "");
+
+    expect(output).toContain(`company RUC ${VALID_RUC}`);
+    expect(output).toContain(`fiscal period ${VALID_PERIOD}`);
+    expect(output).toMatch(/institutional context.*unavailable/i);
+    cleanupTempStore(store);
+  });
+
+  it("reports plainly when Engram is healthy but has no institutional context yet", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    store.setPeriod(VALID_PERIOD);
+    const { pi, registered } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => healthyClientStub("[]"),
+    });
+    const context = registered.find((c) => c.name === "drenyra:context");
+    const output = await runHandler(context!.handler, "");
+
+    expect(output).toMatch(/no institutional context recorded yet/i);
+    cleanupTempStore(store);
+  });
+
+  it("never attempts to reach Engram when no company/period scope is set", async () => {
+    const store = makeTempStore();
+    const { pi, registered } = makeMockPi();
+    let spawnAttempted = false;
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => {
+        spawnAttempted = true;
+        return { status: "spawn-failed", error: "should not be called" };
+      },
+    });
+    const context = registered.find((c) => c.name === "drenyra:context");
+    const output = await runHandler(context!.handler, "");
+
+    expect(output).toContain("company RUC NOT SET");
+    expect(spawnAttempted).toBe(false);
+    cleanupTempStore(store);
+  });
+
+  it("never calls an accounting_* or write-shaped engram_* tool (contracts/engram-dependency.md rule 6)", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    store.setPeriod(VALID_PERIOD);
+    const { pi, registered } = makeMockPi();
+    let calledTool: string | undefined;
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({
+        status: "healthy",
+        client: {
+          pid: 1,
+          serverInfo: { name: "drenyra-engram", version: "0.3.0" },
+          isHealthy: () => true,
+          callTool: async (name: string) => {
+            calledTool = name;
+            return { isError: false, text: "[]" };
+          },
+          shutdown: async () => {},
+        },
+      }),
+    });
+    const context = registered.find((c) => c.name === "drenyra:context");
+    await runHandler(context!.handler, "");
+
+    expect(calledTool).toBe("engram_context");
+    cleanupTempStore(store);
+  });
+});
+
+describe("/drenyra:context — engram_context tool-level error (triangulation)", () => {
+  it("reports a tool-level error plainly without throwing, distinct from a connection failure", async () => {
+    const store = makeTempStore();
+    store.setCompany("20123456786");
+    const { pi, registered } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({
+        status: "healthy",
+        client: {
+          pid: 1,
+          serverInfo: { name: "drenyra-engram", version: "0.3.0" },
+          isHealthy: () => true,
+          callTool: async () => ({ isError: true, text: "invalid scope: ruc required" }),
+          shutdown: async () => {},
+        },
+      }),
+    });
+    const context = registered.find((c) => c.name === "drenyra:context");
+    const output = await runHandler(context!.handler, "");
+
+    expect(output).toContain("company RUC 20123456786");
+    expect(output).toMatch(/institutional context error/i);
+    expect(output).toContain("invalid scope: ruc required");
+    cleanupTempStore(store);
   });
 });

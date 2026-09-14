@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "2e25b5557aab0510df7c08b25f777b10d5827582",
-  "candidateIdentity": "dirty-sha256:bea529637e3bb37d08876befa1562b38174965d674ab33640a5caf17cd4f57e4",
+  "headSha": "085872e1614f38c015c382217ebcdc6e7de35ded",
+  "candidateIdentity": "dirty-sha256:2df1feecc02f59143d374703e6fea37b56c39015144c64fb115827ff6a17800e",
   "packageVersion": "0.1.0",
   "contracts": {
     "consumed": [
@@ -60,7 +60,7 @@
   "capabilityStates": {
     "manifest": "capability-manifest.yaml",
     "schemaVersion": "drenyra.capability-manifest.v1",
-    "digestSha256": "b3ed52e1066c252961096a168c04e07d0c93158cfede4ec0126eeceee40a61ab"
+    "digestSha256": "5ec98dfc6476cac4f4fb52ea51b5c8ee273089548c9e03e84166e02a996fb41b"
   },
   "activeChanges": [
     "pi-engram-integration"

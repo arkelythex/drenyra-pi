@@ -50,14 +50,18 @@ Extracted via vertical PRs and versioned releases, **not** a bulk move:
 - [x] Slice 2: `/drenyra:status` + `/drenyra:company` + `/drenyra:period` context threading
 - [x] Slice 3: `/drenyra:mission` + `/drenyra:receipt` + `/drenyra:ledger`
 - [x] Slice 4: monthly-close chain (R2 gate, explicit approval)
-- [ ] Slice 5: Drenyra Engram integration (context, memory reads)
+- [ ] Slice 5: Drenyra Engram integration (context, memory reads) — read-only institutional context on `/drenyra:context` shipped (`pi-engram-integration`); proposal-informing memory reads remain open
 - [ ] Package released as `drenyra-pi` on npm with pinned `drenyra-ai`
 
 Slices 1–4 are shipped and covered by repository tests, which makes them
 `unit-or-contract-tested` — not `validated-end-to-end`. The monthly-close evidence
-is an in-process fixture, not an operational end-to-end run. Executable Engram
-context/memory integration remains a separate follow-up; static context prose and
-the development-grade JSON store do not complete Slice 5.
+is an in-process fixture, not an operational end-to-end run. Slice 5 is partial:
+`/drenyra:context` reads Drenyra Engram institutional context read-only once a
+company RUC is already known (`pi-engram-integration`, `capability-manifest.yaml`
+`engram-integration: partial`); the active company/period pointer itself is
+still the development-grade local JSON store (Engram's scope model has no
+session-pointer concept to hold it), and no command reads memory to shape a
+proposal yet — both remain open, so the checkbox above stays unchecked.
 
 ## Phase 3 — Ecosystem maturity (alpha → beta)
 
