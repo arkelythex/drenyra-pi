@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "a54bd935b76b09cb336362edbe32b353abc618f9",
-  "candidateIdentity": "dirty-sha256:4eb0da1dba41ff493595ffc812fbd6842908b67f6e06af52e47ecf40f1dc6d8e",
+  "headSha": "8ef3332eb9e17ea0bc079413a1d1fbb7239b2a5b",
+  "candidateIdentity": "dirty-sha256:60b3b0b490eeb68d562badefe99d48dda80a5414a79f91514d022df21693ed6c",
   "packageVersion": "0.1.0",
   "contracts": {
     "consumed": [
@@ -62,9 +62,7 @@
     "schemaVersion": "drenyra.capability-manifest.v1",
     "digestSha256": "8bd590213e342d68d8befae0854aac65f3567b531798c3061351be63d3f8ccb3"
   },
-  "activeChanges": [
-    "pi-engram-memory-reads"
-  ],
+  "activeChanges": [],
   "snapshotRecord": {
     "evidenceScope": "historical",
     "evidenceSource": "openspec/changes/archive/2026-09-09-pi-accounting-orchestration/verify-report.md",
