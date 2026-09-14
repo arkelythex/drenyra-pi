@@ -12,7 +12,12 @@ import { DEFAULT_PIN, installUrlFor, type RuntimePin } from "./pin.js";
 
 export type InstallDecision =
   | { kind: "pending-release"; notice: string }
-  | { kind: "released"; packageName: string; version: string; installUrl: string };
+  | {
+      kind: "released";
+      packageName: string;
+      version: string;
+      installUrl: string;
+    };
 
 /**
  * Relative path of the vendored tarball inside the package tree, when the
@@ -38,7 +43,7 @@ export function decideInstall(pin: RuntimePin): InstallDecision {
       kind: "pending-release",
       notice:
         `drenyra-pi: drenyra-ai@${pin.version} is pinned in "pending-release" state ` +
-        "(checksum still \"pending\"). Nothing to install yet — the package-local " +
+        '(checksum still "pending"). Nothing to install yet — the package-local ' +
         "runtime is filled at the first drenyra-ai release, and doctor keeps " +
         "failing closed until then.",
     };
@@ -86,11 +91,18 @@ function runNpmInstall(packageRoot: string, installUrl: string): Promise<void> {
       // Do NOT add --omit=dev: the pinned runtime is declared in
       // devDependencies, so omitting dev deps drops the very package this
       // install exists to place, and doctor then correctly reports it missing.
-      ["install", "--no-save", "--no-package-lock", "--legacy-peer-deps", installUrl],
+      [
+        "install",
+        "--no-save",
+        "--no-package-lock",
+        "--legacy-peer-deps",
+        installUrl,
+      ],
       { cwd: packageRoot },
       (error, _stdout, stderr) => {
         if (error !== null) {
-          const detail = stderr.trim().length > 0 ? stderr.trim() : error.message;
+          const detail =
+            stderr.trim().length > 0 ? stderr.trim() : error.message;
           reject(new Error(detail));
           return;
         }
@@ -100,7 +112,10 @@ function runNpmInstall(packageRoot: string, installUrl: string): Promise<void> {
   });
 }
 
-function defaultVerify(packageRoot: string, pin: RuntimePin): Promise<DoctorReport> {
+function defaultVerify(
+  packageRoot: string,
+  pin: RuntimePin,
+): Promise<DoctorReport> {
   return doctor({ pin, packageRoot });
 }
 
@@ -110,8 +125,11 @@ function defaultVerify(packageRoot: string, pin: RuntimePin): Promise<DoctorRepo
  * The "released" branch installs the exact pinned version package-local
  * (drenyra-pi never trusts an ambient binary) and then runs the same doctor()
  * used by /drenyra:doctor — the install is only accepted when the verdict is
- * "verified". Until the first real drenyra-ai release this branch is exercised
- * only through test fixtures; the pending-release branch below is live today.
+ * "verified". The released path is the one in force: `DEFAULT_PIN.state` is
+ * "released" in `runtime/pin.ts`, with the entry-artifact checksum pinned, so
+ * this function installs the pinned runtime for real. The pending-release branch
+ * below is a retained fallback for a pin with no published artifact — its notice
+ * is covered by tests — and it is not the live path.
  */
 export async function runInstaller(options: {
   pin: RuntimePin;
@@ -140,8 +158,7 @@ export async function runInstaller(options: {
     const detail = error instanceof Error ? error.message : String(error);
     return {
       exitCode: 1,
-      message:
-        `drenyra-pi: installing ${decision.packageName}@${decision.version} failed: ${detail}`,
+      message: `drenyra-pi: installing ${decision.packageName}@${decision.version} failed: ${detail}`,
     };
   }
 

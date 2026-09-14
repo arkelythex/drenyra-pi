@@ -48,7 +48,8 @@ jobs:
           bun-version: "1.3.11"
       - run: bun install --frozen-lockfile
       # The suite imports the pinned drenyra-ai runtime directly
-      # (devDependency file:./vendored/drenyra-ai-0.2.0.tgz) — this job
+      # (devDependency file:./vendored/drenyra-ai-0.4.1.tgz — keep this version
+      # in sync with package.json#devDependencies.drenyra-ai) — this job
       # exercises the REAL pinned runtime library, not a stub.
       - run: bun run test
 

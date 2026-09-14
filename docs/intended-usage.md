@@ -24,7 +24,7 @@ It is a **Pi extension** — a thin operator layer, the accounting-domain counte
 | The accounting engine | The engine, materiality policy, gates, and approvals live in `drenyra-ai`. Pi holds **no money logic, no gate logic, no receipt authority** — it registers guards and renders results. |
 | The fiscal authority | Pi executes agents and tools with pinned versions and **never authorizes fiscal operations**. Fiscal authority remains in `drenyra-ai`; the human accountant is the final authority. |
 | A reimplementation of the ecosystem | Pi is a **consumer**. It depends on Drenyra AI and Drenyra Engram; it never defines how they work, and they never know Pi exists. |
-| Production accounting software (yet) | Status is **pre-alpha** (`0.0.1-prealpha.1`). The harness extraction is complete, but nothing here is production-ready. |
+| Production accounting software (yet) | Status is **pre-release**: contracts are frozen at v0.1 and the package version is `0.1.0`. The harness extraction is complete, but nothing here is production-ready. |
 | A source of truth | Memory (Engram) informs, never authorizes; authoritative state lives in the pinned kernel's evidence, receipts, and ledger — never in the conversation or model memory. |
 
 ## The responsibility split

@@ -28,8 +28,9 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
     command, and the money/SQL/RUC write guards — registered from the single
     `register.js` entrypoint. The money guard evaluates only introduced text
     (newText), never replaced oldText (false-positive fix).
-  - `themes/Drenyra.json`; `typebox` added as a devDependency for tool
-    schemas.
+  - `themes/fiscal-operator/fiscal-operator-light.json` and
+    `themes/fiscal-operator/fiscal-operator-dark.json` (the two Pi themes declared in
+    `package.json#pi.themes`); `typebox` added as a devDependency for tool schemas.
   - Verification: `verify:package` entry list extended for `fiscal-guard.js`;
     capability-manifest and program-lock-facts refreshed (703 tests, 44 files).
 
@@ -72,6 +73,35 @@ conformance suite after updating; consumers must install the vendored
 `drenyra-ai-0.4.1.tgz` (exact pin + checksum). No breaking API change from the
 0.2.0 kernel surface; the new configurator/routing modules are additions for
 upcoming SDD-020/030 slices.
+
+## 0.1.0 — 2026-09-12
+
+### Changed
+
+- **Package version is now `0.1.0`** (decision D2 of
+  `openspec/changes/pi-recovery-release-readiness`). Both Pi-local produced
+  contracts (`package-contract`, `runtime-dependency`) are frozen at v0.1, which
+  is the point the version policy in [RELEASING.md](RELEASING.md) names for
+  leaving `0.0.1-prealpha.x`. The version is carried by `package.json#/version`,
+  `capability-manifest.yaml#/repository/version`, the generated
+  `docs/architecture/program-lock-facts.json#/packageVersion`, and the two
+  harness-version constants (`extensions/register.ts` `DRENYRA_PI_VERSION` and
+  `extensions/fiscal-guard.ts` `FISCAL_GUARD_VERSION`); a new guard
+  (`__tests__/harness-version.test.ts`) couples those two constants to
+  `package.json#/version` so the drift cannot recur silently. The derived lock
+  facts were regenerated through the sanctioned generator
+  (`bun run refresh:lock-facts`), never hand-edited.
+- **Publication remains off.** This entry records a version bump and the release
+  readiness around it — **not** a published artifact. Nothing was published to
+  any registry: there is no `publishConfig`, no publish step or job, and the
+  roadmap's npm item stays unchecked.
+
+### Notes
+
+- This entry **supersedes** the earlier "verification-only release posture,
+  version stays pre-alpha" note in the `## Unreleased` section above. That
+  reasoning is the one D2 overrode: both produced contracts are frozen at v0.1,
+  so `RELEASING.md`'s own policy names `0.1.0`.
 
 ## 0.0.1-prealpha.1 — 2026-08-01
 

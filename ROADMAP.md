@@ -32,7 +32,7 @@ never duplicates them.
 
 - [x] Repository created with identity scaffolding (README, LICENSE, SECURITY, CONTRIBUTING, CODEOWNERS)
 - [x] Contract index drafted (`contracts/`)
-- [ ] Contract review and freeze: package-contract, runtime-dependency
+- [x] Contract review and freeze: package-contract, runtime-dependency (completed and superseded by Phase 1's v0.1 freeze below; see `contracts/README.md` and `27c597c`)
 - [x] Public roadmap and architecture published (`docs/architecture.md`, `docs/architecture/`, `RELEASING.md` committed; public visibility decided 2026-08-14)
 
 ## Phase 1 — Contracts (v0.1)

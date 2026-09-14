@@ -22,6 +22,14 @@ recoverable across sessions and machines.
 - Re-running a phase overwrites its artifact (no history) — use git for history.
 - `sdd-init` only bootstraps this directory; it does not create changes.
 
+## Lock facts: the one mandatory post-step
+
+Opening or archiving a change folder, or mutating any path in `PARTICIPATION_PATHS_V1` — including through a
+formatter, an autofix pass, or another session — invalidates the generated program lock facts. The mandatory
+recovery sequence and the reason its order matters are stated once, in
+[docs/architecture/program-lock-facts.md](../docs/architecture/program-lock-facts.md). Run it, in that order,
+before claiming a green suite.
+
 ## Testing & TDD
 
 - Test command: `bun test` (vitest runner, fast suite — 54 tests, ~1s).

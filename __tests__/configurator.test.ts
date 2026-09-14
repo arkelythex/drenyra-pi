@@ -21,9 +21,14 @@ import {
   runConfiguratorInstall,
   runConfiguratorSync,
 } from "../lib/configurator.js";
+import { drenyraPiExtension } from "../extensions/register.js";
 
-/** Mirrors DRENYRA_PI_VERSION in extensions/register.ts (the harness version). */
-const PACKAGED_VERSION = "0.0.1-prealpha.1";
+/**
+ * The harness version — imported, never mirrored. A duplicated literal here is
+ * exactly what let the two harness constants drift silently (D11); the coupling
+ * itself is asserted by `__tests__/harness-version.test.ts`.
+ */
+const PACKAGED_VERSION = drenyraPiExtension.version;
 
 function makeTempHome(): string {
   return mkdtempSync(join(tmpdir(), "pi-configurator-"));

@@ -4,7 +4,7 @@
     "name": "drenyra-pi",
     "package": "drenyra-pi",
     "role": "agentic-runtime",
-    "version": "0.0.1-prealpha.1"
+    "version": "0.1.0"
   },
   "capabilities": {
     "persona-startup-panel": {
@@ -228,9 +228,9 @@
     "evidenceScope": "current",
     "classification": "dirty-candidate",
     "command": "bun test",
-    "result": "767 passed, 0 failed",
-    "date": "2026-09-11",
+    "result": "773 passed, 0 failed",
+    "date": "2026-09-12",
     "candidateIdentityRef": "docs/architecture/program-lock-facts.json#/candidateIdentity",
-    "note": "Current PR 3 snapshot. `bun test` ran 767 tests across 50 files with 0 failures from the canonical repository root on 2026-09-11. The identity is delegated to the generated `docs/architecture/program-lock-facts.json#/candidateIdentity` because this manifest's bytes participate in that identity: restating the live value here would invalidate it. Preserved older snapshots (`testState` 44/700, lock-facts `tests` 48/738) remain historical, labeled, and sourced."
+    "note": "Current PR 3 snapshot. `bun test` ran 773 tests across 52 files with 0 failures from the canonical repository root on 2026-09-12. The identity is delegated to the generated `docs/architecture/program-lock-facts.json#/candidateIdentity` because this manifest's bytes participate in that identity: restating the live value here would invalidate it. Preserved older snapshots (`testState` 44/700, lock-facts `tests` 48/738) remain historical, labeled, and sourced."
   }
 }

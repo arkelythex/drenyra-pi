@@ -46,7 +46,11 @@ export interface FiscalGuardExtensionAPI {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const VERSION = "0.0.1-prealpha.1";
+/**
+ * Drenyra Pi harness version carried by the fiscal guard. Exported so the
+ * harness-version guard can couple it to `package.json#/version` by import.
+ */
+export const FISCAL_GUARD_VERSION = "0.1.0";
 
 const FISCAL_PHASES = [
 	"captura",
@@ -232,7 +236,7 @@ export function registerFiscalGuard(pi: FiscalGuardExtensionAPI): void {
 	// Session status
 	pi.on("session_start", async (_event, ctx) => {
 		const c = ctx as FiscalGuardCommandContext;
-		c.ui?.setStatus?.("drenyra-pi", `drenyra-pi v${VERSION}`);
+		c.ui?.setStatus?.("drenyra-pi", `drenyra-pi v${FISCAL_GUARD_VERSION}`);
 	});
 
 	// Persona injection

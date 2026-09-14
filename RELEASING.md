@@ -43,7 +43,13 @@ Every release must pass, in order:
 
 1. **Typecheck** — the repo's configured typecheck is clean.
 2. **Tests** — full test suite passes (commands, chains, permissions).
-3. **Conformance vectors** — install/doctor/pin verification vectors pass against the exact release candidate.
+3. **Conformance gates** — the gates that exist and can be cited as run, all green against the exact
+   release candidate:
+   - `bun run test` — the full suite, including the install, doctor, pin, and status suites and the
+     real-repository capability guard;
+   - `bun run verify:package` — build, tests, and packed-file reconciliation;
+   - `node scripts/verify-packed-install.mjs` — pack → install → postinstall → runtime verified;
+   - `bun run verify:capability` — capability-manifest and projection-surface conformance.
 4. **Package build + pack verification** — build and verify the packed artifact contains exactly the intended files.
 5. **Packed-install test** — install the packed tarball in a clean Pi, run `drenyra-pi` install + doctor, and verify the pinned Drenyra AI runtime installs, verifies, and answers a smoke command.
 6. **Release gate** — the `release-verify` workflow (verification only) passes against the exact annotated tag on protected `main`, with remote authority rechecked after verification (see "Current state" above).
@@ -79,12 +85,25 @@ follow it in order for every runtime pin change.
 6. **Reconcile content hashes.** If any covered contract bytes changed (e.g.
    `contracts/runtime-dependency.md`), run `node scripts/verify-package-files.mjs
    --update` — never hand-edit the manifest.
-7. **Regenerate the program lock-facts.**
-   `docs/architecture/program-lock-facts.json`: `headSha` = the delivery base
-   commit, `candidateIdentity` = `node scripts/compute-candidate-identity.mjs`
-   (last line), `checksums.contentManifest.sha256` = sha256 of the current
-   `contracts/SHA256SUMS.json` bytes, `capabilityStates.digestSha256` = sha256 of
-   the current `capability-manifest.yaml` bytes.
+7. **Regenerate the program lock-facts through the sanctioned sequence.** The canonical statement of this
+   sequence — its trigger set, the reason the mirror is rewritten before `--check`, and the normalization
+   exemption that makes that write safe — lives in
+   [docs/architecture/program-lock-facts.md](docs/architecture/program-lock-facts.md) and is **not restated
+   here**. This pin bump forces the sequence, because `package.json` and `capability-manifest.yaml` are
+   participation paths. Run, in this order:
+
+   ```sh
+   bun run refresh:lock-facts
+   # then rewrite the identity-normalized field
+   # openspec/config.yaml#/current_test_state/candidate_identity with the value the generator just
+   # produced (exact command: docs/architecture/program-lock-facts.md, step 2)
+   node scripts/refresh-program-lock-facts.mjs --check
+   ```
+
+   The generator derives `headSha`, `packageVersion`, the generated `activeChanges`, the content-manifest
+   and capability-manifest digests, and `candidateIdentity`. **Never hand-edit `candidateIdentity`, a
+   checksum or digest, or `headSha`.** A `--check` that exits 0 without the mirror rewrite is not evidence
+   of a consistent tree: `bun run verify:capability` is the other half of the proof.
 8. **Gates.** `bun run typecheck`, `bun run test`, `bun run verify:style`,
    `bun run verify:capability`, `bun run verify:package` — all green.
 9. **Delivery.** Conventional commit + PR chain. The lock-facts `headSha` must
