@@ -2,8 +2,8 @@
   "schemaVersion": "drenyra.program-lock-facts.v1",
   "participantCheckpoint": true,
   "authorityNotice": "Pi-local input; does not modify or promote the program master",
-  "headSha": "d915231b7623c902eae8f813874c54ef5238726b",
-  "candidateIdentity": "dirty-sha256:e8659629fa00d9e65b4e08abd1791d4d51887129013712ecc845d66086ce6bab",
+  "headSha": "2e25b5557aab0510df7c08b25f777b10d5827582",
+  "candidateIdentity": "dirty-sha256:bea529637e3bb37d08876befa1562b38174965d674ab33640a5caf17cd4f57e4",
   "packageVersion": "0.1.0",
   "contracts": {
     "consumed": [
@@ -54,7 +54,7 @@
     "pinEntrySha256": "09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600",
     "contentManifest": {
       "path": "contracts/SHA256SUMS.json",
-      "sha256": "bd6471a7d896aa28813a1e4a6a7892965ca4427cae6fff9f126e0ff1afd7de4b"
+      "sha256": "9c9bf4f9865b7b486e038a33fdb7c0c652e42283b06bc3f2d679d2dbe46ef898"
     }
   },
   "capabilityStates": {
@@ -62,7 +62,9 @@
     "schemaVersion": "drenyra.capability-manifest.v1",
     "digestSha256": "b3ed52e1066c252961096a168c04e07d0c93158cfede4ec0126eeceee40a61ab"
   },
-  "activeChanges": [],
+  "activeChanges": [
+    "pi-engram-integration"
+  ],
   "snapshotRecord": {
     "evidenceScope": "historical",
     "evidenceSource": "openspec/changes/archive/2026-09-09-pi-accounting-orchestration/verify-report.md",

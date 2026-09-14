@@ -38,7 +38,7 @@ current_test_state:
       command: bun test
       classification: dirty-candidate
       evidence_scope: current
-      candidate_identity: "dirty-sha256:e8659629fa00d9e65b4e08abd1791d4d51887129013712ecc845d66086ce6bab"
+      candidate_identity: "dirty-sha256:bea529637e3bb37d08876befa1562b38174965d674ab33640a5caf17cd4f57e4"
       evidence_date: 2026-09-12
       evidence: >-
             PR 3 verified current snapshot. `bun test` from the canonical repository
