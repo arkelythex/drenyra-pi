@@ -46,8 +46,23 @@ interface RegisteredCommand {
   handler: (args: string, ctx: PiCommandContext) => Promise<void>;
 }
 
-function makeMockPi(): { pi: PiExtensionApi; registered: RegisteredCommand[] } {
+interface RegisteredTool {
+  name: string;
+  description: string;
+  parameters: unknown;
+  execute: (
+    toolCallId: string,
+    params: Record<string, unknown>,
+  ) => unknown;
+}
+
+function makeMockPi(): {
+  pi: PiExtensionApi;
+  registered: RegisteredCommand[];
+  registeredTools: RegisteredTool[];
+} {
   const registered: RegisteredCommand[] = [];
+  const registeredTools: RegisteredTool[] = [];
   const pi: PiExtensionApi = {
     registerCommand(name, options) {
       registered.push({
@@ -57,9 +72,16 @@ function makeMockPi(): { pi: PiExtensionApi; registered: RegisteredCommand[] } {
       });
     },
     on(_event: string, _handler: (event: unknown, ctx: unknown) => void): void {},
-    registerTool(_tool: { name: string; description: string; parameters: unknown; execute(toolCallId: string, params: Record<string, unknown>): unknown }): void {},
+    registerTool(tool) {
+      registeredTools.push({
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+        execute: tool.execute,
+      });
+    },
   };
-  return { pi, registered };
+  return { pi, registered, registeredTools };
 }
 
 /** Parse the pretty-printed machine JSON block that starts after the summary. */
@@ -1023,6 +1045,144 @@ describe("/drenyra:context — engram_context tool-level error (triangulation)",
     expect(output).toContain("company RUC 20123456786");
     expect(output).toMatch(/institutional context error/i);
     expect(output).toContain("invalid scope: ruc required");
+    cleanupTempStore(store);
+  });
+});
+
+describe("drenyra_institutional_memory tool (REQ-ENG-005, REQ-ENG-006)", () => {
+  const VALID_RUC = "20123456786";
+
+  function findTool(registeredTools: { name: string; execute: (id: string, params: Record<string, unknown>) => unknown }[]) {
+    const tool = registeredTools.find((t) => t.name === "drenyra_institutional_memory");
+    expect(tool).toBeDefined();
+    return tool!;
+  }
+
+  it("is registered with a query-only parameter shape", () => {
+    const { pi, registeredTools } = makeMockPi();
+    registerDrenyraPiExtension(pi);
+    const tool = findTool(registeredTools);
+    expect(tool.name).toBe("drenyra_institutional_memory");
+  });
+
+  it("returns no-scope-known when no company RUC is set", async () => {
+    const store = makeTempStore();
+    const { pi, registeredTools } = makeMockPi();
+    registerDrenyraPiExtension(pi, { contextStore: store });
+    const tool = findTool(registeredTools);
+    const result = (await tool.execute("call-1", { query: "detracción" })) as {
+      content: Array<{ type: string; text: string }>;
+      details?: { status?: string };
+    };
+    expect(result.details?.status).toBe("no-scope-known");
+    cleanupTempStore(store);
+  });
+
+  it("returns unavailable when Engram cannot be reached", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    const { pi, registeredTools } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({ status: "spawn-failed", error: "not available in test" }),
+    });
+    const tool = findTool(registeredTools);
+    const result = (await tool.execute("call-1", { query: "detracción" })) as {
+      details?: { status?: string; reason?: string };
+    };
+    expect(result.details?.status).toBe("unavailable");
+    expect(result.details?.reason).toBeTruthy();
+    cleanupTempStore(store);
+  });
+
+  it("returns found with parsed results on a non-empty engram_search response", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    const { pi, registeredTools } = makeMockPi();
+    let calledTool: string | undefined;
+    let calledArgs: unknown;
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({
+        status: "healthy",
+        client: {
+          pid: 1,
+          serverInfo: { name: "drenyra-engram", version: "0.3.0" },
+          isHealthy: () => true,
+          callTool: async (name: string, args: unknown) => {
+            calledTool = name;
+            calledArgs = args;
+            return {
+              isError: false,
+              text: JSON.stringify([{ title: "Provider X detracción", what: "12 percent" }]),
+            };
+          },
+          shutdown: async () => {},
+        },
+      }),
+    });
+    const tool = findTool(registeredTools);
+    const result = (await tool.execute("call-1", { query: "Provider X detracción" })) as {
+      details?: { status?: string; results?: unknown };
+    };
+    expect(result.details?.status).toBe("found");
+    expect(JSON.stringify(result.details?.results)).toContain("Provider X detracción");
+    expect(calledTool).toBe("engram_search");
+    expect((calledArgs as { query?: string }).query).toBe("Provider X detracción");
+    expect((calledArgs as { scope?: { ruc?: string } }).scope?.ruc).toBe(VALID_RUC);
+    cleanupTempStore(store);
+  });
+
+  it("returns empty on an empty engram_search response", async () => {
+    const store = makeTempStore();
+    store.setCompany(VALID_RUC);
+    const { pi, registeredTools } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({
+        status: "healthy",
+        client: {
+          pid: 1,
+          serverInfo: { name: "drenyra-engram", version: "0.3.0" },
+          isHealthy: () => true,
+          callTool: async () => ({ isError: false, text: "[]" }),
+          shutdown: async () => {},
+        },
+      }),
+    });
+    const tool = findTool(registeredTools);
+    const result = (await tool.execute("call-1", { query: "nothing here" })) as {
+      details?: { status?: string };
+    };
+    expect(result.details?.status).toBe("empty");
+    cleanupTempStore(store);
+  });
+});
+
+describe("drenyra_institutional_memory — tool-level error (triangulation)", () => {
+  it("reports a tool-level engram_search error distinctly, not as empty or unavailable", async () => {
+    const store = makeTempStore();
+    store.setCompany("20123456786");
+    const { pi, registeredTools } = makeMockPi();
+    registerDrenyraPiExtension(pi, {
+      contextStore: store,
+      spawnEngramClient: async () => ({
+        status: "healthy",
+        client: {
+          pid: 1,
+          serverInfo: { name: "drenyra-engram", version: "0.3.0" },
+          isHealthy: () => true,
+          callTool: async () => ({ isError: true, text: "invalid query" }),
+          shutdown: async () => {},
+        },
+      }),
+    });
+    const tool = registeredTools.find((t) => t.name === "drenyra_institutional_memory");
+    const result = (await tool!.execute("call-1", { query: "" })) as {
+      details?: { status?: string; message?: string };
+    };
+    expect(result.details?.status).toBe("error");
+    expect(result.details?.message).toBe("invalid query");
     cleanupTempStore(store);
   });
 });

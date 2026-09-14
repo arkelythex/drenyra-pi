@@ -152,14 +152,15 @@
           "runtime/context.ts",
           "runtime/engram-pin.ts",
           "runtime/engram-client.ts",
-          "extensions/register.ts"
+          "extensions/register.ts",
+          "agents/journal-candidate-agent.md"
         ],
         "tests": [
           "__tests__/extension.test.ts",
           "__tests__/engram-pin.test.ts",
           "__tests__/engram-client.test.ts"
         ],
-        "limitation": "pi-engram-integration (Slice A-C) added a pinned, fail-closed-verified drenyra-engram binary and a read-only institutional-context addendum on /drenyra:context (engram_context only, REQ-ENG-003) once a company RUC is already known. The active company/period pointer itself is still local (runtime/context.ts's development-grade JSON store) -- Drenyra Engram's scope model has no session-pointer concept to hold it (design.md section 6 of the change). No command reads institutional memory to shape a proposal; that remains not evidenced (REQ-BOUND-001)."
+        "limitation": "pi-engram-integration (Slice A-C) added a pinned, fail-closed-verified drenyra-engram binary and a read-only institutional-context addendum on /drenyra:context (engram_context, REQ-ENG-003). pi-engram-memory-reads added one more caller: journal-candidate-agent (only) can call the drenyra_institutional_memory tool (engram_search, REQ-ENG-005) with its own query to inform which candidate it drafts -- never wired to any gate or the materiality policy (REQ-ENG-006). The active company/period pointer itself is still local (runtime/context.ts's development-grade JSON store) -- Drenyra Engram's scope model has no session-pointer concept to hold it. The other 9 agents and no accounting_* tool are touched; that remains not evidenced (REQ-BOUND-001)."
       },
       "verificationLevel": "unit-or-contract-tested",
       "ownership": "pi-local",
