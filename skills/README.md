@@ -3,22 +3,30 @@
 Packaged Drenyra skills shipped with the extension, declared via the
 `pi.skills` manifest entry (REQ-SKPT-001).
 
+Drenyra Pi takes inspiration from the Gentle-AI packaging model: this directory
+contains the stable foundation and operator skills required to run the harness.
+Specialized fiscal knowledge is maintained separately in
+[`arkelythex/drenyra-skills`](https://github.com/arkelythex/drenyra-skills), then
+validated and pinned by `drenyra-ai`.
+
 ## Layer model (Design 03)
 
 Skills follow the three-layer model approved in
 `drenyra-ai/docs/design/design-03-agents-skills-integrations.md`:
 
-| Layer | Examples | Stability |
-| --- | --- | --- |
-| **Foundation** | Evidence, isolation, money, candidates, recovery | Very stable |
-| **Peru** | SUNAT, SIRE, IGV, detractions, withholdings, perceptions | Versioned by validity period |
-| **Practice / sector** | Commerce, services, agriculture, mining, accounting firms | Extensible later |
+| Layer | Ownership | Examples | Stability |
+| --- | --- | --- | --- |
+| **Foundation** | `drenyra-pi` | Evidence, isolation, money, candidates, recovery | Very stable |
+| **Peru** | `drenyra-skills` | SUNAT, SIRE, IGV, detractions, withholdings, perceptions | Versioned by validity period |
+| **Practice / sector** | `drenyra-skills` | Commerce, services, agriculture, mining, accounting firms | Extensible later |
 
-Current v0.1 skills are **Foundation** layer (`layer: foundation`,
-`jurisdiction: global` in frontmatter). Peru and practice/sector skills ship
-later, versioned by validity period — a normative update never retroactively
-modifies a mission, and the receipt records exactly which skill and policy
-version was used.
+Current v0.1 skills in this package primarily provide the **Foundation** layer
+(`layer: foundation`, `jurisdiction: global` in frontmatter), plus
+runtime-facing fiscal guardrails and review lenses. They do not replace the
+specialized normative catalog: Peru and practice/sector knowledge remains
+versioned by validity period in `drenyra-skills`. A normative update never
+retroactively modifies a mission, and the receipt records exactly which skill
+and policy version was used.
 
 ## Packaged skills
 
