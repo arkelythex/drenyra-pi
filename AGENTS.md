@@ -28,6 +28,7 @@ Every change — code, docs, tests, or CI — must respect these. They are also 
 | The frozen public surface | [Contracts](contracts/README.md) |
 | The runtime pin contract (upgrades are releases) | [runtime-dependency](contracts/runtime-dependency.md) |
 | Trust model and authority boundaries | [Trust Model](docs/architecture/trust-model.md) |
+| Authoring a diagram | [Diagram convention (ecosystem, section 5)](https://github.com/arkelythex/drenyra-ai/blob/main/docs/documentation-standard.md#5-diagrams) |
 
 ## Where Changes Belong
 
