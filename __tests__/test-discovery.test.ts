@@ -13,12 +13,12 @@ describe("Vitest discovery boundaries", () => {
 			"__tests__/**/*.test.ts",
 			"chains/__tests__/**/*.test.ts",
 		]);
-		const includedRoots = include?.map((pattern) =>
+		const includedRoots = include?.map((pattern: string) =>
 			pattern.slice(0, -TEST_FILE_SUFFIX.length),
 		);
 		expect(includedRoots).toEqual(["__tests__/", "chains/__tests__/"]);
-		expect(includedRoots?.some((root) => CACHE_TEST_PATH.startsWith(root))).toBe(
-			false,
-		);
+		expect(
+			includedRoots?.some((root: string) => CACHE_TEST_PATH.startsWith(root)),
+		).toBe(false);
 	});
 });
