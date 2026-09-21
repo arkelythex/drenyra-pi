@@ -38,7 +38,7 @@ lib/                Top-level domain logic (delegated to by handlers)
 runtime/            Pinned drenyra-ai bootstrap, pin, doctor, installer, context
 chains/             RDA command chains (close, reconcile, verify, evidence)
 agents/             Pi-native accounting subagents
-skills/             Packaged Drenyra skills (versioned knowledge, shipped here)
+skills/             Packaged foundation/operator skills shipped with the harness
 prompts/            Persona + command prompts
 contracts/          Package and runtime contracts — FROZEN, versioned
 docs/               Architecture, boundary, and style documentation
@@ -53,4 +53,4 @@ __tests__/          Test suites for commands, chains, and permissions
 
 ## Skills
 
-Drenyra Pi ships packaged Drenyra skills in `skills/` (fiscal compliance, fiscal review lenses, RUC scope, evidence citation, chain operation, SDD, chained PR). They are part of the Drenyra Skills ecosystem: versioned, jurisdiction-scoped accounting and tax knowledge (PE). When working in this repository, resolve the matching `SKILL.md` by task context and read it **before** writing code or docs that touch its domain.
+Drenyra Pi ships foundation/operator skills and runtime-facing fiscal guardrails in `skills/` (scope discipline, evidence citation, chain operation, review lenses, SDD, and chained PR). The complete specialized fiscal and jurisdictional knowledge catalog is owned and versioned separately in [`arkelythex/drenyra-skills`](https://github.com/arkelythex/drenyra-skills), following the Gentle-AI pattern of bundled core skills plus a separate specialized catalog. When working in this repository, resolve the matching `SKILL.md` by task context and read it **before** writing code or docs that touch its domain.

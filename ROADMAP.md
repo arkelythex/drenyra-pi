@@ -66,7 +66,7 @@ proposal yet — both remain open, so the checkbox above stays unchecked.
 ## Phase 3 — Ecosystem maturity (alpha → beta)
 
 - [ ] Model routing profiles for fiscal phases
-- [ ] Skills registry integration (when `arkelythex/drenyra-skills` exists)
+- [ ] Integrate the versioned `arkelythex/drenyra-skills` registry through an explicit, validated pin
 - [ ] Multi-jurisdiction operator personas (Perú → LATAM)
 - [ ] v1.0 candidate when the harness runs a full monthly close end-to-end
 

@@ -7,7 +7,8 @@
 > **Status: contracts frozen, pre-release (`v0.1.0`).** The harness extraction from
 > `arkelythex/drenyra-command-center` (`packages/pi`) is **complete**: this
 > repository is now the single source of truth for the Pi accounting harness
-> (fiscal skills, FSD prompts, RED contracts, fiscal-guard extension, theme).
+> (bundled foundation/operator skills, FSD prompts, RED contracts, fiscal-guard
+> extension, and theme).
 > Nothing here is production-ready; the two produced contracts are frozen at v0.1, which is the `0.1.0` step of the version policy.
 
 Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
@@ -35,12 +36,33 @@ The target visual flow is fully represented in text: **human start → fiscal sc
 - **`/drenyra:*` commands** — doctor, scope, status, capabilities, company/period context, missions, receipts, evidence, verify, and close (see [Command reference](#command-reference)).
 - **Pi-native subagents** — accounting agents for exploration, apply, verify, review.
 - **Model routing** — advisory per-phase model registry (documented intent; it never grants authority).
-- **Packaged skills** — Drenyra-specific skills shipped with the extension.
+- **Packaged foundation skills** — Stable scope, evidence, chain, review, and safety guidance shipped with the extension.
 - **RDA chains** — Receipt-Driven Accounting command chains.
 - **Tool safety** — broad-deny, narrow-allow tool permissions for fiscal actions.
 - **Company & period context** — RUC-scoped context threading across tools and agents.
 - **Drenyra Engram boundary** — institutional memory access is planned but not yet executable (memory never authorizes).
 - **Pinned Drenyra AI runtime** — exact verified version, package-local, never `PATH`.
+
+### Skills boundary
+
+Drenyra Pi takes inspiration from the Gentle-AI packaging model: the harness
+bundles foundation/operator skills and runtime-facing fiscal guardrails, while
+its complete specialized fiscal knowledge catalog remains a separate, versioned
+content layer.
+
+- `drenyra-pi/skills/` owns the bundled foundation/operator layer and
+  runtime-facing fiscal guardrails: scope, evidence, chains, review, safety,
+  and Pi workflow guidance.
+- [`drenyra-skills`](https://github.com/arkelythex/drenyra-skills) owns
+  specialized Peru and future jurisdictional, regulatory, and practice
+  knowledge, including its authoring registry and normative references.
+- [`drenyra-ai`](https://github.com/arkelythex/drenyra-ai) validates and pins
+  the specialized definitions; Pi consumes the resulting verified runtime
+  and never authorizes fiscal actions.
+
+The two repositories are complementary, not duplicate runtimes: bundled
+skills make Pi usable out of the box, and the external catalog preserves
+independent fiscal versioning and validity history.
 
 <!-- conformance:surface id=readme authority=pi-operates-never-authorizes source=AGENTS.md#non-negotiable-rules -->
 <!-- conformance:snapshot scope=current source=capability-manifest.yaml#/evidenceSnapshot -->
