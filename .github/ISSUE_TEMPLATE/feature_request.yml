@@ -1,6 +1,6 @@
 # Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 name: Feature request
-description: Propose a new capability or improvement for Drenyra Pi.
+description: Propose a new capability or improvement for Drenyra Shell.
 title: "[Feature] "
 labels: ["enhancement"]
 body:
@@ -43,7 +43,7 @@ body:
     id: ecosystem
     attributes:
       label: Ecosystem check
-      description: This repo is the Pi harness. Engine capabilities belong in drenyra-ai, product features in Drenyra, and memory in drenyra-engram.
+      description: This repo is the Shell harness. Engine capabilities belong in drenyra-ai, product features in Drenyra, and memory in drenyra-engram.
       options:
-        - label: I confirm this feature belongs in drenyra-pi, not Drenyra / drenyra-ai / drenyra-engram.
+        - label: I confirm this feature belongs in drenyra-shell, not Drenyra / drenyra-ai / drenyra-engram.
           required: true

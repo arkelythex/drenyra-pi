@@ -1,6 +1,6 @@
 # Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 name: Bug report
-description: Report a defect in Drenyra Pi. For fiscal behavior, always include scope and period.
+description: Report a defect in Drenyra Shell. For fiscal behavior, always include scope and period.
 title: "[Bug] "
 labels: ["bug"]
 body:
@@ -41,7 +41,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: "drenyra-pi version and pinned drenyra-ai version, if known."
+      description: "drenyra-shell version and pinned drenyra-ai version, if known."
     validations:
       required: true
   - type: textarea

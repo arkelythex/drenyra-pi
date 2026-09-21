@@ -1,11 +1,11 @@
-# OpenSpec / SDD configuration — drenyra-pi
+# OpenSpec / SDD configuration — drenyra-shell
 # File-back (openspec/) is AUTHORITATIVE. Engram persistence is best-effort only.
 
-name: drenyra-pi
+name: drenyra-shell
 description: >-
-      Pi-native Accounting Operations Harness — consumes a pinned, verified,
+      Shell-native Accounting Operations Harness — consumes a pinned, verified,
       package-local Drenyra AI runtime. Zero runtime dependencies. Public source, proprietary license (source-available).
-repository: git@github.com:arkelythex/drenyra-pi.git
+repository: git@github.com:arkelythex/drenyra-shell.git
 default_branch: main
 stack:
       runtime: bun

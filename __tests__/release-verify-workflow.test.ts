@@ -194,7 +194,7 @@ describe("release-verify workflow: no-publish gate", () => {
 		// Dispatch-from-main guard and repository guard.
 		expect(workflow).toContain("refs/heads/main");
 		expect(workflow).toContain("default_branch");
-		expect(workflow).toContain("github.repository == 'arkelythex/drenyra-pi'");
+		expect(workflow).toContain("github.repository == 'arkelythex/drenyra-shell'");
 	});
 });
 
