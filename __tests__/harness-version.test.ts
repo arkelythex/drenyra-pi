@@ -22,7 +22,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { drenyraPiExtension } from "../extensions/register.js";
+import { drenyraShellExtension } from "../extensions/register.js";
 import { FISCAL_GUARD_VERSION } from "../extensions/fiscal-guard.js";
 
 /** The reference value: the shipped package version, read once. */
@@ -36,9 +36,9 @@ function readPackageVersion(): string {
 /** Every harness constant that disagrees with `version`. */
 function versionViolations(version: string): string[] {
 	const violations: string[] = [];
-	if (drenyraPiExtension.version !== version) {
+	if (drenyraShellExtension.version !== version) {
 		violations.push(
-			`drenyraPiExtension.version ${drenyraPiExtension.version} !== ${version}`,
+			`drenyraShellExtension.version ${drenyraShellExtension.version} !== ${version}`,
 		);
 	}
 	if (FISCAL_GUARD_VERSION !== version) {
@@ -51,7 +51,7 @@ function versionViolations(version: string): string[] {
 
 describe("harness version agreement", () => {
 	it("reports the package version as the extension version", () => {
-		expect(drenyraPiExtension.version).toBe(readPackageVersion());
+		expect(drenyraShellExtension.version).toBe(readPackageVersion());
 	});
 
 	it("reports the package version as the fiscal guard version", () => {

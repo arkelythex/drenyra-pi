@@ -1,7 +1,7 @@
 // Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents;
 // no float is ever used for money. Version strings are semver, checksums are
 // lowercase hex sha256, and exit/status codes are JSON integers — never floats.
-// This module registers the Drenyra Pi extension; it holds no money logic.
+// This module registers the Drenyra Shell extension; it holds no money logic.
 
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -92,15 +92,15 @@ import {
 } from "../chains/monthly-close.js";
 
 /**
- * Drenyra Pi package version. Keep in sync with package.json — the pin's
+ * Drenyra Shell package version. Keep in sync with package.json — the pin's
  * version is the Drenyra AI runtime version, this is the harness version.
  */
-const DRENYRA_PI_VERSION = "0.1.0";
+const DRENYRA_SHELL_VERSION = "0.1.0";
 
 /**
- * Pi extension registration model (verified against the installed gentle-pi):
+ * Pi extension registration model (verified against the installed gentle-shell):
  *
- * - gentle-pi package.json declares `"pi": { "extensions": ["./dist/extensions/register.js"] }`
+ * - gentle-shell package.json declares `"pi": { "extensions": ["./dist/extensions/register.js"] }`
  *   (S4a: exact compiled entry file — helper modules are named exports only).
  * - Each entrypoint default-exports an `ExtensionFactory`:
  *   `(pi: ExtensionAPI) => void | Promise<void>`.
@@ -109,14 +109,14 @@ const DRENYRA_PI_VERSION = "0.1.0";
  *   `(args: string, ctx: ExtensionCommandContext) => Promise<void>`.
  *
  * Sources read:
- *   /home/dreamcoder08/.pi/agent/npm/node_modules/gentle-pi/package.json
- *   /home/dreamcoder08/.pi/agent/npm/node_modules/gentle-pi/extensions/*.ts
+ *   /home/dreamcoder08/.pi/agent/npm/node_modules/gentle-shell/package.json
+ *   /home/dreamcoder08/.pi/agent/npm/node_modules/gentle-shell/extensions/*.ts
  *   @earendil-works/pi-coding-agent@0.74.2 (ExtensionFactory, ExtensionAPI,
  *   RegisteredCommand type definitions).
- * Note: gentle-pi's docs/ has no extensions.md; the model was read from the
+ * Note: gentle-shell's docs/ has no extensions.md; the model was read from the
  * package manifest, the shipped extensions, and the pi-coding-agent types.
  *
- * Drenyra Pi must stay zero-runtime-dependency, so instead of importing
+ * Drenyra Shell must stay zero-runtime-dependency, so instead of importing
  * `ExtensionAPI` from `@earendil-works/pi-coding-agent` this module declares
  * the minimal structural slice it consumes; a real ExtensionAPI satisfies it.
  */
@@ -148,7 +148,7 @@ export interface PiCommandContext {
 
 /**
  * The installed package root, found by walking up from this module's own
- * location to the first package.json named "drenyra-pi".
+ * location to the first package.json named "drenyra-shell".
  *
  * Source layout: <package>/extensions/register.ts → package root is 2 levels up.
  * Compiled layout: <package>/dist/extensions/register.js → 3 levels up.
@@ -161,18 +161,18 @@ function findPackageRoot(fromDir: string): string {
     try {
       const raw = readFileSync(join(dir, "package.json"), "utf8");
       const manifest = JSON.parse(raw) as { name?: unknown };
-      if (manifest.name === "drenyra-pi") return dir;
+      if (manifest.name === "drenyra-shell") return dir;
     } catch {
       // not this directory — keep walking up
     }
     dir = dirname(dir);
   }
-  throw new Error("drenyra-pi: package root not found above this module");
+  throw new Error("drenyra-shell: package root not found above this module");
 }
 
 const PACKAGE_ROOT = findPackageRoot(dirname(fileURLToPath(import.meta.url)));
 
-export interface DrenyraPiExtensionDescriptor {
+export interface DrenyraShellExtensionDescriptor {
   name: string;
   version: string;
   /** Capabilities provided by this extension, as consumed by the startup panel. */
@@ -188,14 +188,14 @@ export interface DrenyraPiExtensionDescriptor {
 }
 
 /**
- * Typed registration descriptor for the drenyra-pi extension, matching the
- * gentle-pi `pi` manifest / factory model. `provides` mirrors the capabilities
+ * Typed registration descriptor for the drenyra-shell extension, matching the
+ * gentle-shell `pi` manifest / factory model. `provides` mirrors the capabilities
  * table in contracts/package-contract.md; the runtime block mirrors
  * contracts/runtime-dependency.md.
  */
-export const drenyraPiExtension = {
-  name: "drenyra-pi",
-  version: DRENYRA_PI_VERSION,
+export const drenyraShellExtension = {
+  name: "drenyra-shell",
+  version: DRENYRA_SHELL_VERSION,
   provides: [
     "status",
     "doctor",
@@ -239,10 +239,10 @@ export const drenyraPiExtension = {
     version: DEFAULT_PIN.version,
     state: DEFAULT_PIN.state,
   },
-} as const satisfies DrenyraPiExtensionDescriptor;
+} as const satisfies DrenyraShellExtensionDescriptor;
 
 /** Optional per-registration dependencies (tests inject a temp context store). */
-export interface DrenyraPiExtensionDeps {
+export interface DrenyraShellExtensionDeps {
   contextStore?: ScopeContextStore;
   /** Durable mission/receipt store root (tests inject a temp dir; default cwd). */
   storesRoot?: string;
@@ -382,7 +382,7 @@ function stringifyMachineOutput(value: unknown): string {
 }
 
 /**
- * Register the drenyra-pi extension against a Pi ExtensionAPI.
+ * Register the drenyra-shell extension against a Pi ExtensionAPI.
  *
  * Every handler follows the parse → scope policy → lib/chain delegation →
  * structured render order (design §10.3; REQ-CMD-004): the scope guard runs
@@ -390,9 +390,9 @@ function stringifyMachineOutput(value: unknown): string {
  * complete canonical scope, and bootstrap/read commands run under the explicit
  * pre-scope policy. Handlers contain no accounting or fiscal logic.
  */
-export function registerDrenyraPiExtension(
+export function registerDrenyraShellExtension(
   pi: PiExtensionApi,
-  deps: DrenyraPiExtensionDeps = {},
+  deps: DrenyraShellExtensionDeps = {},
 ): void {
   const contextStore = deps.contextStore ?? new ScopeContextStore();
   const storesRoot = deps.storesRoot ?? process.cwd();
@@ -504,7 +504,7 @@ export function registerDrenyraPiExtension(
 		// read-only (runConfigDiagnostics never writes; no fiscal authority).
 		const home = homeFromArgs(args.split(/\s+/));
 		console.log(`drenyra:doctor (configurator): home ${home}`);
-		const configurator = runConfiguratorDoctor(home, DRENYRA_PI_VERSION);
+		const configurator = runConfiguratorDoctor(home, DRENYRA_SHELL_VERSION);
 		if (!configurator.ok) {
 			console.log(
 				`drenyra:doctor (configurator): FAILED — ${configurator.reason.kind}: ${configurator.reason.message}`,
@@ -553,7 +553,7 @@ export function registerDrenyraPiExtension(
 		_ctx: PiCommandContext,
 	): Promise<void> {
 		const home = homeFromArgs(args.split(/\s+/));
-		const outcome = runConfiguratorInstall(home, DRENYRA_PI_VERSION);
+		const outcome = runConfiguratorInstall(home, DRENYRA_SHELL_VERSION);
 		if (!outcome.ok) {
 			console.log(
 				`drenyra:install: FAILED — ${outcome.reason.kind}: ${outcome.reason.message}`,
@@ -576,7 +576,7 @@ export function registerDrenyraPiExtension(
 		_ctx: PiCommandContext,
 	): Promise<void> {
 		const home = homeFromArgs(args.split(/\s+/));
-		const outcome = runConfiguratorSync(home, DRENYRA_PI_VERSION);
+		const outcome = runConfiguratorSync(home, DRENYRA_SHELL_VERSION);
 		if (!outcome.ok) {
 			console.log(
 				`drenyra:sync: FAILED — ${outcome.reason.kind}: ${outcome.reason.message}`,
@@ -781,8 +781,8 @@ export function registerDrenyraPiExtension(
       return;
     }
     const output = renderCapabilitiesView({
-      version: DRENYRA_PI_VERSION,
-      commands: drenyraPiExtension.commands,
+      version: DRENYRA_SHELL_VERSION,
+      commands: drenyraShellExtension.commands,
       authorityModes: Object.values(AUTHORITY_MODE),
       scopeElements: [...CANONICAL_SCOPE_ELEMENTS],
     });
@@ -1582,19 +1582,19 @@ export function registerDrenyraPiExtension(
   });
   pi.registerCommand("drenyra:install", {
     description:
-      "Render the drenyra-pi managed composition + pin asset under ~/.drenyra (configurator).",
+      "Render the drenyra-shell managed composition + pin asset under ~/.drenyra (configurator).",
     handler: installHandler,
   });
   pi.registerCommand("drenyra:sync", {
     description:
-      "Synchronize the drenyra-pi managed composition with the packaged version (configurator; idempotent).",
+      "Synchronize the drenyra-shell managed composition with the packaged version (configurator; idempotent).",
     handler: syncHandler,
   });
   registerFiscalGuard(pi);
 }
 
 /**
- * Default export: the extension factory, matching gentle-pi's
+ * Default export: the extension factory, matching gentle-shell's
  * `ExtensionFactory = (pi: ExtensionAPI) => void | Promise<void>` shape.
  *
  * The factory is async: it registers commands first, then emits the activation
@@ -1605,9 +1605,9 @@ export function registerDrenyraPiExtension(
  */
 export default async function drenyraPi(
   pi: PiExtensionApi,
-  deps: DrenyraPiExtensionDeps & Partial<StartupPanelDeps> = {},
+  deps: DrenyraShellExtensionDeps & Partial<StartupPanelDeps> = {},
 ): Promise<void> {
-  registerDrenyraPiExtension(pi, deps);
+  registerDrenyraShellExtension(pi, deps);
   await showStartupPanel({
     writeLine: (line) => console.log(line),
     packageRoot: PACKAGE_ROOT,

@@ -1,5 +1,5 @@
 /**
- * drenyra-pi — Fiscal Guard extension.
+ * drenyra-shell — Fiscal Guard extension.
  *
  * Ported from the legacy `@drenyra/pi` package (`packages/pi` in
  * drenyra-command-center) as part of the vertical-slice extraction: the
@@ -47,7 +47,7 @@ export interface FiscalGuardExtensionAPI {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 /**
- * Drenyra Pi harness version carried by the fiscal guard. Exported so the
+ * Drenyra Shell harness version carried by the fiscal guard. Exported so the
  * harness-version guard can couple it to `package.json#/version` by import.
  */
 export const FISCAL_GUARD_VERSION = "0.1.0";
@@ -141,7 +141,7 @@ function guardMoneyWrite(event: {
 	return {
 		block: true,
 		reason:
-			"drenyra-pi: Monetary values must use BigInt (cents). Floats are blocked. Use `amount: 1500n` for S/15.00.",
+			"drenyra-shell: Monetary values must use BigInt (cents). Floats are blocked. Use `amount: 1500n` for S/15.00.",
 	};
 }
 
@@ -188,20 +188,20 @@ function guardSQLBash(event: {
 		return {
 			block: true,
 			reason:
-				"drenyra-pi: RUC-scoped query must use `:currentRuc`. Unsafe RUC filter.",
+				"drenyra-shell: RUC-scoped query must use `:currentRuc`. Unsafe RUC filter.",
 		};
 	}
 	if (cmd.includes("DELETE FROM") && !cmd.includes("WHERE")) {
 		return {
 			block: true,
 			reason:
-				"drenyra-pi: Unconditional DELETE blocked. WHERE clause required for audit.",
+				"drenyra-shell: Unconditional DELETE blocked. WHERE clause required for audit.",
 		};
 	}
 	if (cmd.includes("DROP TABLE") || cmd.includes("TRUNCATE")) {
 		return {
 			block: true,
-			reason: "drenyra-pi: Destructive DDL blocked. Use migrations instead.",
+			reason: "drenyra-shell: Destructive DDL blocked. Use migrations instead.",
 		};
 	}
 	return null;
@@ -224,7 +224,7 @@ function guardRucPath(event: {
 		return {
 			block: true,
 			reason:
-				"drenyra-pi: RUC path without context variable. Use `:ruc` placeholder.",
+				"drenyra-shell: RUC path without context variable. Use `:ruc` placeholder.",
 		};
 	}
 	return null;
@@ -236,7 +236,7 @@ export function registerFiscalGuard(pi: FiscalGuardExtensionAPI): void {
 	// Session status
 	pi.on("session_start", async (_event, ctx) => {
 		const c = ctx as FiscalGuardCommandContext;
-		c.ui?.setStatus?.("drenyra-pi", `drenyra-pi v${FISCAL_GUARD_VERSION}`);
+		c.ui?.setStatus?.("drenyra-shell", `drenyra-shell v${FISCAL_GUARD_VERSION}`);
 	});
 
 	// Persona injection

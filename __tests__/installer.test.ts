@@ -17,7 +17,7 @@ import {
 } from "../runtime/installer.js";
 
 function makeRoot(): string {
-  return mkdtempSync(join(tmpdir(), "drenyra-pi-installer-"));
+  return mkdtempSync(join(tmpdir(), "drenyra-shell-installer-"));
 }
 
 describe("decideInstall", () => {

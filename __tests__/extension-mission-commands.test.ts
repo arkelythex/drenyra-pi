@@ -32,7 +32,7 @@ import {
 } from "drenyra-ai/receipts";
 import type { ReceiptContent, SigningKeyInfo } from "drenyra-ai/receipts";
 import {
-  registerDrenyraPiExtension,
+  registerDrenyraShellExtension,
   type PiCommandContext,
   type PiExtensionApi,
 } from "../extensions/register.js";
@@ -98,7 +98,7 @@ function makeHarness(rootOverride?: string): HarnessContext {
   const root = rootOverride ?? mkdtempSync(join(tmpdir(), "drenyra-s4b-"));
   const { pi, registered } = makeMockPi();
   const store = new ScopeContextStore(join(root, "context.json"));
-  registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+  registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
   return { pi, registered, store, root };
 }
 

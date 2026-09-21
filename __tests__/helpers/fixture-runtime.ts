@@ -34,7 +34,7 @@ const DEFAULT_ARTIFACT = 'export const runtime = "drenyra-ai-fixture";\n';
 export async function createFakeRuntime(
   options: FakeRuntimeOptions = {},
 ): Promise<FakeRuntime> {
-  const root = mkdtempSync(join(tmpdir(), "drenyra-pi-fixture-"));
+  const root = mkdtempSync(join(tmpdir(), "drenyra-shell-fixture-"));
   const installUnder = options.installUnder ?? "node_modules";
   const runtimeDir = join(root, installUnder, "drenyra-ai");
   mkdirSync(runtimeDir, { recursive: true });

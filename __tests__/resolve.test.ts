@@ -21,7 +21,7 @@ describe("resolvePackageLocal — package-locality", () => {
   });
 
   function makeRoot(): string {
-    root = mkdtempSync(join(tmpdir(), "drenyra-pi-resolve-"));
+    root = mkdtempSync(join(tmpdir(), "drenyra-shell-resolve-"));
     return root;
   }
 

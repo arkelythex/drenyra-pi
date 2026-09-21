@@ -42,7 +42,7 @@ import { loadEvidenceStatus } from "../lib/evidence-status.js";
 import { projectEvidenceProvenance } from "../lib/evidence-projection.js";
 import { renderStatusView } from "../extensions/mission-status.js";
 import {
-  registerDrenyraPiExtension,
+  registerDrenyraShellExtension,
   type PiCommandContext,
   type PiExtensionApi,
 } from "../extensions/register.js";
@@ -531,7 +531,7 @@ describe("drenyra:status command integration — evidence projection wiring (des
     const root = tempRoot();
     const { pi, registered } = makeMockPi();
     const store = new ScopeContextStore(join(root, "context.json"));
-    registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+    registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
     store.setCanonicalScope(makeCanonicalScope());
     const closeCmd = registered.find((c) => c.name === "drenyra:close");
     const statusCmd = registered.find((c) => c.name === "drenyra:status");
@@ -564,7 +564,7 @@ describe("drenyra:status command integration — evidence projection wiring (des
     const root = tempRoot();
     const { pi, registered } = makeMockPi();
     const store = new ScopeContextStore(join(root, "context.json"));
-    registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+    registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
     store.setCanonicalScope(makeCanonicalScope());
     const evidenceCmd = registered.find((c) => c.name === "drenyra:evidence");
     const statusCmd = registered.find((c) => c.name === "drenyra:status");

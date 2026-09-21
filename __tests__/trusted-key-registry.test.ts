@@ -37,7 +37,7 @@ const ISSUED = "2026-01-01T00:00:00.000Z";
 const DIRS: string[] = [];
 
 function tempRoot(): string {
-  const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-keys-"));
+  const dir = mkdtempSync(join(tmpdir(), "drenyra-shell-keys-"));
   DIRS.push(dir);
   return dir;
 }

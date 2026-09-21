@@ -1,5 +1,5 @@
 /**
- * drenyra-pi style verification — the durable formatting/lint gate for newly
+ * drenyra-shell style verification — the durable formatting/lint gate for newly
  * written code (see docs/style.md). Zero runtime dependencies; deterministic.
  *
  * What it checks:

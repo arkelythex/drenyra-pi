@@ -31,7 +31,7 @@ export interface DoctorReport {
 
 export interface DoctorInput {
   pin: RuntimePin;
-  /** Drenyra Pi package root — resolution is always package-local. */
+  /** Drenyra Shell package root — resolution is always package-local. */
   packageRoot: string;
 }
 

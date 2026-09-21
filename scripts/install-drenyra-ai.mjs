@@ -1,5 +1,5 @@
 /**
- * drenyra-pi postinstall entry.
+ * drenyra-shell postinstall entry.
  *
  * Thin wrapper around runtime/installer.ts (compiled to dist/runtime/installer.js):
  * resolves the package root from its own location, runs the installer against
@@ -26,20 +26,20 @@ const { runInstaller, DEFAULT_PIN } = await import(
 
 /**
  * Walk up from this module's location to the first package.json named
- * "drenyra-pi". Correct from both scripts/ (dev) and dist/scripts/ (packed).
+ * "drenyra-shell". Correct from both scripts/ (dev) and dist/scripts/ (packed).
  */
 function findPackageRoot(fromDir) {
   let dir = fromDir;
   for (let depth = 0; depth < 8; depth += 1) {
     try {
       const manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
-      if (manifest.name === "drenyra-pi") return dir;
+      if (manifest.name === "drenyra-shell") return dir;
     } catch {
       // not this directory — keep walking up
     }
     dir = dirname(dir);
   }
-  throw new Error(`drenyra-pi: package root not found above ${fromDir}`);
+  throw new Error(`drenyra-shell: package root not found above ${fromDir}`);
 }
 
 const result = await runInstaller({ pin: DEFAULT_PIN, packageRoot: findPackageRoot(here) });

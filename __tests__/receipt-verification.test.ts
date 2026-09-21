@@ -30,7 +30,7 @@ import { makeScopeBinding } from "./helpers/authority-fixtures.js";
 const DIRS: string[] = [];
 
 function tempRoot(): string {
-  const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-receipts-"));
+  const dir = mkdtempSync(join(tmpdir(), "drenyra-shell-receipts-"));
   DIRS.push(dir);
   return dir;
 }

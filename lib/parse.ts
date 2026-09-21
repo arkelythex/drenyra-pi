@@ -1,5 +1,5 @@
 /**
- * Shared fail-closed parse helpers for the Drenyra Pi stores and chains.
+ * Shared fail-closed parse helpers for the Drenyra Shell stores and chains.
  *
  * Every store and chain module parses either a single JSON document or an NDJSON
  * log and fails closed (throw, or treat the source as unavailable) on corrupt

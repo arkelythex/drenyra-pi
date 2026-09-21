@@ -307,7 +307,7 @@ export async function spawnEngramClient({
         params: {
           protocolVersion: "2024-11-05",
           capabilities: {},
-          clientInfo: { name: "drenyra-pi", version: "0.1.0" },
+          clientInfo: { name: "drenyra-shell", version: "0.1.0" },
         },
       })}\n`,
     );

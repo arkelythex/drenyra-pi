@@ -3,7 +3,7 @@
 // lowercase hex sha256, and exit/status codes are JSON integers — never floats.
 // Configurator host integration tests (SDD-020 slice 2): Pi consumes the Core
 // configurator library (drenyra-ai@0.4.1 public subpath) — these tests lock
-// the public-export fix, the drenyra-pi pin record, the fresh-home bootstrap,
+// the public-export fix, the drenyra-shell pin record, the fresh-home bootstrap,
 // idempotency, and the fail-closed typed outcomes. No money logic here.
 
 import { describe, expect, it } from "vitest";
@@ -21,14 +21,14 @@ import {
   runConfiguratorInstall,
   runConfiguratorSync,
 } from "../lib/configurator.js";
-import { drenyraPiExtension } from "../extensions/register.js";
+import { drenyraShellExtension } from "../extensions/register.js";
 
 /**
  * The harness version — imported, never mirrored. A duplicated literal here is
  * exactly what let the two harness constants drift silently (D11); the coupling
  * itself is asserted by `__tests__/harness-version.test.ts`.
  */
-const PACKAGED_VERSION = drenyraPiExtension.version;
+const PACKAGED_VERSION = drenyraShellExtension.version;
 
 function makeTempHome(): string {
   return mkdtempSync(join(tmpdir(), "pi-configurator-"));
@@ -39,7 +39,7 @@ function cleanupTempHome(home: string): void {
 }
 
 describe("drenyra-ai/configurator public surface (0.4.1)", () => {
-  it("resolves the public subpath and renders the reviewed drenyra-pi pin record", () => {
+  it("resolves the public subpath and renders the reviewed drenyra-shell pin record", () => {
     // The subpath import at the top of this file is the regression: it only
     // resolves when the master publishes configurator/ (drenyra-ai@0.4.1).
     const record = JSON.parse(renderPinnedAiRuntime("drenyra-pi")) as {
@@ -151,7 +151,7 @@ describe("runConfiguratorDoctor", () => {
 });
 
 describe("runConfiguratorInstall / runConfiguratorSync", () => {
-  it("bootstraps the drenyra-pi managed composition + pin asset on a fresh home", () => {
+  it("bootstraps the drenyra-shell managed composition + pin asset on a fresh home", () => {
     const home = makeTempHome();
     try {
       const outcome = runConfiguratorInstall(home, PACKAGED_VERSION);

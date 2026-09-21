@@ -42,7 +42,7 @@ export function decideInstall(pin: RuntimePin): InstallDecision {
     return {
       kind: "pending-release",
       notice:
-        `drenyra-pi: drenyra-ai@${pin.version} is pinned in "pending-release" state ` +
+        `drenyra-shell: drenyra-ai@${pin.version} is pinned in "pending-release" state ` +
         '(checksum still "pending"). Nothing to install yet — the package-local ' +
         "runtime is filled at the first drenyra-ai release, and doctor keeps " +
         "failing closed until then.",
@@ -73,7 +73,7 @@ export interface InstallerDeps {
 /**
  * Install the pinned runtime from its release tarball URL (the install source
  * until drenyra-ai publishes to the npm registry). Package-local only —
- * drenyra-pi never trusts an ambient binary.
+ * drenyra-shell never trusts an ambient binary.
  */
 function runNpmInstall(packageRoot: string, installUrl: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -123,7 +123,7 @@ function defaultVerify(
  * Run the postinstall for a package root.
  *
  * The "released" branch installs the exact pinned version package-local
- * (drenyra-pi never trusts an ambient binary) and then runs the same doctor()
+ * (drenyra-shell never trusts an ambient binary) and then runs the same doctor()
  * used by /drenyra:doctor — the install is only accepted when the verdict is
  * "verified". The released path is the one in force: `DEFAULT_PIN.state` is
  * "released" in `runtime/pin.ts`, with the entry-artifact checksum pinned, so
@@ -158,7 +158,7 @@ export async function runInstaller(options: {
     const detail = error instanceof Error ? error.message : String(error);
     return {
       exitCode: 1,
-      message: `drenyra-pi: installing ${decision.packageName}@${decision.version} failed: ${detail}`,
+      message: `drenyra-shell: installing ${decision.packageName}@${decision.version} failed: ${detail}`,
     };
   }
 
@@ -167,7 +167,7 @@ export async function runInstaller(options: {
     return {
       exitCode: 1,
       message:
-        `drenyra-pi: postinstall verification failed — doctor verdict "${report.verdict}".\n` +
+        `drenyra-shell: postinstall verification failed — doctor verdict "${report.verdict}".\n` +
         report.issues.join("\n"),
     };
   }
@@ -175,7 +175,7 @@ export async function runInstaller(options: {
   return {
     exitCode: 0,
     message:
-      `drenyra-pi: ${decision.packageName}@${decision.version} installed and verified ` +
+      `drenyra-shell: ${decision.packageName}@${decision.version} installed and verified ` +
       "package-local.",
   };
 }
