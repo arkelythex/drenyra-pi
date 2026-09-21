@@ -1,13 +1,13 @@
 # Contract: package-contract
 
-> Version: v0.1 · Status: frozen · Applies to: `drenyra-pi` npm package.
+> Version: v0.2 · Status: frozen · Applies to: `drenyra-shell` npm package.
 
-This contract defines the **install surface** and the **provided capabilities** of Drenyra Pi. It is the promise a consumer gets when running `pi install npm:drenyra-pi`.
+This contract defines the **install surface** and the **provided capabilities** of Drenyra Shell. It is the promise a consumer gets when running `pi install npm:drenyra-shell`.
 
 ## Install surface
 
 ```bash
-pi install npm:drenyra-pi
+pi install npm:drenyra-shell
 ```
 
 The package must:
@@ -42,7 +42,7 @@ Every `/drenyra:*` command:
 
 ## Versioning
 
-- Drenyra Pi follows semver. Major = breaking command, extension, or runtime-pin contract change.
+- Drenyra Shell follows semver. Major = breaking command, extension, or runtime-pin contract change.
 - The pinned Drenyra AI version is part of the package manifest and changes with the pin — see [runtime-dependency](runtime-dependency.md).
 - Command output shape is versioned; consumers (chains, scripts) declare the version they parse.
 
@@ -64,3 +64,7 @@ Install + doctor behavior (contract item 3) is exercised by `__tests__/doctor.te
 ## Conformance
 
 Tests cover: clean install, doctor verification, permission defaults, command scope validation, receipt enforcement, and fail-closed behavior on an unverifiable runtime.
+
+## Migration notes
+
+- v0.2 (2026-09-21): Project renamed from Drenyra Pi to Drenyra Shell (drenyra-pi → drenyra-shell). No schema or field changes — this is a naming-only update. See CHANGELOG.md.
