@@ -1,7 +1,7 @@
 # Style Standard and Verification Gate
 
 This document defines the durable, low-churn formatting/lint standard for
-drenyra-pi and the gate that enforces it. The gate is deliberately **diff-scoped**
+drenyra-shell and the gate that enforces it. The gate is deliberately **diff-scoped**
 so it checks newly written code without requiring a whole-repository reformat
 and without touching pre-existing legacy whitespace debt.
 

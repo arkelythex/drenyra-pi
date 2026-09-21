@@ -2,7 +2,7 @@
 
 ## Scope
 
-This repository covers the Drenyra Pi harness: persona, `/drenyra:*` commands, subagents, RDA chains, tool permissions, themes, and the pinned Drenyra AI runtime bootstrap. It operates **fiscal workflows** — treat confidentiality, integrity, and auditability as product safety requirements.
+This repository covers the Drenyra Shell harness: persona, `/drenyra:*` commands, subagents, RDA chains, tool permissions, themes, and the pinned Drenyra AI runtime bootstrap. It operates **fiscal workflows** — treat confidentiality, integrity, and auditability as product safety requirements.
 
 ## Reporting a vulnerability
 

@@ -60,7 +60,7 @@ are in [`capability-conformance-matrix.md`](capability-conformance-matrix.md).
 | --- | --- | --- |
 | Pi is a pinned consumer of `drenyra-ai` — never reimplements materiality, gates, or receipts | `runtime/pin.ts` (`DEFAULT_PIN`, released pin), `runtime/doctor.ts` (checksum verify, fails closed), `vendored/drenyra-ai-0.4.1.tgz`; `__tests__/pin.test.ts`, `__tests__/doctor.test.ts` | DELIVERED |
 | Pi is not the engine, not the UI, not the fiscal authority | `docs/architecture/ecosystem-boundaries.md` (explicit non-goals); `extensions/register.ts` (handlers are thin: parse → scope policy → delegation → render) | DELIVERED |
-| Dependency rule: `drenyra-pi → drenyra-ai`, never reverse; Engram never input to gates | `docs/architecture/dependency-direction.md`; `docs/architecture/trust-model.md` ("Memory informs; it never authorizes", sharpened in `1eec8e9`); `README.md` ("Drenyra Pi executes agents and tools with pinned versions and never authorizes fiscal operations") | DELIVERED |
+| Dependency rule: `drenyra-pi → drenyra-ai`, never reverse; Engram never input to gates | `docs/architecture/dependency-direction.md`; `docs/architecture/trust-model.md` ("Memory informs; it never authorizes", sharpened in `1eec8e9`); `README.md` ("Drenyra Shell executes agents and tools with pinned versions and never authorizes fiscal operations") | DELIVERED |
 
 ### Draft §4 — Commands
 
@@ -120,7 +120,7 @@ persona with an on/off toggle. Two-mode persona is not shipped (see §5).
 | Fase 0–1 (design; single host Pi) | DELIVERED | Harness extraction complete; README "Host strategy" (`1eec8e9`) — Pi is the v1.0 host, Claude Code the planned second |
 | Fase 2 (subagents cover the 5 frozen intents) | DELIVERED | `agents/` — `close-controller` (monthly-close), `journal-candidate-agent` (correction), `reconciliation-agent` (reconciliation), `invoice-sire-agent` (invoice-review), `tax-controller-pe` (compliance-check), plus support roles (`accounting-scout`, `evidence-builder`, `ledger-analyst`, `anomaly-refuter`, `guardian-angel`) |
 | Fase 3 (Guardian Angel as independent second model at `AWAITING_APPROVAL`) | PARTIAL — gated | `agents/guardian-angel.md` role exists; wiring as independent verifier is SDD-090 (master-owned, gated); README "Model routing" documents the independent-provider tier |
-| Fase 4 (LATAM jurisdiction adapters) | DEFERRED (out of Pi scope) | Jurisdiction-awareness lives in `drenyra-ai` `adapters/`; Pi only consumes it |
+| Fase 4 (LATAM jurisdiction adapters) | DEFERRED (out of Shell scope) | Jurisdiction-awareness lives in `drenyra-ai` `adapters/`; Shell only consumes it |
 
 ## 4. Delivered vs. draft letter — documented deviations
 

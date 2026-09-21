@@ -3,7 +3,7 @@
 AI-assisted contributions are permitted. The human contributor must understand, review, validate, and take full responsibility for everything they submit — especially when it touches fiscal behavior.
 
 > [!IMPORTANT]
-> **The harness never authorizes; the pin is sacred.** Drenyra Pi is the operator-experience layer: it never performs fiscal approval, and it consumes a pinned, checksum-verified, package-local `drenyra-ai` runtime (never `PATH`). A contribution that breaks the pin, the write guards (money/SQL/RUC), or the operator-verification boundary is a product defect regardless of who or what authored it. The contributor owns the submission; AI assistance does not transfer that ownership.
+> **The harness never authorizes; the pin is sacred.** Drenyra Shell is the operator-experience layer: it never performs fiscal approval, and it consumes a pinned, checksum-verified, package-local `drenyra-ai` runtime (never `PATH`). A contribution that breaks the pin, the write guards (money/SQL/RUC), or the operator-verification boundary is a product defect regardless of who or what authored it. The contributor owns the submission; AI assistance does not transfer that ownership.
 
 ## Human Responsibility
 

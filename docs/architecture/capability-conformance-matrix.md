@@ -1,6 +1,6 @@
 # Capability conformance snapshot
 
-This matrix is the point-in-time capability inventory for Drenyra Pi. It uses
+This matrix is the point-in-time capability inventory for Drenyra Shell. It uses
 concrete source and test evidence so public status claims can be checked without
 treating the manifest as self-attestation.
 
@@ -9,7 +9,7 @@ and the narrative surfaces are projections of it. `bun run verify:capability`
 reads every surface declared in the manifest's `currentProjection` and fails on a
 contradicting capability state, verification level, or ownership, on disagreeing
 current snapshot facts, on an unlabeled historical value, and on any claim that
-grants Pi fiscal authority.
+grants Shell fiscal authority.
 
 <!-- conformance:surface id=matrix authority=pi-operates-never-authorizes source=AGENTS.md#non-negotiable-rules -->
 <!-- conformance:snapshot scope=current source=openspec/config.yaml#/current_test_state -->
@@ -54,7 +54,7 @@ Each capability has exactly one verification level:
 | `unit-or-contract-tested` | A cited unit or contract test exercises the capability in isolation. |
 | `validated-end-to-end` | A cited recorded run covers the full operational invocation path through observable output. |
 
-This four-level scheme is Drenyra Pi's own synthesis of Kubernetes-style
+This four-level scheme is Drenyra Shell's own synthesis of Kubernetes-style
 evidence-gated readiness and Backstage-style manifest embedding. It is not a
 1:1 copy of either standard. In-process fixtures count as unit or contract
 evidence here; they do not establish operational end-to-end validation.
@@ -71,7 +71,7 @@ Ownership is `pi-local` for every row except `pinned-ai-runtime`, which is
 | --- | --- | --- | --- | --- |
 | `persona-startup-panel` | SDD-020 | `unit-or-contract-tested` | `extensions/startup-panel.ts:48` (`showStartupPanel`); `extensions/fiscal-guard.ts:248` (`/drenyra:persona`); exact test: `__tests__/extension.test.ts` | Source and cited tests cover the panel registration surface; no live activation run exists, so this is not `validated-end-to-end`. |
 | `drenyra-commands` | SDD-020 / SDD-030 / SDD-040 | `unit-or-contract-tested` | `extensions/register.ts:1147`; exact test: “registers the 15 intended commands plus company, context, install and sync (19 commands)” in `__tests__/extension.test.ts:312` (asserts 20 registered commands); routing-adapter `direct` modality: `lib/routing/direct-port.ts:80` (`createChainPipelineRoutingPort`), wired into `statusHandler` (`extensions/register.ts`); exact tests: `__tests__/routing/direct-port.test.ts` and “default /drenyra:status surfaces routing.preflight additively…” in `__tests__/extension.test.ts:798` | The test name is historical wording; its assertion and current surface are 20 commands. The routing adapter's `direct` modality is unit/contract-tested and wired into `/drenyra:status route` (not `validated-end-to-end`); `delegated` has no production port — an explicit, tracked follow-up (REQ-ROUTE-005), not silently omitted; `durable` has a production port (`lib/mission-commands.ts` `createDurableMissionRoutingPort`) but is not wired into any live command. |
-| `pi-subagents` | SDD-030 | `unit-or-contract-tested` | `agents/README.md:15`; exact tests: “ships exactly the ten required roles under agents/” and “grants a read/query tool and never grants an execute tool (REQ-AGENT-005)” in `__tests__/agents.test.ts:119,149` | Ten Pi definitions are packaged; agents propose and analyze but do not authorize. |
+| `pi-subagents` | SDD-030 | `unit-or-contract-tested` | `agents/README.md:15`; exact tests: “ships exactly the ten required roles under agents/” and “grants a read/query tool and never grants an execute tool (REQ-AGENT-005)” in `__tests__/agents.test.ts:119,149` | Ten Shell definitions are packaged; agents propose and analyze but do not authorize. |
 | `model-routing` | SDD-030 | `unit-or-contract-tested` | `extensions/register.ts:540`; exact test: “registers drenyra:models with the documented model-routing registry” in `__tests__/extension.test.ts:281` | Advisory registry only; the Pi host exposes no model-routing authority API. |
 | `packaged-skills` | SDD-070 (master, referenced-only) | `unit-or-contract-tested` | `skills/scope-discipline/SKILL.md:2`; exact tests: “ships at least the core fiscal skills” and “has real instructional content” in `__tests__/content.test.ts:121,126` | Packaged content is tested; the master-owned skills program remains external. |
 | `rda-chains` | SDD-040 | `unit-or-contract-tested` | `chains/monthly-close.ts:1`, `chains/reconcile.ts:1`, `chains/verify.ts:1`, `chains/evidence.ts:1`; exact tests: “runs intake → evidence wait → evidence satisfaction → proposal → approval → receipt → export” (`chains/__tests__/monthly-close-flow.test.ts:109`), “wires real reconciliation into RECONCILE: a discrepancy manifest produces an anomaly conclusion node and an ERROR blocker (REQ-CHAIN-001)” (`chains/__tests__/monthly-close.test.ts`), “runs sources → real reconciliation anomaly → evidence → proposal → approval (incl. R2-gate negative case) → execution → close → verify” (`chains/__tests__/monthly-close-reconcile-flow.test.ts`), “detects anomalies as evidence conclusion nodes with payload hashes” (`chains/__tests__/reconcile.test.ts:138`), “reports per-check verdicts and completes the fixed check list (REQ-CHAIN-003)” (`chains/__tests__/verify.test.ts:106`), and “adds a source node with a canonical payload hash” (`chains/__tests__/evidence.test.ts:99`) | These are bounded, in-process fixtures, not a live operational E2E run. The monthly-close journey now invokes `chains/reconcile.ts`'s real `computeReconcileDifferences` inside its own RECONCILE phase instead of the prior no-op; the two-tier bank-movement/bank-statement confirmation model from `reconcile.ts` is intentionally not replicated here (tracked follow-up). |
@@ -81,7 +81,7 @@ Ownership is `pi-local` for every row except `pinned-ai-runtime`, which is
 | `configurator-install-doctor-sync` | SDD-020 | `unit-or-contract-tested` | `lib/configurator.ts:126,151,163`; exact tests: “reports all-ok configurator diagnostics after install (composition is current-schema)” and “is idempotent: a second install and a sync report unchanged with zero writes” in `__tests__/configurator.test.ts:105,174` | Legitimate pre-Wave-1 scaffolding that consumes the public configurator contract; not delivery of master SDD-020. |
 
 No row is tagged `validated-end-to-end`: this snapshot has no live operational
-run covering an installed Pi command through external services. In particular,
+run covering an installed Shell command through external services. In particular,
 Engram remains incomplete and the monthly-close evidence is an in-process
 fixture.
 
@@ -92,7 +92,7 @@ fixture.
 | Current candidate snapshot | `bun test` → 767 passed / 0 failed (50 files), dirty candidate, 2026-09-11 | `openspec/config.yaml#/current_test_state`; identity delegated to `docs/architecture/program-lock-facts.json#/candidateIdentity` |
 | Command surface | 20 registered commands | `extensions/register.ts:1147-1247`; `__tests__/extension.test.ts:312` |
 | Runtime pin | `drenyra-ai@0.4.1` | `runtime/pin.ts:128`; `__tests__/pin.test.ts:73` |
-| Contracts | Pi-local package/runtime and schema families are Frozen v0.1 | `contracts/README.md:3-14` |
+| Contracts | Shell-local package/runtime and schema families are Frozen v0.1 | `contracts/README.md:3-14` |
 | Monthly close | In-process fixture evidence only | `chains/__tests__/monthly-close-flow.test.ts:109` |
 | Engram | Executable operational integration incomplete | `runtime/context.ts:10-11`; `capability-manifest.yaml` `engram-integration.limitation` |
 | Manifest embedded test state | Preserved historical snapshot: 44 files / 700 passing, labeled `historical`. Not asserted as the live candidate | `capability-manifest.yaml` `testState.evidenceScope` + `evidenceSource`; do not conflate with the preserved 47/717 or 48/738 records |

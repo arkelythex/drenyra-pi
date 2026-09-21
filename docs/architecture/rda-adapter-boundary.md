@@ -1,17 +1,17 @@
-# Drenyra Pi Adapter Boundary
+# Drenyra Shell Adapter Boundary
 
-> Change: `pi-sdd-040-adapter-boundary` · Repo: `drenyra-pi` · Date: 2026-08-15
+> Change: `pi-sdd-040-adapter-boundary` · Repo: `drenyra-shell` · Date: 2026-08-15
 > Runtime baseline: published, pinned `drenyra-ai@0.4.1` (checksum `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600`)
 > Authority-side record: `drenyra-ai/openspec/changes/sdd-040-rda-v2/`, coordinated 2026-08-15 (final closure identity bound during verification)
 
 ## The boundary in one sentence
 
-**Pi coordinates and presents; humans decide; Drenyra AI owns fiscal authority.**
+**Shell coordinates and presents; humans decide; Drenyra AI owns fiscal authority.**
 
-Pi is a replaceable agentic-runtime host. It prepares requests, persists
+Shell is a replaceable agentic-runtime host. It prepares requests, persists
 non-authoritative working state, orders kernel calls, and presents results —
 it never computes a materiality tier, accepts a lifecycle transition, creates a
-gate verdict, or verifies a receipt with Pi-local fiscal rules. Every
+gate verdict, or verifies a receipt with Shell-local fiscal rules. Every
 authoritative decision in a mission belongs to the pinned
 `drenyra-ai@0.4.1` kernel. This document explains the operator-to-result flow;
 the per-rule evidence lives in the
@@ -20,16 +20,16 @@ the per-rule evidence lives in the
 ## Quick path (happy path)
 
 1. Operator starts a monthly close for a bound scope.
-2. Pi prepares the request: complete canonical scope + explicit materiality input + bounded evidence.
-3. Pi calls Drenyra AI: the kernel derives materiality, runs the mission through engine-validated transitions, and evaluates the approval gate.
-4. Pi presents the candidate (proposal with a real evidence hash) to the human.
+2. Shell prepares the request: complete canonical scope + explicit materiality input + bounded evidence.
+3. Shell calls Drenyra AI: the kernel derives materiality, runs the mission through engine-validated transitions, and evaluates the approval gate.
+4. Shell presents the candidate (proposal with a real evidence hash) to the human.
 5. The human decides: an explicit approver record is created.
-6. Pi calls Drenyra AI again: the receipt gate verifies the signed completion receipt.
-7. Pi projects the result (export artifact, status projection) — presentation only.
+6. Shell calls Drenyra AI again: the receipt gate verifies the signed completion receipt.
+7. Shell projects the result (export artifact, status projection) — presentation only.
 
 ## Per-step ownership
 
-| Step | Pi owns | Human owns | Drenyra AI owns | Local persistence | Evidence |
+| Step | Shell owns | Human owns | Drenyra AI owns | Local persistence | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 1. Operator | Receives the operator's close intent and binds the complete ten-element canonical scope (scope-discipline skill) | Chooses the company/period/scope to close | — | Scope context (`~/.drenyra/context.json`) is a convenience input only; complete scope is revalidated (`dev/demo`) | `runtime/context.ts` `assertMissionScopeReady`; `lib/canonicalization.ts` `bindScope` |
 | 2. Prepare request | Validates complete materiality input, source refs/evidence, and the declared R2 policy floor; starts the mission with the full 13-phase EDA plan | — | Derives the R0–R3 materiality tier (`deriveMateriality`, `orderOf`) and validates the DRAFT→QUEUED start transition (`MissionRuntime`) | Mission snapshot + events under `.local/missions/**` (`dev/demo`) | `chains/monthly-close.ts` `CLOSE_MATERIALITY` + `startMission`; `lib/authority-gates.ts` `deriveRequiredMateriality` |
@@ -41,7 +41,7 @@ the per-rule evidence lives in the
 
 ## Fail-closed behavior
 
-Every failure mode below stops the workflow and names who or what resumes it. Pi never guesses, never defaults, and never auto-advances a waiting or unknown mission.
+Every failure mode below stops the workflow and names who or what resumes it. Shell never guesses, never defaults, and never auto-advances a waiting or unknown mission.
 
 | Failure mode | What happens (stop behavior) | Required to resume |
 | --- | --- | --- |
@@ -76,7 +76,7 @@ receipt/export/context data and proves the kernel pipeline still stops at
 
 - Per-rule audit verdict table (10 rules, one demonstrated verdict each):
   [`./rda-adapter-boundary-audit.md`](./rda-adapter-boundary-audit.md)
-- Two-host replacement harness (same bounded fixture through Pi and an
+- Two-host replacement harness (same bounded fixture through Shell and an
   independent substitute host over the pinned kernel; canonical authority
   projection equivalence + five negative controls):
   [`../../__tests__/adapter-boundary-replacement.test.ts`](../../__tests__/adapter-boundary-replacement.test.ts)
@@ -90,7 +90,7 @@ receipt/export/context data and proves the kernel pipeline still stops at
 
 ## Master alignment
 
-Pi contributes **host-side structural proof only**. The authority record for
+Shell contributes **host-side structural proof only**. The authority record for
 RDA v2 behavior is the master change
 `drenyra-ai/openspec/changes/sdd-040-rda-v2/`, coordinated on 2026-08-15. Its
 final closure identity is bound during verification of this change. This

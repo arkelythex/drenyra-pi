@@ -1,6 +1,6 @@
 # prompts/
 
-Operator prompts bundled with Drenyra Pi, declared via the `pi.prompts`
+Operator prompts bundled with Drenyra Shell, declared via the `pi.prompts`
 manifest entry (REQ-SKPT-002).
 
 | File | Purpose |

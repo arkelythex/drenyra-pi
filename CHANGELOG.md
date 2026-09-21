@@ -2,18 +2,31 @@
 
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
-All notable changes to Drenyra Pi will be documented in this file.
+All notable changes to Drenyra Shell will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
 
 ## Unreleased — runtime pin → 0.4.1 (release event, pre-alpha)
 
+### Changed
+
+- **Renamed Drenyra Pi to Drenyra Shell** (product identity rename, mirroring
+  the sibling `gentle-pi` → `gentle-shell` rename): package identity, runtime
+  identifiers, docs, and branding assets renamed throughout.
+  - `contracts/package-contract.md` and `contracts/runtime-dependency.md`
+    bumped `v0.1` → `v0.2` (naming-only, no schema/field changes).
+  - 8 branding assets renamed from `drenyra-pi-*` to `drenyra-shell-*`.
+  - The on-disk host-id string in `lib/configurator.ts` intentionally
+    **stays** `"drenyra-pi"` — it's a closed `HostName` union owned by the
+    pinned external `drenyra-ai@0.4.1` kernel, not this package's call; not a
+    bug, tracked as a future `drenyra-ai` release requirement.
+
 ### Added
 
 - **Fiscal harness extraction complete** — the harness that lived in
   `drenyra-command-center/packages/pi` now ships from this repository, the
-  single source of truth for the Pi accounting harness:
+  single source of truth for the Drenyra Shell accounting harness:
   - Packaged skills: `lens-audit-trail`, `lens-ledger-integrity`,
     `lens-sunat-compliance`, `lens-tenant-isolation`, `ruc-scope`,
     `fiscal-compliance`, `fiscal-review`, `drenyra-sdd`, `drenyra-chained-pr`.
@@ -46,19 +59,19 @@ and this project adheres to the version policy in [RELEASING.md](RELEASING.md).
     configurator host integration (PinnedComposition, PINNED_AI_COMPOSITION,
     drenyra-pi as the fourth managed host) and the routing preflight router
     (`routing/router.ts`, deterministic `route()` over the eight §5 axes). The
-    fiscal-authority kernel surface Pi consumes is unchanged — no breaking
-    API change.
+    fiscal-authority kernel surface Drenyra Shell consumes is unchanged — no
+    breaking API change.
   - `runtime/pin.ts`, `contracts/runtime-dependency.md`,
     `contracts/package-contract.md`, `docs/architecture/program-lock-facts.json`
     updated to the new pin; doctor + conformance + full suite re-run.
 
 ### Added
 
-- **SDD-040 adapter boundary slice** (Pi is a replaceable RDA host):
+- **SDD-040 adapter boundary slice** (Drenyra Shell is a replaceable RDA host):
   - `docs/architecture/rda-adapter-boundary-audit.md` — 10/10 boundary rules
     PASS with executable evidence (no Pi-local violation).
   - `__tests__/adapter-boundary-replacement.test.ts` + fixtures — harness
-    replacement test: same mission through Pi and an independent substitute
+    replacement test: same mission through Drenyra Shell and an independent substitute
     host yields equivalent canonical authority projections (candidates, gates,
     receipts); five negative controls fail on any authority difference.
   - `docs/architecture/rda-adapter-boundary.md` — adapter contract
@@ -113,7 +126,7 @@ upcoming SDD-020/030 slices.
   - `runtime-dependency` — pinned, verified, package-local Drenyra AI runtime strategy.
 - **PR 1 — Pinned runtime verification core:**
   - `runtime/` — pin, package-local resolution (never PATH), checksum, fail-closed doctor, status.
-  - Pi extension registration (`extensions/register.ts`) against the gentle-pi model.
+  - Pi extension registration (`extensions/register.ts`) against the gentle-shell model.
   - CLI-exposed doctor/status machinery; fail-closed matrix tests (30 tests).
 - **Release hardening:**
   - Build to `dist/` (tsc, NodeNext, declarations), `engines >= 22`, complete `files` manifest, `pi` manifest pointing at `dist/extensions`, optional Pi peer dependency, subpath `exports`.

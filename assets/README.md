@@ -1,6 +1,6 @@
 # assets/
 
-Static operating assets for Drenyra Pi, shipped in the published package
+Static operating assets for Drenyra Shell, shipped in the published package
 (`files` includes `assets/`).
 
 | Directory | Content |

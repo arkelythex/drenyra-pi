@@ -3,7 +3,7 @@
 Packaged Drenyra skills shipped with the extension, declared via the
 `pi.skills` manifest entry (REQ-SKPT-001).
 
-Drenyra Pi takes inspiration from the Gentle-AI packaging model: this directory
+Drenyra Shell takes inspiration from the Gentle-AI packaging model: this directory
 contains the stable foundation and operator skills required to run the harness.
 Specialized fiscal knowledge is maintained separately in
 [`arkelythex/drenyra-skills`](https://github.com/arkelythex/drenyra-skills), then
@@ -16,7 +16,7 @@ Skills follow the three-layer model approved in
 
 | Layer | Ownership | Examples | Stability |
 | --- | --- | --- | --- |
-| **Foundation** | `drenyra-pi` | Evidence, isolation, money, candidates, recovery | Very stable |
+| **Foundation** | `drenyra-shell` | Evidence, isolation, money, candidates, recovery | Very stable |
 | **Peru** | `drenyra-skills` | SUNAT, SIRE, IGV, detractions, withholdings, perceptions | Versioned by validity period |
 | **Practice / sector** | `drenyra-skills` | Commerce, services, agriculture, mining, accounting firms | Extensible later |
 

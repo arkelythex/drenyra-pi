@@ -122,6 +122,6 @@ evidence, not the reason this one may delete.
 
 ## Authority boundary
 
-This record is additive conformance evidence. It creates no new authority, grants Pi no fiscal
-authority, promotes no capability's verification level, and authorizes no removal. Pi operates and
+This record is additive conformance evidence. It creates no new authority, grants Shell no fiscal
+authority, promotes no capability's verification level, and authorizes no removal. Shell operates and
 never authorizes; fiscal authority remains in the pinned `drenyra-ai` kernel.

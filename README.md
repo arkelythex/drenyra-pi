@@ -1,21 +1,21 @@
-# Drenyra Pi
+# Drenyra Shell
 
 > **Public source repository (open-core intention)** — this repository is **publicly visible** on GitHub as part of the Drenyra open-core transition intention (charter §9: intention, not contractual promise); packaged artifacts and commercial distribution remain contractual and never public. See the Drenyra [Private Product Policy](https://github.com/arkelythex/drenyra-command-center/blob/main/docs/products/private-product-policy.md).
 >
-> **Pi-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
+> **Shell-native Accounting Operations Harness** — the best way to operate Drenyra AI from Pi.
 >
 > **Status: contracts frozen, pre-release (`v0.1.0`).** The harness extraction from
 > `arkelythex/drenyra-command-center` (`packages/pi`) is **complete**: this
-> repository is now the single source of truth for the Pi accounting harness
+> repository is now the single source of truth for the Drenyra Shell accounting harness
 > (bundled foundation/operator skills, FSD prompts, RED contracts, fiscal-guard
 > extension, and theme).
 > Nothing here is production-ready; the two produced contracts are frozen at v0.1, which is the `0.1.0` step of the version policy.
 
-Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Pi does with Gentle AI.
+Drenyra Shell is the direct counterpart of `gentle-shell` for the accounting domain: a Pi extension that packages the operator experience for Drenyra AI. It does **not** contain the full accounting engine — it installs and consumes a pinned, verified, package-local version of Drenyra AI, exactly like Gentle Shell does with Gentle AI.
 
 <div align="center">
 
-<img width="1200" alt="Drenyra Pi — the runtime manifest: pinned runtime, source, checksum, scope and authority" src="assets/branding/drenyra-shell-hero-runtime-manifest.svg" />
+<img width="1200" alt="Drenyra Shell — the runtime manifest: pinned runtime, source, checksum, scope and authority" src="assets/branding/drenyra-shell-hero-runtime-manifest.svg" />
 
 </div>
 
@@ -23,7 +23,7 @@ Drenyra Pi is the direct counterpart of `gentle-pi` for the accounting domain: a
 
 <div align="center">
 
-<img width="1200" alt="Pi-native operational flow — human → fiscal scope → mission routing → pinned runtime → Engram → receipt → human decision" src="assets/branding/drenyra-shell-operational-flow.svg" />
+<img width="1200" alt="Shell-native operational flow — human → fiscal scope → mission routing → pinned runtime → Engram → receipt → human decision" src="assets/branding/drenyra-shell-operational-flow.svg" />
 
 </div>
 
@@ -34,7 +34,7 @@ The target visual flow is fully represented in text: **human start → fiscal sc
 - **Accounting operator persona** — warm, direct, fiscal-first operator behavior.
 - **Startup panel** — company and fiscal period context on session start.
 - **`/drenyra:*` commands** — doctor, scope, status, capabilities, company/period context, missions, receipts, evidence, verify, and close (see [Command reference](#command-reference)).
-- **Pi-native subagents** — accounting agents for exploration, apply, verify, review.
+- **Shell-native subagents** — accounting agents for exploration, apply, verify, review.
 - **Model routing** — advisory per-phase model registry (documented intent; it never grants authority).
 - **Packaged foundation skills** — Stable scope, evidence, chain, review, and safety guidance shipped with the extension.
 - **RDA chains** — Receipt-Driven Accounting command chains.
@@ -45,23 +45,23 @@ The target visual flow is fully represented in text: **human start → fiscal sc
 
 ### Skills boundary
 
-Drenyra Pi takes inspiration from the Gentle-AI packaging model: the harness
+Drenyra Shell takes inspiration from the Gentle-AI packaging model: the harness
 bundles foundation/operator skills and runtime-facing fiscal guardrails, while
 its complete specialized fiscal knowledge catalog remains a separate, versioned
 content layer.
 
-- `drenyra-pi/skills/` owns the bundled foundation/operator layer and
+- `drenyra-shell/skills/` owns the bundled foundation/operator layer and
   runtime-facing fiscal guardrails: scope, evidence, chains, review, safety,
-  and Pi workflow guidance.
+  and Drenyra Shell workflow guidance.
 - [`drenyra-skills`](https://github.com/arkelythex/drenyra-skills) owns
   specialized Peru and future jurisdictional, regulatory, and practice
   knowledge, including its authoring registry and normative references.
 - [`drenyra-ai`](https://github.com/arkelythex/drenyra-ai) validates and pins
-  the specialized definitions; Pi consumes the resulting verified runtime
+  the specialized definitions; Drenyra Shell consumes the resulting verified runtime
   and never authorizes fiscal actions.
 
 The two repositories are complementary, not duplicate runtimes: bundled
-skills make Pi usable out of the box, and the external catalog preserves
+skills make Drenyra Shell usable out of the box, and the external catalog preserves
 independent fiscal versioning and validity history.
 
 <!-- conformance:surface id=readme authority=pi-operates-never-authorizes source=AGENTS.md#non-negotiable-rules -->
@@ -85,24 +85,24 @@ operational end-to-end integration.
 
 ### Drenyra Dominion Program
 
-Drenyra Pi is a participant in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion), the federated program master in `drenyra-ai` that fixes vision, authority, contracts, dependencies, gates, and sequencing across every Drenyra repository. The program follows a master + vertical SDD model: one master SDD fixes the constitution, and vertical SDDs deliver complete capabilities that may traverse repositories while each repository preserves its ownership and boundaries. Drenyra Pi holds only its local change plus a reference to this master — full specs are never copied here.
+Drenyra Shell is a participant in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion), the federated program master in `drenyra-ai` that fixes vision, authority, contracts, dependencies, gates, and sequencing across every Drenyra repository. The program follows a master + vertical SDD model: one master SDD fixes the constitution, and vertical SDDs deliver complete capabilities that may traverse repositories while each repository preserves its ownership and boundaries. Drenyra Shell holds only its local change plus a reference to this master — full specs are never copied here.
 
-| SDD | Role in Drenyra Pi |
+| SDD | Role in Drenyra Shell |
 | --- | --- |
-| [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) | Pre-Wave-1 scaffolding in Pi: `install`, `doctor`, and `sync` consume the public configurator contract; this is not the Wave-1 SDD-020 implementation |
+| [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) | Pre-Wave-1 scaffolding in Drenyra Shell: `install`, `doctor`, and `sync` consume the public configurator contract; this is not the Wave-1 SDD-020 implementation |
 | [SDD-030 — Organic Accounting Work Routing](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-030-routing) | Direct / delegated / durable-mission routing from evidence and risk |
 | [SDD-040 — Receipt-Driven Accounting v2](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-040-rda-v2) | Frozen candidate, proportional review, bounded correction, reusable receipt (RDA v2 chains) |
 
-The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates. [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) remains **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. Pi's existing `/drenyra:install`, `/drenyra:doctor`, and `/drenyra:sync` commands are legitimate pre-Wave-1 scaffolding that consumes the public configurator contract; they do not claim delivery of the master SDD. Any further Wave-1 implementation waits for master readiness. The historical harness draft that reused the SDD-050 label (the early "Drenyra Pi" harness spec) is reconciled in [harness-draft-conformance.md](docs/architecture/harness-draft-conformance.md): the master assigns SDD-050 to monthly close, and the harness was delivered via `pi-sdd-010-participation` + extraction.
+The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Shell references only and never duplicates. [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) remains **planned** (Wave 1) in the master and gated by the master's [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md) — **in progress**. Drenyra Shell's existing `/drenyra:install`, `/drenyra:doctor`, and `/drenyra:sync` commands are legitimate pre-Wave-1 scaffolding that consumes the public configurator contract; they do not claim delivery of the master SDD. Any further Wave-1 implementation waits for master readiness. The historical harness draft that reused the SDD-050 label (the early "Drenyra Shell" harness spec) is reconciled in [harness-draft-conformance.md](docs/architecture/harness-draft-conformance.md): the master assigns SDD-050 to monthly close, and the harness was delivered via `pi-sdd-010-participation` + extraction.
 
-Drenyra Pi executes agents and tools with pinned versions and **never authorizes fiscal operations** — fiscal authority remains in `drenyra-ai`.
+Drenyra Shell executes agents and tools with pinned versions and **never authorizes fiscal operations** — fiscal authority remains in `drenyra-ai`.
 
 ## Install
 
 npm publication is pending; the release item remains open in [ROADMAP.md](ROADMAP.md). The eventual install command will be:
 
 ```bash
-pi install npm:drenyra-pi
+pi install npm:drenyra-shell
 ```
 
 Do not expect that package reference to resolve until the npm release is published.
@@ -186,7 +186,7 @@ touches an LLM**. Suggested tiers:
 
 ## Institutional memory (Drenyra Engram)
 
-Drenyra Pi accesses [Drenyra Engram](https://github.com/arkelythex/drenyra-engram)
+Drenyra Shell accesses [Drenyra Engram](https://github.com/arkelythex/drenyra-engram)
 as institutional accounting memory. The boundary is non-negotiable:
 
 - **Memory informs, never authorizes.** No observation is ever permission to act.
@@ -201,9 +201,9 @@ as institutional accounting memory. The boundary is non-negotiable:
 
 ## Host strategy
 
-<img width="1200" alt="Authority boundary — Drenyra Pi operates, Drenyra AI validates, the professional decides; fiscal authority remains outside Pi" src="assets/branding/drenyra-shell-authority-boundary.svg" />
+<img width="1200" alt="Authority boundary — Drenyra Shell operates, Drenyra AI validates, the professional decides; fiscal authority remains outside Drenyra Shell" src="assets/branding/drenyra-shell-authority-boundary.svg" />
 
-Drenyra Pi is the v1.0 host: the ecosystem's base runtime, and the name says so.
+Drenyra Shell is the v1.0 host: a thin shell wrapped around the ecosystem's pinned runtime, and the name says so.
 The headless-core delivery (library, CLI, or MCP — per the drenyra-ai v1.0
 strategy) means less host surface equals less regulatory risk while validating
 with real Peruvian accountants. Claude Code is the planned second host; the full
@@ -212,7 +212,7 @@ with real Peruvian accountants. Claude Code is the planned second host; the full
 ## Layout
 
 ```text
-agents/      Pi-native accounting subagents (mirrors in assets/agents/)
+agents/      Shell-native accounting subagents (mirrors in assets/agents/)
 assets/      Static assets (branding, chain maps, policies, schemas)
 chains/      RDA command chain implementations
 contracts/   Package and runtime contracts (see contracts/)
@@ -232,11 +232,11 @@ __tests__/   Test suites for commands, chains, and permissions
 ## Dependency
 
 ```text
-drenyra-pi
+drenyra-shell
   └── installs and consumes drenyra-ai (pinned, verified, package-local)
 ```
 
-Drenyra Pi uses an **exact, verified, package-local version of Drenyra AI** — never whatever binary happens to be on `PATH`. See [contracts/runtime-dependency.md](contracts/runtime-dependency.md).
+Drenyra Shell uses an **exact, verified, package-local version of Drenyra AI** — never whatever binary happens to be on `PATH`. See [contracts/runtime-dependency.md](contracts/runtime-dependency.md).
 
 ## Ecosystem
 
@@ -246,16 +246,16 @@ Drenyra Pi uses an **exact, verified, package-local version of Drenyra AI** — 
 | [Drenyra AI](https://github.com/arkelythex/drenyra-ai) | Agent ecosystem (installed, pinned) |
 | [Drenyra Engram](https://github.com/arkelythex/drenyra-engram) | Institutional accounting memory (planned integration) |
 
-**Direction rule:** Drenyra Pi depends on Drenyra AI; Drenyra Engram integration is planned. Pi never leaks into Drenyra AI's contracts, and Drenyra AI never knows Drenyra Pi exists.
+**Direction rule:** Drenyra Shell depends on Drenyra AI; Drenyra Engram integration is planned. Drenyra Shell never leaks into Drenyra AI's contracts, and Drenyra AI never knows Drenyra Shell exists.
 
 ## National alignment
 
-Drenyra Pi is positioned for the Peruvian digital-government and data-protection context. This is **positioning and roadmap direction**, not an implemented compliance claim.
+Drenyra Shell is positioned for the Peruvian digital-government and data-protection context. This is **positioning and roadmap direction**, not an implemented compliance claim.
 
 | National reference | Position |
 | --- | --- |
 | [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030) | Approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm), derived from the Política Nacional de Transformación Digital 2030. Its 2030 vision — a trusted, innovative, secure digital ecosystem — and six action lines (data regulatory framework; data quality, management and privacy; open data and interoperability; infrastructure/platforms, talent/culture, ecosystem/collaboration) frame the governed-data direction. |
-| [PIDE interoperability](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad) | PIDE enables electronic data exchange among State entities and is used by more than 450 public entities. Drenyra Pi does **not** claim automatic PIDE access: integration would require applicable authorization, purpose, and agreements. |
+| [PIDE interoperability](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad) | PIDE enables electronic data exchange among State entities and is used by more than 450 public entities. Drenyra Shell does **not** claim automatic PIDE access: integration would require applicable authorization, purpose, and agreements. |
 | [Reglamento de la Ley N.º 29733](https://www.gob.pe/institucion/anpd/normas-legales/6554453-16-2024-jus) | The new reglamento is DS N.º 016-2024-JUS — tracked as personal-data-protection context for security/privacy-by-design work. |
 | [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1) | Approved under RM N.° 152-2026-PCM. Its public-sector AI governance mechanisms (OIA, Catálogo IA Perú) are context only — not a private-sector legal classification of Drenyra's tax AI. |
 

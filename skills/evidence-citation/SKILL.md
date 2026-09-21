@@ -3,7 +3,7 @@ name: evidence-citation
 description: "Drenyra evidence citation: cite evidence-graph node ids for every conclusion, follow the source-to-action lineage, and verify payload hashes."
 license: Apache-2.0
 metadata:
-  author: drenyra-pi
+  author: drenyra-shell
   version: "0.1"
   layer: foundation
   jurisdiction: global

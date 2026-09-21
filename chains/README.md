@@ -1,6 +1,6 @@
 # chains/
 
-Drenyra chains shipped with Drenyra Pi: the EDA chain implementations over
+Drenyra chains shipped with Drenyra Shell: the EDA chain implementations over
 the durable mission stores, evidence graph, and shared chain pipeline.
 
 | Chain | Intent | Behavior |

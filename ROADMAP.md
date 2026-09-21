@@ -1,4 +1,4 @@
-# Drenyra Pi — Roadmap
+# Drenyra Shell — Roadmap
 
 > **Last updated:** 2026-08-14. Status: pre-alpha (public repository policy decided 2026-08-14; source-available under the proprietary license).
 >
@@ -13,7 +13,7 @@
 
 ## Program alignment
 
-Drenyra Pi participates in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion), the federated program master in `drenyra-ai` that fixes vision, authority, contracts, dependencies, gates, and sequencing across every Drenyra repository. The roadmap phases below align to the program waves:
+Drenyra Shell participates in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion), the federated program master in `drenyra-ai` that fixes vision, authority, contracts, dependencies, gates, and sequencing across every Drenyra repository. The roadmap phases below align to the program waves:
 
 | Roadmap phase | Drenyra Dominion wave |
 | --- | --- |
@@ -22,10 +22,10 @@ Drenyra Pi participates in the [Drenyra Dominion Program](https://github.com/ark
 | Phase 3 — Ecosystem maturity | Waves 2–3 (Fiscal intelligence and flagship product) |
 
 **Gate note (reference-only, 2026-08-14):** SDD-020 — the configurator capability
-Drenyra Pi serves — is **planned** in the master and gated by master [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md)
+Drenyra Shell serves — is **planned** in the master and gated by master [Gate 0](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/gate-0.md)
 (**in progress**) / Wave 1 readiness. **No Pi-local implementation of SDD-020
 proceeds until the master promotes readiness.** The master owns the full SDD
-catalog (SDD-000/010/050/060/070/080/090/100/110); Drenyra Pi references these,
+catalog (SDD-000/010/050/060/070/080/090/100/110); Drenyra Shell references these,
 never duplicates them.
 
 ## Phase 0 — Identity (current)
@@ -51,7 +51,7 @@ Extracted via vertical PRs and versioned releases, **not** a bulk move:
 - [x] Slice 3: `/drenyra:mission` + `/drenyra:receipt` + `/drenyra:ledger`
 - [x] Slice 4: monthly-close chain (R2 gate, explicit approval)
 - [ ] Slice 5: Drenyra Engram integration (context, memory reads) — read-only institutional context on `/drenyra:context` shipped (`pi-engram-integration`); proposal-informing memory reads remain open
-- [ ] Package released as `drenyra-pi` on npm with pinned `drenyra-ai`
+- [ ] Package released as `drenyra-shell` on npm with pinned `drenyra-ai`
 
 Slices 1–4 are shipped and covered by repository tests, which makes them
 `unit-or-contract-tested` — not `validated-end-to-end`. The monthly-close evidence

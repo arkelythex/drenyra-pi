@@ -1,4 +1,4 @@
-# Trust Model — Drenyra Pi (Pi-native Accounting Operations Harness)
+# Trust Model — Drenyra Shell (Shell-native Accounting Operations Harness)
 
 > **Last updated:** 2026-08-11 (Design 4 — persistence, security, and recovery).
 
@@ -6,7 +6,7 @@
 
 ## Model in one line
 
-**Pinned verified runtime, fail-closed.** Drenyra Pi trusts exactly one engine — the exact version of Drenyra AI it pinned and verified at install — and every fiscal action is default-denied until scope and authority are proven.
+**Pinned verified runtime, fail-closed.** Drenyra Shell trusts exactly one engine — the exact version of Drenyra AI it pinned and verified at install — and every fiscal action is default-denied until scope and authority are proven.
 
 ## Trust boundaries
 
@@ -28,7 +28,7 @@
 
 ### 4. Authority comes from Drenyra AI gates and humans
 
-- Drenyra Pi never invents authority. Missions, candidates, gates, and approvals run in Drenyra AI.
+- Drenyra Shell never invents authority. Missions, candidates, gates, and approvals run in Drenyra AI.
 - Explicit human approval is required for material actions (R2/R3 chains such as monthly close).
 
       ### 5. Memory informs; it never authorizes
@@ -64,7 +64,7 @@
 
 ## Fail-closed default
 
-When the pin is unverifiable, the context is missing, or permissions are insufficient, Drenyra Pi **fails closed**: the command refuses, explains why, and waits for a human. There is no ambient-binary fallback and no permission escalation.
+When the pin is unverifiable, the context is missing, or permissions are insufficient, Drenyra Shell **fails closed**: the command refuses, explains why, and waits for a human. There is no ambient-binary fallback and no permission escalation.
 
 ## National alignment
 
@@ -78,7 +78,7 @@ National alignment reinforces — never weakens — the trust model:
 
 ## Interaction with consumers
 
-Drenyra Pi is the operator layer: it packages the Drenyra AI experience for Pi and enforces scope at the surface. The engine's contracts remain the source of truth for fiscal behavior.
+Drenyra Shell is the operator layer: it packages the Drenyra AI experience for Pi and enforces scope at the surface. The engine's contracts remain the source of truth for fiscal behavior.
 
 ## Operational consequences
 
