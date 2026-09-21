@@ -4,24 +4,12 @@
 
 ## Position in the ecosystem
 
-```text
-                    ┌───────────────────┐
-                    │ Drenyra-Engram    │
-                    │ Accounting Memory │
-                    └─────────▲─────────┘
-                              │
-                ┌─────────────┴─────────────┐
-                │                           │
-       ┌────────┴────────┐        ┌─────────┴─────────┐
-       │ Drenyra-AI      │        │ Drenyra-Pi       │
-       │ Agent Ecosystem │◄───────│ Pi-native Harness│
-       └────────▲────────┘        └───────────────────┘
-                │
-       ┌────────┴────────┐
-       │ Drenyra         │
-       │ Command Center  │
-       └─────────────────┘
-```
+![Drenyra Pi — Position in the Ecosystem](diagrams/drenyra-pi-position.architecture.light.svg#gh-light-mode-only)
+![Drenyra Pi — Position in the Ecosystem](diagrams/drenyra-pi-position.architecture.dark.svg#gh-dark-mode-only)
+
+Drenyra Command Center (product surface) also consumes this harness; that
+dependency is evidenced and diagrammed in `drenyra-command-center`, not here —
+see [Repository scope](#repository-scope) below.
 
 Drenyra Pi depends on Drenyra AI (pinned, package-local) and Drenyra Engram (memory access). It is a consumer — it never defines the agent ecosystem or the memory engine.
 

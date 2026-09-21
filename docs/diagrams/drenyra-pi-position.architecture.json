@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Drenyra Pi — Position in the Ecosystem",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/arkelythex/drenyra-pi",
+      "provider": "github",
+      "revision": "3e2866938b465f794453b3d29bd858917f4883e8"
+    }
+  },
+  "components": [
+    {
+      "id": "engram",
+      "type": "database",
+      "label": "Drenyra Engram",
+      "sublabel": "accounting memory — informs, never authorizes",
+      "sources": [
+        { "path": "runtime/engram-client.ts", "label": "engram client" },
+        { "path": "runtime/engram-pin.ts", "label": "engram pin" }
+      ],
+      "pos": [420, 40],
+      "size": [220, 110]
+    },
+    {
+      "id": "ai",
+      "type": "backend",
+      "label": "Drenyra AI",
+      "sublabel": "pinned, package-local agent ecosystem",
+      "sources": [
+        { "path": "package.json", "line": 67, "label": "vendored drenyra-ai dependency" },
+        { "path": "contracts/runtime-dependency.md", "label": "runtime dependency contract" }
+      ],
+      "pos": [40, 220],
+      "size": [220, 110]
+    },
+    {
+      "id": "pi",
+      "type": "frontend",
+      "label": "Drenyra Pi",
+      "sublabel": "Pi-native harness (this repo)",
+      "sources": [
+        { "path": "docs/architecture.md", "line": 135, "label": "direction rules" }
+      ],
+      "pos": [420, 220],
+      "size": [220, 110]
+    }
+  ],
+  "connections": [
+    { "from": "pi", "to": "ai", "label": "consumes (pinned, one-way)" },
+    { "from": "pi", "to": "engram", "label": "reads (never authorizes)" }
+  ]
+}
