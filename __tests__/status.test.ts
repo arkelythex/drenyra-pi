@@ -72,7 +72,7 @@ describe("status", () => {
   });
 
   it("missing: summary mentions the missing runtime", async () => {
-    const emptyRoot = mkdtempSync(join(tmpdir(), "drenyra-pi-status-empty-"));
+    const emptyRoot = mkdtempSync(join(tmpdir(), "drenyra-shell-status-empty-"));
     try {
       const pin = createPin({
         state: "released",

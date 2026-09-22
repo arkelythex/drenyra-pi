@@ -24,7 +24,7 @@ import { isValidRuc } from "../runtime/ruc.js";
 import { makeCanonicalScope } from "./helpers/authority-fixtures.js";
 
 function makeStore(): { store: ScopeContextStore; dir: string } {
-  const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-context-"));
+  const dir = mkdtempSync(join(tmpdir(), "drenyra-shell-context-"));
   return { store: new ScopeContextStore(join(dir, "context.json")), dir };
 }
 
@@ -174,7 +174,7 @@ describe("ScopeContextStore", () => {
   });
 
   it("rejects invalid selectors before loading or saving existing state", () => {
-    const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-recording-context-"));
+    const dir = mkdtempSync(join(tmpdir(), "drenyra-shell-recording-context-"));
     const file = join(dir, "context.json");
     const store = new RecordingStore(file);
     try {

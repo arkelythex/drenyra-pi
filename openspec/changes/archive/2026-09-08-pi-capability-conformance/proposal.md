@@ -2,7 +2,7 @@
 
 ## Intent
 
-`drenyra-pi`'s point-in-time audit artifacts (README, ROADMAP, `docs/architecture/*`, `capability-manifest.yaml`, an unarchived reconciliation change) contradict each other and the actual `main` tree: ROADMAP understates shipped work (Phase 2 items are wired and tested), README overstates it (implies an npm release that hasn't happened), and three independent audit documents disagree on command count, pinned version, and contract-freeze state. This change fixes the concrete contradictions now and publishes one evidence-cited capability matrix, so the next audit has a single trustworthy source instead of a fourth stale document.
+`drenyra-shell`'s point-in-time audit artifacts (README, ROADMAP, `docs/architecture/*`, `capability-manifest.yaml`, an unarchived reconciliation change) contradict each other and the actual `main` tree: ROADMAP understates shipped work (Phase 2 items are wired and tested), README overstates it (implies an npm release that hasn't happened), and three independent audit documents disagree on command count, pinned version, and contract-freeze state. This change fixes the concrete contradictions now and publishes one evidence-cited capability matrix, so the next audit has a single trustworthy source instead of a fourth stale document.
 
 ## Scope
 
@@ -16,7 +16,7 @@
 
 ### Out of Scope
 - `capability-manifest.yaml` schema/tooling redesign (generator, lint-check) — tracked as a separate follow-up change.
-- Any fix inside `drenyra-ai` itself (e.g., missing model-routing enforcement API) — recorded as an external finding only; `allowedEditRoots` is `drenyra-pi`-only.
+- Any fix inside `drenyra-ai` itself (e.g., missing model-routing enforcement API) — recorded as an external finding only; `allowedEditRoots` is `drenyra-shell`-only.
 - Deep rewrite of `docs/architecture/ecosystem-boundaries.md` beyond correcting stale command/chain counts.
 
 ## Capabilities

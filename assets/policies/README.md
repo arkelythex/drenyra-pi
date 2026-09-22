@@ -1,4 +1,4 @@
-# Drenyra Pi — Operating Policies (v0.1)
+# Drenyra Shell — Operating Policies (v0.1)
 
 The v0.1 operating policies of the evidence-driven accounting harness. Every
 policy is a fail-closed rule: when the policy cannot be satisfied, the

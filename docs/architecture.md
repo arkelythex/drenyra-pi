@@ -1,4 +1,4 @@
-# Drenyra Pi — Architecture
+# Drenyra Shell — Architecture
 
 > **Last updated:** 2026-08-14 (Design 4 — persistence, security, and recovery).
 
@@ -12,10 +12,10 @@
                               │
                 ┌─────────────┴─────────────┐
                 │                           │
-       ┌────────┴────────┐        ┌─────────┴─────────┐
-       │ Drenyra-AI      │        │ Drenyra-Pi       │
-       │ Agent Ecosystem │◄───────│ Pi-native Harness│
-       └────────▲────────┘        └───────────────────┘
+       ┌────────┴────────┐        ┌──────────────────────┐
+       │ Drenyra-AI      │        │ Drenyra-Shell        │
+       │ Agent Ecosystem │◄───────│ Shell-native Harness │
+       └────────▲────────┘        └──────────────────────┘
                 │
        ┌────────┴────────┐
        │ Drenyra         │
@@ -23,14 +23,14 @@
        └─────────────────┘
 ```
 
-Drenyra Pi depends on Drenyra AI (pinned, package-local) and Drenyra Engram (memory access). It is a consumer — it never defines the agent ecosystem or the memory engine.
+Drenyra Shell depends on Drenyra AI (pinned, package-local) and Drenyra Engram (memory access). It is a consumer — it never defines the agent ecosystem or the memory engine.
 
 ## Core principle: package-local pinned runtime
 
-Drenyra Pi installs an **exact, verified version of Drenyra AI** inside its own package tree:
+Drenyra Shell installs an **exact, verified version of Drenyra AI** inside its own package tree:
 
 ```text
-drenyra-pi/
+drenyra-shell/
 └── runtime/
     └── drenyra-ai@<exact.version>   # pinned + checksum-verified
 ```
@@ -65,7 +65,7 @@ Pi host
   │
   ├── runtime/             pinned drenyra-ai bootstrap + verification
   ├── chains/              RDA command chains (close, reconcile, verify, evidence)
-  ├── agents/              Pi-native accounting subagents
+  ├── agents/              Shell-native accounting subagents
   ├── skills/              packaged Drenyra skills
   ├── prompts/             persona + command prompts
   └── contracts/           package + runtime contracts
@@ -94,10 +94,10 @@ Drenyra · Pi · External hosts
 - **Agents propose, never decide.** Each returns a known schema (evidence
     manifest, exceptions and candidates, explained differences, candidate
     journal entries, compliance findings, close plan); free text never replaces
-    structured values, references, hashes, or states. Pi ships the ten subagents
-    in `agents/` (seven Design 03 ecosystem roles + three Pi work agents).
+    structured values, references, hashes, or states. Shell ships the ten subagents
+    in `agents/` (seven Design 03 ecosystem roles + three Shell work agents).
 - **Skills are layered** (Foundation / Peru / Practice-sector) and versioned by
-    validity period; Pi ships the Foundation skills in `skills/`.
+    validity period; Shell ships the Foundation skills in `skills/`.
 - **Models are provider-agnostic** — selected by capability, cost, and risk,
     recorded as provenance, validated against schemas before entering the Core.
 
@@ -132,13 +132,13 @@ Design 04 fixes where authoritative state lives and how the harness stays safe:
 
 ## Direction rules
 
-1. Drenyra Pi → Drenyra AI: consumed (pinned). One-way.
-2. Drenyra Pi → Drenyra Engram: memory reads/context. Memory **never authorizes**.
-3. Drenyra AI → Drenyra Pi: **never**. Drenyra AI must not know this harness exists.
+1. Drenyra Shell → Drenyra AI: consumed (pinned). One-way.
+2. Drenyra Shell → Drenyra Engram: memory reads/context. Memory **never authorizes**.
+3. Drenyra AI → Drenyra Shell: **never**. Drenyra AI must not know this harness exists.
 
 ## Repository scope
 
-This repo is the Pi harness only. The accounting engine, UI, and product surfaces live in `arkelythex/drenyra-command-center`; the agent runtime in `arkelythex/drenyra-ai`; the memory engine in `arkelythex/drenyra-engram`.
+This repo is the Shell harness only. The accounting engine, UI, and product surfaces live in `arkelythex/drenyra-command-center`; the agent runtime in `arkelythex/drenyra-ai`; the memory engine in `arkelythex/drenyra-engram`.
 
 ## National alignment (positioning)
 

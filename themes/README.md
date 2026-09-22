@@ -1,6 +1,6 @@
 # themes/
 
-Pi themes for Drenyra Pi, declared as explicit JSON file paths in the
+Pi themes for Drenyra Shell, declared as explicit JSON file paths in the
 `pi.themes` package manifest entry (REQ-SKPT-003).
 
 Pi loads every discovered JSON file as a complete theme, so this directory

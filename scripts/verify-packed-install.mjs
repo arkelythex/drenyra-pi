@@ -1,5 +1,5 @@
 /**
- * drenyra-pi packed-install verification.
+ * drenyra-shell packed-install verification.
  *
  * Proves the PUBLISHED artifact works, not just the source tree:
  *   1. npm pack → produces the .tgz exactly as npm would publish it
@@ -43,9 +43,9 @@ try {
 const { DEFAULT_PIN, RUNTIME_VERSION } = await import(
   pathToFileURL(join(root, "dist", "runtime", "pin.js")).href
 );
-const tgzName = `drenyra-pi-${pkg.version}.tgz`;
-const work = mkdtempSync(join(tmpdir(), "drenyra-pi-pack-"));
-const installDir = mkdtempSync(join(tmpdir(), "drenyra-pi-install-"));
+const tgzName = `drenyra-shell-${pkg.version}.tgz`;
+const work = mkdtempSync(join(tmpdir(), "drenyra-shell-pack-"));
+const installDir = mkdtempSync(join(tmpdir(), "drenyra-shell-install-"));
 const failures = [];
 
 try {
@@ -79,7 +79,7 @@ try {
   const installedPkgPath = join(
     installDir,
     "node_modules",
-    "drenyra-pi",
+    "drenyra-shell",
     "package.json",
   );
   try {
@@ -106,7 +106,7 @@ try {
   const extPath = join(
     installDir,
     "node_modules",
-    "drenyra-pi",
+    "drenyra-shell",
     "dist",
     "extensions",
     "register.js",
@@ -126,7 +126,7 @@ try {
   const postinstallPath = join(
     installDir,
     "node_modules",
-    "drenyra-pi",
+    "drenyra-shell",
     "dist",
     "scripts",
     "install-drenyra-ai.js",

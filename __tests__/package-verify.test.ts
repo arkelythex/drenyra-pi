@@ -134,7 +134,7 @@ function makeVendoredFixture(
 		omitEntry?: boolean;
 	} = {},
 ): VendoredFixture {
-	const root = tempRoot("drenyra-pi-vendored-");
+	const root = tempRoot("drenyra-shell-vendored-");
 	const version = options.version ?? "0.4.1";
 	const entryContent = Buffer.from(
 		options.entryContent ?? 'export const runtime = "drenyra-ai-fixture";\n',
@@ -203,7 +203,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("flags content drift when a covered file changes", async () => {
-		const root = tempRoot("drenyra-pi-drift-");
+		const root = tempRoot("drenyra-shell-drift-");
 		writeTree(root, {
 			"contracts/mission/status.schema.json": '{"title":"original"}\n',
 		});
@@ -224,7 +224,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("flags a covered file listed in the manifest but missing on disk", async () => {
-		const root = tempRoot("drenyra-pi-missing-");
+		const root = tempRoot("drenyra-shell-missing-");
 		writeTree(root, { "contracts/evidence/node.schema.json": "{}\n" });
 		const manifest = makeManifest({
 			"contracts/evidence/node.schema.json": sha256Hex("{}\n"),
@@ -239,7 +239,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("flags an uncovered addition under contracts/ (new file not in the manifest)", async () => {
-		const root = tempRoot("drenyra-pi-uncovered-");
+		const root = tempRoot("drenyra-shell-uncovered-");
 		writeTree(root, {
 			"contracts/receipts/receipt-content.schema.json": "{}\n",
 			"contracts/receipts/brand-new.schema.json": "{}\n",
@@ -256,7 +256,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("fails closed when the manifest itself is missing", async () => {
-		const root = tempRoot("drenyra-pi-nomanifest-");
+		const root = tempRoot("drenyra-shell-nomanifest-");
 		writeTree(root, { "contracts/package-contract.md": "# contract\n" });
 		let thrown: unknown;
 		try {
@@ -268,7 +268,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("flags a manifest entry with a non-sha256 hash", async () => {
-		const root = tempRoot("drenyra-pi-badhash-");
+		const root = tempRoot("drenyra-shell-badhash-");
 		writeTree(root, { "contracts/package-contract.md": "# contract\n" });
 		const manifest = makeManifest({
 			"contracts/package-contract.md": "not-a-sha256",
@@ -282,7 +282,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("flags an unsupported manifest version", async () => {
-		const root = tempRoot("drenyra-pi-badver-");
+		const root = tempRoot("drenyra-shell-badver-");
 		writeTree(root, { "contracts/package-contract.md": "# contract\n" });
 		const manifest = makeManifest(
 			{ "contracts/package-contract.md": sha256Hex("# contract\n") },
@@ -297,7 +297,7 @@ describe("content integrity manifest (contracts/ + assets/schemas/)", () => {
 	});
 
 	it("buildManifest produces entries whose hashes verify cleanly", async () => {
-		const root = tempRoot("drenyra-pi-buildmanifest-");
+		const root = tempRoot("drenyra-shell-buildmanifest-");
 		writeTree(root, {
 			"contracts/mission/status.schema.json": '{"title":"x"}\n',
 			"assets/schemas/scope/scope-binding.schema.json": '{"title":"y"}\n',
@@ -382,7 +382,7 @@ describe("vendored runtime artifact reconciliation vs DEFAULT_PIN", () => {
 	});
 
 	it("returns no errors for a pending-release pin (nothing to reconcile)", () => {
-		const root = tempRoot("drenyra-pi-pending-");
+		const root = tempRoot("drenyra-shell-pending-");
 		const result = reconcileVendoredArtifact({
 			root,
 			pin: {
@@ -409,7 +409,7 @@ describe("tar reader", () => {
 	});
 
 	it("round-trips a synthetic tar.gz fixture", () => {
-		const root = tempRoot("drenyra-pi-tar-");
+		const root = tempRoot("drenyra-shell-tar-");
 		const fixture = makeVendoredFixture();
 		const entry = readTarEntry(
 			join(fixture.root, "vendored", "drenyra-ai-0.4.1.tgz"),

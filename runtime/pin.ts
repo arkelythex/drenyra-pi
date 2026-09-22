@@ -4,12 +4,12 @@
 // This module contains no money logic; it pins the Drenyra AI runtime.
 
 /**
- * Runtime pin for the Drenyra AI runtime consumed by Drenyra Pi.
+ * Runtime pin for the Drenyra AI runtime consumed by Drenyra Shell.
  *
  * Contract: contracts/runtime-dependency.md
  *   - Pinned exact version. Range pins are not allowed for fiscal operations.
- *   - The pin is part of the Drenyra Pi package manifest and changes with the
- *     runtime — upgrading the pin is a release of Drenyra Pi itself.
+ *   - The pin is part of the Drenyra Shell package manifest and changes with the
+ *     runtime — upgrading the pin is a release of Drenyra Shell itself.
  */
 
 export const RUNTIME_PACKAGE = "drenyra-ai";
@@ -117,12 +117,12 @@ export function createPin(overrides: Partial<RuntimePin> = {}): RuntimePin {
  * install); the release tarball hash lives in the GitHub Release SHA256SUMS.
  *
  * v0.4.1 is a MINOR backward-compatible addition: configurator host
- * integration (PinnedComposition, PINNED_AI_COMPOSITION, drenyra-pi as the
+ * integration (PinnedComposition, PINNED_AI_COMPOSITION, drenyra-shell as the
  * fourth managed host) and the routing preflight router (routing/router.ts,
  * deterministic route() over the eight §5 axes) land here; the
  * fiscal-authority kernel surface is unchanged.
  *
- * Upgrading the pin is itself a release of Drenyra Pi (see
+ * Upgrading the pin is itself a release of Drenyra Shell (see
  * contracts/runtime-dependency.md, "Upgrade is explicit").
  */
 export const DEFAULT_PIN: RuntimePin = createPin({

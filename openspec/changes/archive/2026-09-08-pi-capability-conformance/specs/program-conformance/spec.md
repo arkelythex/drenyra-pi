@@ -3,7 +3,7 @@
 ## Purpose
 
 Defines the evidence-cited capability conformance matrix: a point-in-time,
-commit-scoped artifact that tags every `drenyra-pi` capability with a
+commit-scoped artifact that tags every `drenyra-shell` capability with a
 verification level backed by a checkable citation, so README, ROADMAP, and
 `capability-manifest.yaml` cannot silently drift into contradiction again.
 This is a new capability with no prior spec; every requirement below is

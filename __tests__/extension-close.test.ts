@@ -22,7 +22,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { AccountingMissionStatus, WaitReason } from "drenyra-ai/missions";
 import {
-	registerDrenyraPiExtension,
+	registerDrenyraShellExtension,
 	type PiCommandContext,
 	type PiExtensionApi,
 } from "../extensions/register.js";
@@ -154,7 +154,7 @@ describe("drenyra:close command wiring (S3b intact; REQ-CMD-004/008)", () => {
 		const root = tempRoot();
 		const { pi, registered } = makeMockPi();
 		const store = new ScopeContextStore(join(root, "context.json"));
-		registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+		registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
 		store.setCanonicalScope(makeCanonicalScope());
 		const command = registered.find((c) => c.name === "drenyra:close");
 		expect(command).toBeDefined();
@@ -168,7 +168,7 @@ describe("drenyra:close command wiring (S3b intact; REQ-CMD-004/008)", () => {
 	it("fails closed without a complete canonical scope and mutates nothing", async () => {
 		const root = tempRoot();
 		const { pi, registered } = makeMockPi();
-		registerDrenyraPiExtension(pi, {
+		registerDrenyraShellExtension(pi, {
 			contextStore: new ScopeContextStore(join(root, "context.json")),
 			storesRoot: root,
 		});
@@ -184,7 +184,7 @@ describe("drenyra:close command wiring (S3b intact; REQ-CMD-004/008)", () => {
 		const root = tempRoot();
 		const { pi, registered } = makeMockPi();
 		const store = new ScopeContextStore(join(root, "context.json"));
-		registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+		registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
 		store.setCanonicalScope(makeCanonicalScope());
 		const command = registered.find((c) => c.name === "drenyra:close");
 		expect(command).toBeDefined();
@@ -206,7 +206,7 @@ describe("drenyra:close command wiring (S3b intact; REQ-CMD-004/008)", () => {
 		const root = tempRoot();
 		const { pi, registered } = makeMockPi();
 		const store = new ScopeContextStore(join(root, "context.json"));
-		registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+		registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
 		store.setCanonicalScope(makeCanonicalScope());
 		const closeCmd = registered.find((c) => c.name === "drenyra:close");
 		const evidenceCmd = registered.find((c) => c.name === "drenyra:evidence");

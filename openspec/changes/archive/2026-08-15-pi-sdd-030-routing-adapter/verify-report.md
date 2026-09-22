@@ -1,7 +1,7 @@
 # Verify Report — pi-sdd-030-routing-adapter
 
 > Change: `pi-sdd-030-routing-adapter`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Phase: verify (independent re-run and comparison — apply claims were NOT trusted)
 > Date: 2026-08-15 (verification run)
 > Runtime baseline: published, pinned `drenyra-ai@0.3.0` (vendored tgz, checksum `09df8d69...b7600` confirmed by `verify-package-files`)

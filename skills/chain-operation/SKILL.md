@@ -3,7 +3,7 @@ name: chain-operation
 description: "Drenyra chain operation: run one EDA phase per continue, respect RUN/SKIP/WAIT, never auto-advance waits, and require R2 approval plus receipts for execute."
 license: Apache-2.0
 metadata:
-  author: drenyra-pi
+  author: drenyra-shell
   version: "0.1"
   layer: foundation
   jurisdiction: global

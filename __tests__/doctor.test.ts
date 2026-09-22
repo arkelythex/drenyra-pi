@@ -46,7 +46,7 @@ describe("doctor — fail-closed matrix", () => {
   });
 
   it("missing: no package-local runtime → fail closed", async () => {
-    const emptyRoot = mkdtempSync(join(tmpdir(), "drenyra-pi-doctor-empty-"));
+    const emptyRoot = mkdtempSync(join(tmpdir(), "drenyra-shell-doctor-empty-"));
     try {
       const pin = createPin({
         state: "released",

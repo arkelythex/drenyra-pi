@@ -1,6 +1,6 @@
-# Tasks — Prove the Drenyra Pi Adapter Boundary
+# Tasks — Prove the Drenyra Shell Adapter Boundary
 
-> Change: `pi-sdd-040-adapter-boundary` · Repo: `drenyra-pi` · Status: tasks drafted
+> Change: `pi-sdd-040-adapter-boundary` · Repo: `drenyra-shell` · Status: tasks drafted
 > Store: HYBRID — this file is authoritative; Engram is best-effort
 > Runtime baseline: published, pinned `drenyra-ai@0.2.0` (checksum `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047`)
 > Authority-side record: `drenyra-ai/openspec/changes/sdd-040-rda-v2/`, coordinated 2026-08-15 (final closure identity bound during verification)

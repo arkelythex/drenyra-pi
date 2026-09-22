@@ -1,4 +1,4 @@
-# Design: Pi Skills Registry Consumption (Skills-Only Scope)
+# Design: Shell Skills Registry Consumption (Skills-Only Scope)
 
 ## Technical Approach
 
@@ -150,7 +150,7 @@ All three proposal success-criteria fixtures use real `BASE_PE_SKILLS`
 constants imported from `drenyra-ai/skills` directly — no synthetic
 `SkillDefinition` is needed; `IGV_VALIDATE` alone (jurisdiction `"PE"`,
 `validity.from: "2026-01-01"`, no `to`) exercises all three cases by varying
-`at`/`jurisdiction`. Never fork/copy skill bytes into a Pi fixture.
+`at`/`jurisdiction`. Never fork/copy skill bytes into a Shell fixture.
 
 ## Threat Matrix
 

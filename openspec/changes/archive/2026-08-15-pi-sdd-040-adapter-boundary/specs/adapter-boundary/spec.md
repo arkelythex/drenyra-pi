@@ -1,7 +1,7 @@
-# Drenyra Pi Adapter Boundary — Specification
+# Drenyra Shell Adapter Boundary — Specification
 
 > Change: `pi-sdd-040-adapter-boundary`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Phase: specs (real SDD pipeline)
 > Date: 2026-08-15
 > Runtime baseline: published and pinned `drenyra-ai@0.2.0` (entry checksum `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047`)
@@ -10,7 +10,7 @@
 
 ## Purpose
 
-Defines what must be true after Drenyra Pi proves, rather than merely documents,
+Defines what must be true after Drenyra Shell proves, rather than merely documents,
 that it is a replaceable agentic-runtime host for Drenyra AI's deterministic
 fiscal-authority kernel: an evidence-backed audit of every prohibited authority
 behavior, the smallest fixes for any Pi-local boundary violation found, a

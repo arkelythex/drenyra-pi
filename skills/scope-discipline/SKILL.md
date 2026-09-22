@@ -3,7 +3,7 @@ name: scope-discipline
 description: "Drenyra scope discipline: bind and verify the complete canonical scope before any protected work, and fail closed on mismatch or change."
 license: Apache-2.0
 metadata:
-  author: drenyra-pi
+  author: drenyra-shell
   version: "0.1"
   layer: foundation
   jurisdiction: global
@@ -11,7 +11,7 @@ metadata:
 
 # Scope Discipline
 
-Every Drenyra Pi operation is bound to a canonical scope. Scope discipline is
+Every Drenyra Shell operation is bound to a canonical scope. Scope discipline is
 the first gate: read the scope, verify it, and never work outside it.
 
 ## When to use

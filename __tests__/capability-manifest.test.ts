@@ -266,7 +266,7 @@ function writeValidRoot(): { root: string; manifestPath: string } {
 	const root = tempRoot("pi-capability-valid-");
 	writeFileSync(
 		join(root, "package.json"),
-		`${JSON.stringify({ name: "drenyra-pi", version: "0.0.1-prealpha.1" })}\n`,
+		`${JSON.stringify({ name: "drenyra-shell", version: "0.0.1-prealpha.1" })}\n`,
 	);
 	const stubFiles: Record<string, string> = {
 		"extensions/register.ts": "export const register = true;\n",
@@ -304,8 +304,8 @@ function writeValidRoot(): { root: string; manifestPath: string } {
 			currentSnapshot: CURRENT_SNAPSHOT_LOCATOR,
 		},
 		repository: {
-			name: "drenyra-pi",
-			package: "drenyra-pi",
+			name: "drenyra-shell",
+			package: "drenyra-shell",
 			role: "agentic-runtime",
 			version: "0.0.1-prealpha.1",
 		},

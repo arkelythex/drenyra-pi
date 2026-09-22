@@ -17,9 +17,9 @@ This change establishes an evidence-first reconciliation: verified publication p
 ### In scope
 
 - Verify public publication evidence for both:
-  - the Drenyra Pi roadmap; and
-  - the Drenyra Pi architecture documentation.
-- Require evidence to be accessible without repository credentials or privileged access and to identify the published Drenyra Pi documents clearly.
+  - the Drenyra Shell roadmap; and
+  - the Drenyra Shell architecture documentation.
+- Require evidence to be accessible without repository credentials or privileged access and to identify the published Drenyra Shell documents clearly.
 - If both publications are verified, change only the Phase 0 marker in `ROADMAP.md` from unchecked to checked.
 - Record the evidence and verification outcome in the change's implementation or verification artifacts rather than adding publication claims elsewhere.
 - Keep the work below the 400 authored-changed-line budget and any stricter local policy. The intended product edit is one checklist marker.
@@ -30,7 +30,7 @@ Publication evidence is sufficient only when a reviewer can reproduce it and con
 
 1. A public, unauthenticated location is reachable for the roadmap.
 2. A public, unauthenticated location is reachable for the architecture documentation.
-3. Each location clearly corresponds to Drenyra Pi and exposes the relevant document content, rather than only a repository title, placeholder, redirect to authentication, screenshot, or private preview.
+3. Each location clearly corresponds to Drenyra Shell and exposes the relevant document content, rather than only a repository title, placeholder, redirect to authentication, screenshot, or private preview.
 4. The evidence is current enough to support the checklist claim at verification time.
 
 A local checkout, authenticated GitHub view, private repository URL, planned publication, cached claim, or evidence for only one of the two documents is insufficient. If any criterion cannot be verified, the marker remains unchecked and the change reports the missing evidence.
@@ -64,7 +64,7 @@ Maintainers and roadmap readers can trust the Phase 0 publication marker as an e
 | --- | --- | --- |
 | Private or authenticated access is mistaken for public publication | The roadmap overstates public availability | Verify from an unauthenticated context and reject login-gated or permission-dependent evidence. |
 | Only one document is public | A compound checklist item is marked complete prematurely | Require separate, reproducible evidence for both roadmap and architecture. |
-| Public content is a placeholder or belongs to another Drenyra project | Evidence does not support the Drenyra Pi claim | Confirm project identity and relevant document content at each location. |
+| Public content is a placeholder or belongs to another Drenyra project | Evidence does not support the Drenyra Shell claim | Confirm project identity and relevant document content at each location. |
 | Scope expands into national-alignment or architecture edits | Carefully bounded positioning and compliance language may drift | Limit any later product diff to the single roadmap checkbox; treat all related docs as protected. |
 | External publication disappears after verification | The marker can become stale again | Record the checked locations and verification time in change evidence; future loss is handled by a separate reconciliation. |
 | A documentation-only fix accumulates unrelated cleanup | Review becomes harder and rollback less reliable | Enforce the 400-line ceiling and any stricter local limit; reject incidental edits. |
@@ -77,8 +77,8 @@ If evidence is unavailable during implementation, no product-file edit occurs, s
 
 ## Success criteria
 
-- Public, unauthenticated, reproducible evidence is verified separately for the Drenyra Pi roadmap and architecture documentation.
-- Evidence clearly identifies Drenyra Pi and exposes the relevant document content.
+- Public, unauthenticated, reproducible evidence is verified separately for the Drenyra Shell roadmap and architecture documentation.
+- Evidence clearly identifies Drenyra Shell and exposes the relevant document content.
 - When both checks pass, the only product-document change is the existing Phase 0 publication checkbox in `ROADMAP.md` changing from unchecked to checked.
 - When either check fails or remains ambiguous, `ROADMAP.md` is unchanged and the missing evidence is reported.
 - `README.md`, architecture documents, national-alignment content, policy assets, code, dependencies, release behavior, and all unrelated roadmap entries remain byte-for-byte unchanged.
@@ -90,9 +90,9 @@ If evidence is unavailable during implementation, no product-file edit occurs, s
 Automatic execution prevents an interactive question round before this proposal. The following product questions and working assumptions should be reviewed before any apply phase:
 
 1. **What is the authoritative public location for each document?** Assumption: roadmap and architecture may use different public URLs, but both must be reachable without authentication.
-2. **Must the public copies match the repository documents exactly?** Assumption: they must clearly expose the corresponding current Drenyra Pi content; cosmetic hosting transformations are acceptable, but placeholders, summaries, or materially stale copies are not.
+2. **Must the public copies match the repository documents exactly?** Assumption: they must clearly expose the corresponding current Drenyra Shell content; cosmetic hosting transformations are acceptable, but placeholders, summaries, or materially stale copies are not.
 3. **What should happen when evidence is partial or temporarily unreachable?** Assumption: fail closed, leave the marker unchecked, and report a no-op rather than retrying indefinitely or inferring publication.
-4. **Does the compound marker require both the main architecture document and every supporting architecture page?** Assumption: the main Drenyra Pi architecture publication is required; supporting pages may strengthen evidence but are not independently required unless the public architecture entry point claims to publish them.
+4. **Does the compound marker require both the main architecture document and every supporting architecture page?** Assumption: the main Drenyra Shell architecture publication is required; supporting pages may strengthen evidence but are not independently required unless the public architecture entry point claims to publish them.
 
 These assumptions preserve the smallest useful slice: evidence-backed reconciliation of one marker, with publication work and all adjacent documentation changes deferred.
 

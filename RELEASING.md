@@ -1,4 +1,4 @@
-# Releasing — Drenyra Pi
+# Releasing — Drenyra Shell
 
 > **Last updated:** 2026-08-15.
 >
@@ -6,7 +6,9 @@
 
 ## Current state: public repository, verification-only release gate
 
-Drenyra Pi is currently a **public repository** (`arkelythex/drenyra-pi`, source-available under a proprietary license — see [LICENSE](LICENSE)). Publication of the npm **package** stays off until an explicit, recorded decision flips the package to a publishing state (see below); the release process is **verification only**:
+Drenyra Shell is currently a **public repository** (`arkelythex/drenyra-shell`, source-available under a proprietary license — see [LICENSE](LICENSE)). Publication of the npm **package** stays off until an explicit, recorded decision flips the package to a publishing state (see below); the release process is **verification only**:
+
+> **Note:** the GitHub repository was renamed from `arkelythex/drenyra-pi` to `arkelythex/drenyra-shell` on 2026-09-21 (`gh repo rename`). The old `arkelythex/drenyra-pi` path still resolves via GitHub's automatic redirect.
 
 - **No publication happens anywhere in automation**: no npm registry publication, no dist-tag mutations, no GitHub releases, no tag pushes.
 - The release gate is `.github/workflows/release-verify.yml`, a manually dispatched workflow whose single input is the exact annotated `v<semver>` tag. It must be dispatched from the protected default `main` branch.
@@ -51,7 +53,7 @@ Every release must pass, in order:
    - `node scripts/verify-packed-install.mjs` — pack → install → postinstall → runtime verified;
    - `bun run verify:capability` — capability-manifest and projection-surface conformance.
 4. **Package build + pack verification** — build and verify the packed artifact contains exactly the intended files.
-5. **Packed-install test** — install the packed tarball in a clean Pi, run `drenyra-pi` install + doctor, and verify the pinned Drenyra AI runtime installs, verifies, and answers a smoke command.
+5. **Packed-install test** — install the packed tarball in a clean Pi, run `drenyra-shell` install + doctor, and verify the pinned Drenyra AI runtime installs, verifies, and answers a smoke command.
 6. **Release gate** — the `release-verify` workflow (verification only) passes against the exact annotated tag on protected `main`, with remote authority rechecked after verification (see "Current state" above).
 
 ## Runtime pin bump procedure (reference)

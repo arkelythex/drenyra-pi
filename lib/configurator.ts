@@ -4,16 +4,26 @@
 // This module is the Pi boundary over the Core configurator library; it holds
 // no money logic and no fiscal authority.
 //
-// drenyra-pi configurator host integration (SDD-020 slice 2).
+// drenyra-shell configurator host integration (SDD-020 slice 2).
 //
 // Pi consumes the Core configurator library (`drenyra-ai/configurator`,
 // public since drenyra-ai@0.4.1) — no deterministic composition logic is
 // duplicated here (REQ-BOUND-001). This module owns only the Pi boundary:
-// the drenyra-pi host identity, the typed fail-closed outcomes, and the
-// fresh-home bootstrap that composes Core primitives (the Core's own
-// `cmd/install` bootstrap flow is deliberately not part of the public
-// configurator subpath, so the same primitive composition is wired here,
-// scoped to the drenyra-pi host only).
+// the host identity, the typed fail-closed outcomes, and the fresh-home
+// bootstrap that composes Core primitives (the Core's own `cmd/install`
+// bootstrap flow is deliberately not part of the public configurator
+// subpath, so the same primitive composition is wired here).
+//
+// NOTE (drenyra-shell rename): the managed-host identity registered with the
+// pinned Core stays the literal string "drenyra-pi" — the pinned
+// drenyra-ai@0.4.1 kernel's `HostName` union (drenyra-ai/dist/configurator/
+// managed-config.d.ts) is a frozen closed set that does not include
+// "drenyra-shell", and `HOST_DIR_MAP` there has no entry for it either
+// (`reDeriveHostConfigDir` would throw at runtime — `path.join` rejects the
+// resulting `undefined`). Renaming this host id requires a drenyra-ai release
+// that adds "drenyra-shell" to `HostName`/`HOST_DIR_MAP`; until then this is
+// tracked as a follow-up, not silently done here (AGENTS.md rule 1: Pi never
+// reimplements the pinned kernel's contracts).
 //
 // Scope boundary: the configurator manages harness-level agent-host
 // composition under `<home>/.drenyra`. It has no fiscal authority — no
@@ -112,7 +122,10 @@ export type ConfiguratorTransitionOutcome =
   | ConfiguratorTransitionFailed;
 
 /**
- * The drenyra-pi host config directory: `<home>/.drenyra` (Core HOST_DIR_MAP).
+ * The drenyra-shell host config directory: `<home>/.drenyra` (Core
+ * HOST_DIR_MAP). Host id stays "drenyra-pi" — see the NOTE at the top of this
+ * file; the pinned drenyra-ai@0.4.1 kernel's `HostName` type does not yet
+ * recognize "drenyra-shell".
  */
 export function drenyraPiHostConfigDir(homeDir: string): string {
   return reDeriveHostConfigDir(homeDir, "drenyra-pi");
@@ -144,7 +157,7 @@ export function runConfiguratorDoctor(
 }
 
 /**
- * Install the drenyra-pi managed composition + pin asset under
+ * Install the drenyra-shell managed composition + pin asset under
  * `<home>/.drenyra`. Idempotent: a current-schema home at the packaged
  * version reports `unchanged` with zero writes.
  */
@@ -156,7 +169,7 @@ export function runConfiguratorInstall(
 }
 
 /**
- * Synchronize the drenyra-pi managed composition with the packaged version.
+ * Synchronize the drenyra-shell managed composition with the packaged version.
  * Shares the install transition engine (per SDD-020): absent state
  * bootstraps, current state reports `unchanged` with zero writes.
  */
@@ -187,7 +200,7 @@ function runManagedTransition(
       });
     }
     if (state.state === "absent") {
-      return bootstrapDrenyraPiComposition(homeDir, packagedVersion);
+      return bootstrapDrenyraShellComposition(homeDir, packagedVersion);
     }
     const plan = planUpgrade(homeDir, packagedVersion, packagedVersion);
     const status: ConfiguratorTransitionStatus =
@@ -212,13 +225,14 @@ function runManagedTransition(
 
 /**
  * Fresh-home bootstrap, mirroring the Core's `cmd/install` flow but scoped to
- * the drenyra-pi host (the host config dir IS the managed dir). All asset
+ * the "drenyra-pi" host id (the host config dir IS the managed dir — see the
+ * file-level NOTE on why this id is not yet "drenyra-shell"). All asset
  * rendering, hashing, pin bytes, paths, and the manifest schema come from the
  * Core; only the wiring lives here (REQ-BOUND-001). Managed files are created
  * only when absent — foreign bytes are preserved, never overwritten. The
  * manifest is written last (the composition authority never publishes alone).
  */
-function bootstrapDrenyraPiComposition(
+function bootstrapDrenyraShellComposition(
   homeDir: string,
   packagedVersion: string,
 ): ConfiguratorTransitionOutcome {

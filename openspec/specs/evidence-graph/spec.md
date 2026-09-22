@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines Drenyra Pi's frozen v0.1 evidence-record boundary: the `schemaVersion: 1` provenance graph model `source → transformation → conclusion → action`, payload-hash integrity, citation rules, and append-only behavior within one mission. These are Pi-local persisted records consumed by the harness; external Dominion/Drenyra AI evidence hashing and authority semantics remain external contracts and are not redefined here.
+Defines Drenyra Shell's frozen v0.1 evidence-record boundary: the `schemaVersion: 1` provenance graph model `source → transformation → conclusion → action`, payload-hash integrity, citation rules, and append-only behavior within one mission. These are Shell-local persisted records consumed by the harness; external Dominion/Drenyra AI evidence hashing and authority semantics remain external contracts and are not redefined here.
 
 ## Compatibility boundary
 
@@ -32,7 +32,7 @@ The system MUST treat the graph as append-only within a mission: nodes and edges
 
 ### Requirement: REQ-EVID-006 — Receipt-bound evidence hash
 
-The system MUST consume the pinned engine's public id-sorted `computeEvidenceHash` behavior so the same evidence set yields the same hash regardless of insertion order. Pi MUST NOT copy or redefine that engine algorithm as a local contract.
+The system MUST consume the pinned engine's public id-sorted `computeEvidenceHash` behavior so the same evidence set yields the same hash regardless of insertion order. Shell MUST NOT copy or redefine that engine algorithm as a local contract.
 
 ### Requirement: REQ-EVID-007 — Action traceability
 
@@ -76,4 +76,4 @@ The system MUST validate graph integrity by recomputing node payload hashes and 
 
 ## Out of Scope
 
-External engine evidence contracts or authority decisions, cross-mission graph traversal, and multi-tenant graph stores; v0.1 Pi graphs are per-mission only.
+External engine evidence contracts or authority decisions, cross-mission graph traversal, and multi-tenant graph stores; v0.1 Shell graphs are per-mission only.

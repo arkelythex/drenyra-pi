@@ -1,4 +1,4 @@
-# Design: Add the Drenyra Pi Routing Adapter
+# Design: Add the Drenyra Shell Routing Adapter
 
 > Change: `pi-sdd-030-routing-adapter`  
 > Runtime baseline: published, pinned `drenyra-ai@0.3.0`  

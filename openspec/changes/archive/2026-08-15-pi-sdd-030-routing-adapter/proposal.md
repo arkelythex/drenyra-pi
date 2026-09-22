@@ -1,7 +1,7 @@
-# Change: Add Deterministic Work Routing to Drenyra Pi
+# Change: Add Deterministic Work Routing to Drenyra Shell
 
 > Change: `pi-sdd-030-routing-adapter`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Status: proposed (real SDD pipeline: `proposal → specs → design → tasks → apply → verify → archive`)
 > Artifact store: OpenSpec
 > Date: 2026-08-15
@@ -10,7 +10,7 @@
 
 ## 0. Decision
 
-Drenyra Pi will add the host-side routing adapter for Organic Accounting Work Routing. The adapter will consume the published `drenyra-ai/routing` contracts, perform a deterministic seven-step preflight, propose one of three execution routes, execute authorized work through Pi's existing chain and mission machinery, enforce bounded attempts and cost, and return a structured `WorkResult`.
+Drenyra Shell will add the host-side routing adapter for Organic Accounting Work Routing. The adapter will consume the published `drenyra-ai/routing` contracts, perform a deterministic seven-step preflight, propose one of three execution routes, execute authorized work through Pi's existing chain and mission machinery, enforce bounded attempts and cost, and return a structured `WorkResult`.
 
 The authority boundary is fixed: Pi proposes routes and executes authorized work; Drenyra AI Core determines transitions and fiscal authority. Pi must inject the canonical transition validator into the published routing helpers and must not reproduce the transition matrix, materiality derivation, risk authority, approvals, or gates.
 

@@ -1,6 +1,6 @@
 # Tasks — Evidence-Driven Accounting Harness
 
-> Change: `evidence-driven-accounting-harness` · Repo: `drenyra-pi` · Status: tasks drafted
+> Change: `evidence-driven-accounting-harness` · Repo: `drenyra-shell` · Status: tasks drafted
 > Store: HYBRID — this file is authoritative; Engram is best-effort
 > Runtime baseline: pinned `drenyra-ai@0.2.0` (15 `AccountingMissionStatus` members — design §1, verified against `node_modules/drenyra-ai@0.2.0` d.ts)
 > Delivery: **9 chained PRs**, strategy `ask-on-risk`, strict TDD (`bun test`), every PR ends green

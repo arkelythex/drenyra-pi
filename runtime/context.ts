@@ -1,5 +1,5 @@
 /**
- * Company + fiscal period context — the scope every Drenyra Pi command runs in.
+ * Company + fiscal period context — the scope every Drenyra Shell command runs in.
  *
  * The startup panel and every /drenyra:* command thread this context:
  * company (RUC, check-digit-validated) and fiscal period (YYYYMM). A command

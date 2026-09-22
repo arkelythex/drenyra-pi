@@ -10,7 +10,7 @@ import { join } from "node:path";
  * Package-local runtime resolution.
  *
  * Package-local rule (contracts/runtime-dependency.md):
- *   The runtime lives inside Drenyra Pi's own package tree — never an ambient
+ *   The runtime lives inside Drenyra Shell's own package tree — never an ambient
  *   binary. Resolution consults ONLY:
  *
  *     1. <packageRoot>/runtime/<packageName>       (installed runtime override)

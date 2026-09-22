@@ -14,13 +14,13 @@ The proposal's new capability row conflicts with the design/specification's exte
 
 Read-only inspection of the installed pinned runtime found ID-based `SkillRegistry.resolveAt`, handler-based `IntentRegistry`, and caller-supplied `MonthlyCloseInput.igvSkill`; none supplies authoritative mission-to-skill requirements. This is a proposed upstream dependency, not approval to change the pin or frozen contracts.
 
-The user explicitly selected `explicit_task_asof`: every task declares a visible, verifiable fiscal `asOf` date. Missing `asOf` must not default to the current system day, a transaction date, or a fiscal-period rule. Required versus optional skill requirements must be explicit in the upstream descriptor, never inferred from an empty result. No optional-skill policy or task mapping is authorized for Pi to invent.
+The user explicitly selected `explicit_task_asof`: every task declares a visible, verifiable fiscal `asOf` date. Missing `asOf` must not default to the current system day, a transaction date, or a fiscal-period rule. Required versus optional skill requirements must be explicit in the upstream descriptor, never inferred from an empty result. No optional-skill policy or task mapping is authorized for Shell to invent.
 
 ## Scope decision (answered)
 
 Choose one scope before further phase execution:
 
-1. `functional_selection_contract_first`: define the missing task-to-skill/provenance contract and observable missing-skill behavior before production wiring; keep master-owned selection decisions in the kernel/program, not Pi-local mappings. Recommended to meet the original functional goal.
+1. `functional_selection_contract_first`: define the missing task-to-skill/provenance contract and observable missing-skill behavior before production wiring; keep master-owned selection decisions in the kernel/program, not Shell-local mappings. Recommended to meet the original functional goal.
 2. `adapter_only_explicit`: deliberately build only the technical adapter; record that current mission-based calls resolve no skill and that neither task-based selection nor memory integration is complete.
 3. `defer_skills_advance_journey`: leave this change pending and investigate the monthly-close journey next without claiming skills/memory readiness.
 

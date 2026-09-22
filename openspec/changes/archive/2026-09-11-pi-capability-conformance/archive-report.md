@@ -1,8 +1,8 @@
-# Archive Report — Pi Capability Conformance
+# Archive Report — Shell Capability Conformance
 
 **Change**: `pi-capability-conformance` (local SDD 1 of 6)
 **Change root**: `openspec/changes/pi-capability-conformance/`
-**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Artifact store**: `openspec` (file-backed, authoritative; `openspec/config.yaml` also declares `store_mode: hybrid`)
 **Archive date**: `2026-09-11` (local, UTC-05:00)
 **Archive status**: **ARCHIVED** — the block recorded below was resolved by a maintainer-authorized measurement that proved the verification survives the forced identity advance; see §1b.
@@ -315,7 +315,7 @@ No bounded review, refutation, correction, or validation actor ran and **no rece
 ## 9. Reproduce this archive attempt
 
 ```text
-cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
 git rev-parse HEAD                                     # 4d64f383758f3c9d5e5b7d7ad558908be15f2e42
 node scripts/compute-candidate-identity.mjs             # dirty-sha256:134dae52… (unchanged)
 node scripts/refresh-program-lock-facts.mjs --check     # program lock facts are current

@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Defines Pi's consumption of the pinned Core's `drenyra-ai/skills`
+Defines Shell's consumption of the pinned Core's `drenyra-ai/skills`
 `SkillRegistry.resolveAt()` at the routing-preflight call site, so
 `WorkUnitInput.skills` reflects real, validity- and jurisdiction-scoped
-skill resolution instead of a permanently hardcoded empty array. Pi remains
+skill resolution instead of a permanently hardcoded empty array. Shell remains
 a thin consumer: it never forks, reimplements, or locally re-derives skill
 selection logic that the Core already owns.
 
 **Production-reality disclosure**: no `MissionIntent -> skill id` mapping
-exists in Pi today; none of the five `MissionIntent` values match any
+exists in Shell today; none of the five `MissionIntent` values match any
 `BASE_PE_SKILLS` id. A production call built from a real
 `MissionIntent`-derived `taskId` therefore typically raises
 `SKILL_NOT_FOUND` and resolves an empty `WorkUnitInput.skills`. This wiring
@@ -85,12 +85,12 @@ if it were still current, or silently serve a skill across jurisdictions.
 ### Requirement: REQ-SKILLS-004 — No fork, copy, or re-embed of Core skill content
 
 The system MUST NOT fork, copy, or re-embed `BASE_PE_SKILLS` or any other
-Core skill content or checksums into Pi. Skill resolution MUST always call
+Core skill content or checksums into Shell. Skill resolution MUST always call
 the Core `drenyra-ai/skills` module directly.
 
-#### Scenario: SC-SKILLS-005 — No local skill content exists in Pi
+#### Scenario: SC-SKILLS-005 — No local skill content exists in Shell
 
-- GIVEN the Pi codebase after this change
+- GIVEN the Shell codebase after this change
 - WHEN it is inspected for skill content or checksums
 - THEN no `BASE_PE_SKILLS` (or equivalent) content is forked, copied, or
   re-embedded, and every resolution path calls the Core module directly

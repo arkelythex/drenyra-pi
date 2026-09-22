@@ -66,7 +66,7 @@ found in the seven surfaces or by repository-wide search. `unknown` is not a saf
 | B1 | `docs/architecture/harness-draft-conformance.md` — the historical "SDD-050 — Drenyra Pi" draft conformance record | its own historical-snapshot disclaimer header; README, "Drenyra Dominion Program" section (inline link) | the README link is the only inbound link found in the seven surfaces; the document links out to the matrix | retained |
 | B2 | Archived OpenSpec changes `2026-08-15-pi-sdd-010-participation`, `2026-08-15-pi-sdd-030-routing-adapter`, `2026-08-15-pi-sdd-040-adapter-boundary` | `harness-draft-conformance.md` §1 numbering reconciliation and §4 deviations table; `capability-manifest.yaml#derivedFrom` | those citations; all three directories exist under `openspec/changes/archive/` and hold the delivered evidence for the harness record | retained |
 | B3 | `openspec/changes/archive/2026-09-09-pi-accounting-orchestration/verify-report.md` | `program-lock-facts.json#snapshotRecord.evidenceSource`; matrix "Generated lock-fact test evidence" row | the lock-facts `snapshotRecord.evidenceSource` label; the matrix row that cites it as the source of the 48/738 record | retained |
-| B4 | `capability-manifest.yaml` provenance fields `generatedAt: 2026-08-14T00:00:00Z` and `derivedFrom` (`arkelythex/drenyra-ai@4975f4f capability-matrix.yaml Pi row (read-only)`, `package.json version (drenyra-pi)`, `design §5.2 state table (pi-sdd-010-participation)`) | `capability-manifest.yaml` | **unknown** — repository-wide search found no script or test that reads `generatedAt` or `derivedFrom`; the `design §5.2 state table` entry additionally cross-references B2 | retained |
+| B4 | `capability-manifest.yaml` provenance fields `generatedAt: 2026-08-14T00:00:00Z` and `derivedFrom` (`arkelythex/drenyra-ai@4975f4f capability-matrix.yaml Pi row (read-only)`, `package.json version (drenyra-shell)`, `design §5.2 state table (pi-sdd-010-participation)`) | `capability-manifest.yaml` | **unknown** — repository-wide search found no script or test that reads `generatedAt` or `derivedFrom`; the `design §5.2 state table` entry additionally cross-references B2 | retained |
 
 ### C. Legacy helpers and compatibility paths
 
@@ -122,6 +122,6 @@ evidence, not the reason this one may delete.
 
 ## Authority boundary
 
-This record is additive conformance evidence. It creates no new authority, grants Pi no fiscal
-authority, promotes no capability's verification level, and authorizes no removal. Pi operates and
+This record is additive conformance evidence. It creates no new authority, grants Shell no fiscal
+authority, promotes no capability's verification level, and authorizes no removal. Shell operates and
 never authorizes; fiscal authority remains in the pinned `drenyra-ai` kernel.

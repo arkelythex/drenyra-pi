@@ -1,21 +1,21 @@
-# Ecosystem Boundaries — Drenyra Pi (Pi-native Accounting Operations Harness)
+# Ecosystem Boundaries — Drenyra Shell (Shell-native Accounting Operations Harness)
 
-> **Last updated:** 2026-08-18 (Pi-local contract-family freeze and boundary reconciliation).
+> **Last updated:** 2026-08-18 (Shell-local contract-family freeze and boundary reconciliation).
 >
 > Fiscal convention: monetary values in the Drenyra ecosystem are BigInt cents; no float is ever used for money; version/sequence numbers are JSON integers, never floats.
 
 ## Role in the ecosystem
 
-Drenyra Pi is the **Pi-native Accounting Operations Harness**: a Pi extension that packages the operator experience for Drenyra AI. It is the direct accounting-domain counterpart of `gentle-pi`.
+Drenyra Shell is the **Shell-native Accounting Operations Harness**: a Shell extension that packages the operator experience for Drenyra AI. It is the direct accounting-domain counterpart of `gentle-shell`.
 
-Drenyra Pi does **not** contain the accounting engine. It **installs and consumes a pinned, verified, package-local version of Drenyra AI** — never whatever binary happens to be on `PATH`.
+Drenyra Shell does **not** contain the accounting engine. It **installs and consumes a pinned, verified, package-local version of Drenyra AI** — never whatever binary happens to be on `PATH`.
 
-## What Drenyra Pi is (in scope)
+## What Drenyra Shell is (in scope)
 
 - Accounting operator persona: warm, direct, fiscal-first behavior.
 - Startup panel: company and fiscal period context on session start.
 - `/drenyra:*` commands: doctor, scope, status, capabilities, company, period, mission, receipt, evidence, verify, reconcile, close.
-- Pi-native subagents: exploration, apply, verify, review.
+- Shell-native subagents: exploration, apply, verify, review.
 - Model routing: per-phase model selection for fiscal work.
 - Packaged skills and RDA (Receipt-Driven Accounting) command chains.
 - Tool safety: broad-deny, narrow-allow permissions for fiscal actions.
@@ -24,13 +24,13 @@ Drenyra Pi does **not** contain the accounting engine. It **installs and consume
 
 ## Explicit non-goals
 
-Drenyra Pi is **not**:
+Drenyra Shell is **not**:
 
 - The accounting engine — that is `arkelythex/drenyra-command-center` (product) and `arkelythex/drenyra-ai` (runtime).
 - An agent runtime — missions, candidates, receipts, gates, and ledger belong to `drenyra-ai`.
 - A memory engine — observations and scope-first search belong to `drenyra-engram`.
 
-## What Drenyra Pi must NOT contain long-term
+## What Drenyra Shell must NOT contain long-term
 
 - **Fiscal logic in command handlers.** Commands are thin: validate scope, delegate to Drenyra AI domain operations, render results.
 - **A second copy of the runtime.** The engine is installed and pinned, never vendored or re-implemented.
@@ -40,7 +40,7 @@ Drenyra Pi is **not**:
 
 National alignment is positioning and roadmap direction, and it stays inside the ecosystem boundaries:
 
-- Drenyra Pi does **not** currently implement a full data catalog, a retention engine, an official digital signature, PIDE access, or a public-sector institutional edition.
+- Drenyra Shell does **not** currently implement a full data catalog, a retention engine, an official digital signature, PIDE access, or a public-sector institutional edition.
 - The evidence-adapter line ("Adaptadores: gather evidence from ERP, banks, SUNAT and files") is the interoperable-adapter differentiator. Any State-entity exchange — for example [PIDE](https://guias.servicios.gob.pe/creacion-servicios-digitales/reutilizables/interoperabilidad), used by more than 450 public entities — requires applicable authorization, purpose, and agreements, never automatic access.
 - [ENGD 2026–2030](https://www.gob.pe/99097-estrategia-nacional-de-gobierno-de-datos-2026-2030) (approved by [RM N.° 049-2026-PCM](https://www.gob.pe/institucion/pcm/normas-legales/7739698-049-2026-pcm), derived from the Política Nacional de Transformación Digital 2030) frames the governed-data direction; [ENIA 2026–2030](https://busquedas.elperuano.pe/dispositivo/NL/2511535-1) (RM N.° 152-2026-PCM) public-sector governance (OIA, Catálogo IA Perú) is context, not a private-sector legal classification.
 - Internal Ed25519 integrity receipts are distinct from Peruvian legally-valid digital signatures; no receipt confers legal signature status.
@@ -51,7 +51,7 @@ National alignment is positioning and roadmap direction, and it stays inside the
 flowchart TD
     P["Profesional contable"] --> D["Drenyra Command Center"]
     D --> AI["Drenyra-AI Core"]
-    PI["Drenyra Pi"] --> AI
+    PI["Drenyra Shell"] --> AI
     ERP["ERP · bancos · SUNAT"] --> AD["Adaptadores de evidencia"]
     AD --> AI
     EN["Drenyra Engram"] --> AI
@@ -65,7 +65,7 @@ flowchart TD
 | --- | --- | --- |
 | **Drenyra** | Interface, inboxes, visualization, review and approval | Re-implement gates or mutate authoritative states directly |
 | **Drenyra-AI** | Missions, candidates, materiality, authority, gates, receipts, ledger and recovery | Depend on the UI or trust agent narratives |
-| **Drenyra Pi** | Harness optimized to run specialized agents | Resolve versions from PATH or bypass the Core |
+| **Drenyra Shell** | Harness optimized to run specialized agents | Resolve versions from PATH or bypass the Core |
 | **Drenyra Engram** | Institutional memory and context retrieval | Authorize actions or treat memories as evidence |
 | **Drenyra Skills** | Versioned accounting, fiscal and jurisdictional knowledge | Silently change frozen policies |
 | **Adaptadores** | Gather evidence from ERP, banks, SUNAT and files | Claim success without a verifiable response |
@@ -85,20 +85,20 @@ flowchart TD
 
 ### Dependency rule
 
-- Drenyra and Drenyra Pi consume **published versions** of Drenyra-AI. Drenyra-AI never depends on them.
+- Drenyra and Drenyra Shell consume **published versions** of Drenyra-AI. Drenyra-AI never depends on them.
 - The UI may go down and rebuild from Core state; a transcript may be lost and the mission recovered from events and evidence.
 - **No consumer may convert a Core rejection into an approval.**
 
-### Pi-local schema boundary
+### Shell-local schema boundary
 
-The frozen v0.1 families under `contracts/evidence/`, `contracts/authority/`, `contracts/receipts/`, and `contracts/mission/` are Pi-owned conformance adapters. They validate documents Pi consumes, persists, or projects; they are not published Dominion/Drenyra-AI engine contracts.
+The frozen v0.1 families under `contracts/evidence/`, `contracts/authority/`, `contracts/receipts/`, and `contracts/mission/` are Shell-owned conformance adapters. They validate documents Shell consumes, persists, or projects; they are not published Dominion/Drenyra-AI engine contracts.
 
-- **Evidence:** Pi owns its `schemaVersion: 1` graph record envelope; the pinned engine remains authoritative for evidence hashing used by receipts and authority decisions.
-- **Authority:** Pi validates local scope and authorization records; the Core owns gates and authorization semantics.
-- **Receipts:** Pi owns `drenyra.receipt-binding.v1` and its trusted-key registry storage; the Core owns SignedReceipt production, cryptography, and protocol semantics.
-- **Missions:** Pi validates and projects public mission documents; the Core owns lifecycle transitions.
+- **Evidence:** Shell owns its `schemaVersion: 1` graph record envelope; the pinned engine remains authoritative for evidence hashing used by receipts and authority decisions.
+- **Authority:** Shell validates local scope and authorization records; the Core owns gates and authorization semantics.
+- **Receipts:** Shell owns `drenyra.receipt-binding.v1` and its trusted-key registry storage; the Core owns SignedReceipt production, cryptography, and protocol semantics.
+- **Missions:** Shell validates and projects public mission documents; the Core owns lifecycle transitions.
 
-Every shipped schema byte is checksum-covered. An incompatible external document is rejected until a reviewed Pi adapter version and migration are available; Pi never silently widens v0.1 or copies a private engine definition.
+Every shipped schema byte is checksum-covered. An incompatible external document is rejected until a reviewed Shell adapter version and migration are available; Shell never silently widens v0.1 or copies a private engine definition.
 
 ## Agent orchestration contract (Design 3 — approved in `drenyra-ai`)
 
@@ -137,7 +137,7 @@ accompany the explanation but never replaces structured values, references,
 hashes, or states. The seven ecosystem roles (Close Coordinator, Evidence
 Agent, Invoice/SIRE Agent, Reconciliation Agent, Journal Candidate Agent,
 Compliance Agent, Guardian Angel — which produces findings, never approval)
-map to Pi subagents in `agents/README.md`.
+map to Shell subagents in `agents/README.md`.
 
 ### Skills are layered and versioned
 
@@ -155,7 +155,7 @@ skill and policy version was used.
 ### Integrations and CLI
 
 v1.0 integrations in order: Drenyra SDK/API (Command Center primary surface),
-Drenyra Pi (its own harness with an exact Drenyra AI version), MCP server
+Drenyra Shell (its own harness with an exact Drenyra AI version), MCP server
 (uniform access for external hosts), Codex/Claude Code/OpenCode (first agent
 adapters), and ERP/SUNAT/banks connectors (evidence and confirmed execution).
 Drenyra AI **detects and configures existing hosts** — following Gentle-AI's
@@ -168,7 +168,7 @@ Models are selected by capability, cost, and risk; a mission may use
 different models per specialty; prompts and models are recorded as
 provenance; changing models never alters contracts or authority; no
 confidence score reduces a required approval; results are validated against
-schemas before entering the Core. Model routing in Pi is advisory
+schemas before entering the Core. Model routing in Shell is advisory
 (`prompts/models.md`) and never grants authority.
 
 ## Persistence, security, and recovery contract (Design 4 — approved in `drenyra-ai`)
@@ -244,8 +244,8 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
 | --------- | ----- | -------- |
 | Consumes | `drenyra-ai` | pinned, verified, package-local runtime (never `PATH`) |
 | Consumes (read-only) | `drenyra-engram` | pinned, verified, package-local binary; `/drenyra:context` reads institutional context for an already-known scope only; memory never authorizes |
-| Produces for | Pi users | the disciplined accounting operator experience |
-| Provides | `drenyra-pi` package | installable via `pi install npm:drenyra-pi` |
+| Produces for | Shell users | the disciplined accounting operator experience |
+| Provides | `drenyra-shell` package | installable via `pi install npm:drenyra-shell` |
 
 ## Current state and maturity
 
@@ -268,12 +268,14 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
   Drenyra Pi" maps to this implemented harness. Its 44-file / 703-test run was
   observed on 2026-08-18 and remains historical rather than being relabeled;
   see [`harness-draft-conformance.md`](harness-draft-conformance.md).
-- **Frozen Pi-local contracts:** `package-contract` and `runtime-dependency`
-  remain frozen at v0.1. The implemented evidence, authority, receipt, and
-  mission schema families are also frozen at Pi-local v0.1 as consumption and
+- **Frozen Shell-local contracts:** `package-contract` and `runtime-dependency`
+  are frozen at v0.2 (naming-only bump for the Drenyra Shell rename, no
+  schema/field changes — see each contract's migration notes). The implemented
+  evidence, authority, receipt, and
+  mission schema families are also frozen at Shell-local v0.1 as consumption and
   adaptation boundaries; their existing schema bytes did not require a version
   bump or migration. Release cadence remains pre-release, with the produced contracts frozen at v0.1
-  (`drenyra-pi@0.1.0`).
+  (`drenyra-shell@0.1.0`).
 - Future slices continue to land as vertical PRs on released, pinned versions of
   `drenyra-ai` — never a checkout.
 
@@ -285,5 +287,5 @@ gate, cross a tenant, forge an approval, or rewrite the ledger.**
 
 ## Boundary enforcement
 
-- Direction violations are caught in review: a PR that defines fiscal logic or duplicates runtime contracts in Drenyra Pi is rejected and redirected.
+- Direction violations are caught in review: a PR that defines fiscal logic or duplicates runtime contracts in Drenyra Shell is rejected and redirected.
 - Runtime pinning is part of the package contract (`contracts/runtime-dependency.md`); changing a pin is a release with a migration note.

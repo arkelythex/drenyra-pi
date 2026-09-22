@@ -2,7 +2,7 @@
 
 **Change:** `pi-engram-memory-reads` (candidate; second follow-on to `pi-engram-integration`)
 **Phase:** explore — read-only against the repository and local Pi-host packages (not modified)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Topic:** the remaining half of `ROADMAP.md`'s Slice 5 — "memory reads" (proposal-informing), explicitly deferred by `pi-engram-integration`'s design.md §6.
 
 ---

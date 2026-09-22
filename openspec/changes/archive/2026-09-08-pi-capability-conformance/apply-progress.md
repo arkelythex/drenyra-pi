@@ -7,7 +7,7 @@
 - Structured status consumed: `gentle-ai.sdd-status` v2; change
   `pi-capability-conformance`; authoritative OpenSpec store; `apply` ready.
 - Action context: `repo-local`; workspace and sole allowed edit root were
-  `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; no warnings.
+  `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; no warnings.
 - Delivery: `auto-chain`, `stacked-to-main`; three ordered, uncommitted review
   slices. No branch, commit, PR, publication, receipt, or lifecycle settlement.
 - Native acquire context was parent-owned. Apply did not acquire, settle, reset,

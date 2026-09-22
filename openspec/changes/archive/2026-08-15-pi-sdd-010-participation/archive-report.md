@@ -1,7 +1,7 @@
 # ARCHIVE REPORT — pi-sdd-010-participation
 
-**Change**: `pi-sdd-010-participation` — Pi's bounded participation slice in the program master's active **SDD-010 (Ecosystem Contracts and Release Train, Wave 0)**
-**Repo**: `drenyra-pi` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
+**Change**: `pi-sdd-010-participation` — Shell's bounded participation slice in the program master's active **SDD-010 (Ecosystem Contracts and Release Train, Wave 0)**
+**Repo**: `drenyra-shell` (Bun + TS ESM, vitest, Shell extension package, pinned `drenyra-ai@0.2.0` vendored)
 **Archived at**: `openspec/changes/archive/2026-08-14-pi-sdd-010-participation/`
 **Archive date**: 2026-08-14
 **Artifact store**: HYBRID (openspec/ files authoritative; engram best-effort)
@@ -12,9 +12,9 @@
 
 ## 1. Executive summary
 
-The `pi-sdd-010-participation` change delivered Drenyra Pi's bounded, verification-only
+The `pi-sdd-010-participation` change delivered Drenyra Shell's bounded, verification-only
 participation slice in the program master's active SDD-010 (Ecosystem Contracts and
-Release Train). It restored the known red local baseline, froze Pi's two remaining draft
+Release Train). It restored the known red local baseline, froze Shell's two remaining draft
 contracts at v0.1, added proportional machine-readable conformance, and recorded verified
 final-candidate facts as participant-checkpoint inputs for the master's next integrated
 checkpoint. It preserved the verification-only release posture and implemented nothing
@@ -83,17 +83,17 @@ All 25 SC-* scenarios covered by re-executed evidence. CRITICAL: 0 · WARNING: 1
 ## 7. Gated-SDD status (reference only)
 
 SDD-020/030/040 **remain gated** by the master's **Gate 0 (R10)** and are not implemented
-by or in this change. This change delivers only the Pi-local participation slice that Pi
+by or in this change. This change delivers only the Shell-local participation slice that Shell
 can own while master Gate 0 is pending. The master owns the gate decision, the federated
-capability matrix, the program lock, and the cross-repository release train. No Pi-local
+capability matrix, the program lock, and the cross-repository release train. No Shell-local
 implementation of any gated SDD proceeds until the master promotes readiness. This
 archive does not alter, close, or advance that gating.
 
 ## 8. Program alignment
 
 - **SDD-010 is active in Wave 0** at the program master (`arkelythex/drenyra-ai@4975f4f`).
-- `pi-sdd-010-participation` is the **Pi participation slice** of SDD-010, delivered as a real Pi-local SDD change through the full `proposal → specs → design → tasks → apply → verify → archive` pipeline.
-- The master remains authoritative; Pi references but does not duplicate program-master SDD artifacts.
+- `pi-sdd-010-participation` is the **Shell participation slice** of SDD-010, delivered as a real Shell-local SDD change through the full `proposal → specs → design → tasks → apply → verify → archive` pipeline.
+- The master remains authoritative; Shell references but does not duplicate program-master SDD artifacts.
 - **Master checkpoint handoff note:** `docs/architecture/program-lock-facts.json` and `capability-manifest.yaml` are **Pi-owned inputs** (non-authoritative for program promotion) for the master's next integrated checkpoint. They carry `participantCheckpoint: true` / "Pi-local input; does not modify or promote the program master".
 
 ## 9. Rollback notes
@@ -113,10 +113,10 @@ archive does not alter, close, or advance that gating.
 ## 11. Result contract
 
 - `status`: `completed` (success — 23/23 PASS, 0 CRITICAL; archive move complete)
-- `executive_summary`: Pi's SDD-010 participation slice is formally closed: 23/23 requirements verified PASS, final candidate identity `f70369f7…`, final suite 37/582/0 all gates green, boundaries REQ-BOUND-001..005 confirmed, size exception recorded, and the change moved to the dated archive as an audit trail with no commit/PR/publish.
+- `executive_summary`: Shell's SDD-010 participation slice is formally closed: 23/23 requirements verified PASS, final candidate identity `f70369f7…`, final suite 37/582/0 all gates green, boundaries REQ-BOUND-001..005 confirmed, size exception recorded, and the change moved to the dated archive as an audit trail with no commit/PR/publish.
 - `artifacts`: this archive-report + the archived change directory at `openspec/changes/archive/2026-08-14-pi-sdd-010-participation/`.
-- `next_recommended`: `complete` — none further for Pi until the master promotes Gate 0 / Wave 1 readiness.
-- `risks`: R1 — the recorded candidate identity `f70369f7…` refers to the pre-archive layout; any post-archive identity recompute will legitimately differ (documented in §9). R2 — lock-facts / capability-manifest are Pi-owned checkpoint inputs; the master's next integrated checkpoint must treat them as participant evidence, not authority. R3 — delivery remains uncommitted by design; the orchestrator owns any future commit.
+- `next_recommended`: `complete` — none further for Shell until the master promotes Gate 0 / Wave 1 readiness.
+- `risks`: R1 — the recorded candidate identity `f70369f7…` refers to the pre-archive layout; any post-archive identity recompute will legitimately differ (documented in §9). R2 — lock-facts / capability-manifest are Shell-owned checkpoint inputs; the master's next integrated checkpoint must treat them as participant evidence, not authority. R3 — delivery remains uncommitted by design; the orchestrator owns any future commit.
   - `skill_resolution`: `paths-injected` (cognitive-doc-design, evidence-citation, scope-discipline loaded before work).
 
 ---
@@ -154,7 +154,7 @@ package, style, and capability verification all green. No commit/PR/publish;
 
     - `next_recommended` (amended): `complete` — the slice is closed; the master's
       next integrated checkpoint consumes the lock-facts + capability manifest as
-      Pi-owned participant inputs once master Gate 0 / Wave 1 readiness is promoted.
+      Shell-owned participant inputs once master Gate 0 / Wave 1 readiness is promoted.
 
 ## 13. Amendment — manifest corruption incident (2026-08-14)
 

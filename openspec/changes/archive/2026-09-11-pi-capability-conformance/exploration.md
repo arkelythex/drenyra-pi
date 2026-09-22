@@ -9,8 +9,8 @@ The repository has a capability manifest and a richer conformance matrix, but th
 ## Repository and authority context
 
 - `openspec/config.yaml` establishes Bun/TypeScript ESM, Vitest, strict TDD, and file-backed OpenSpec artifacts. It is itself stale (`37 files / 582 tests`, dated 2026-08-14) relative to the newer matrix evidence.
-- `AGENTS.md`, `README.md`, `contracts/README.md`, and `docs/architecture/ecosystem-boundaries.md` consistently establish Pi as an operator/adapter: fiscal authority, gates, receipts, and engine semantics remain in the pinned `drenyra-ai`; Pi must not duplicate them.
-- `README.md` and `ROADMAP.md` state that the Dominion master owns the complete SDD catalog and Pi references rather than duplicates it. Local active roles are the SDD-020/030/040 participant surfaces; SDD-050/070/080/090/110 and other master SDDs must remain reference-only.
+- `AGENTS.md`, `README.md`, `contracts/README.md`, and `docs/architecture/ecosystem-boundaries.md` consistently establish Shell as an operator/adapter: fiscal authority, gates, receipts, and engine semantics remain in the pinned `drenyra-ai`; Shell must not duplicate them.
+- `README.md` and `ROADMAP.md` state that the Dominion master owns the complete SDD catalog and Shell references rather than duplicates it. Local active roles are the SDD-020/030/040 participant surfaces; SDD-050/070/080/090/110 and other master SDDs must remain reference-only.
 - `openspec/changes/archive/` contains historical and superseded changes, including prior participation and program-status reconciliation work. Those artifacts are historical evidence, not current implementation authority.
 
 ## Capability evidence audit

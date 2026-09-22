@@ -44,7 +44,7 @@ describe("AuthorityStore", () => {
   let store: AuthorityStore;
 
   beforeEach(() => {
-    root = mkdtempSync(join(tmpdir(), "drenyra-pi-authority-"));
+    root = mkdtempSync(join(tmpdir(), "drenyra-shell-authority-"));
     store = new AuthorityStore(root);
   });
 

@@ -120,7 +120,7 @@ Two chained PRs merged to protected `main`:
 - **PR #70** `feat/capability-conformance-guard` → `sync/accumulated-main` — ten commits by work area, all four required checks green.
 - **PR #69** `sync/accumulated-main` → `main` — absorbed #70, went green, and merged as `70d87ac`.
 
-The delivery also required repairing the release gate itself. The required `package` check failed on **every** branch: the postinstall runs a nested `npm install` with `cwd` inside the installed package, npm reads drenyra-pi's published manifest and walks its devDependency tree, and npm 10.9.x crashes there in Arborist `#loadPeerSet` (`Cannot read properties of null (reading 'edgesOut')`). Reproduced deterministically by pinning npm 10.9.0 locally; fixed with `--legacy-peer-deps` and verified on both npm 10.9.0 and 11.19.0.
+The delivery also required repairing the release gate itself. The required `package` check failed on **every** branch: the postinstall runs a nested `npm install` with `cwd` inside the installed package, npm reads drenyra-shell's published manifest and walks its devDependency tree, and npm 10.9.x crashes there in Arborist `#loadPeerSet` (`Cannot read properties of null (reading 'edgesOut')`). Reproduced deterministically by pinning npm 10.9.0 locally; fixed with `--legacy-peer-deps` and verified on both npm 10.9.0 and 11.19.0.
 
 **This is a unit of SDD 6's own subject matter that arrived early**, so the proposal should account for it as already-delivered rather than re-planning it: release readiness was blocked by a defect the repository's own gate could not name, and the diagnostics fix that made it nameable is now part of the delivery.
 

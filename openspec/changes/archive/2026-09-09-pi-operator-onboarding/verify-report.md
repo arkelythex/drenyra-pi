@@ -25,7 +25,7 @@ The verified behavior is limited to canonical-scope isolation after company/fisc
 ## Status and action context
 
 - Consumed parent latest native status `gentle-ai.sdd-status@2`: change `pi-operator-onboarding`; proposal/specs/design/tasks/apply done; 13/13 tasks; verify ready; archive blocked.
-- `actionContext.mode`: `repo-local`; workspace and sole allowed edit root are `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`.
+- `actionContext.mode`: `repo-local`; workspace and sole allowed edit root are `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`.
 - Verification ownership is proven inside that root. The only verification write is this report.
 - Parent proceed token was treated as coordination context only. No acquire, lifecycle, reset, grant, settlement, sync, archive, commit, delivery, fiscal, install, network, build, pack, or doctor operation was invoked.
 

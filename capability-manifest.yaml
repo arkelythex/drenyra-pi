@@ -1,8 +1,8 @@
 {
   "schemaVersion": "drenyra.capability-manifest.v1",
   "repository": {
-    "name": "drenyra-pi",
-    "package": "drenyra-pi",
+    "name": "drenyra-shell",
+    "package": "drenyra-shell",
     "role": "agentic-runtime",
     "version": "0.1.0"
   },
@@ -191,7 +191,7 @@
         "tests": [
           "__tests__/configurator.test.ts"
         ],
-        "note": "Pi consumes the drenyra-ai@0.4.1 public configurator: doctor reports managed-composition diagnostics incl. pinned-ai-runtime; install/sync render the drenyra-pi managed composition + pin asset under ~/.drenyra."
+        "note": "Pi consumes the drenyra-ai@0.4.1 public configurator: doctor reports managed-composition diagnostics incl. pinned-ai-runtime; install/sync render the drenyra-shell managed composition + pin asset under ~/.drenyra."
       },
       "verificationLevel": "unit-or-contract-tested",
       "ownership": "pi-local",
@@ -226,7 +226,7 @@
   "generatedAt": "2026-08-14T00:00:00Z",
   "derivedFrom": [
     "arkelythex/drenyra-ai@4975f4f capability-matrix.yaml Pi row (read-only)",
-    "package.json version (drenyra-pi)",
+    "package.json version (drenyra-shell)",
     "design §5.2 state table (pi-sdd-010-participation)"
   ],
   "evidenceSnapshot": {

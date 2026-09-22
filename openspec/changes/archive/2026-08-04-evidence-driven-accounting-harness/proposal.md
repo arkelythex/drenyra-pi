@@ -1,14 +1,14 @@
 # Proposal: Evidence-Driven Accounting Harness
 
 > Change: `evidence-driven-accounting-harness`  
-> Product: `drenyra-pi`  
+> Product: `drenyra-shell`  
 > Status: proposed  
 > Artifact store: HYBRID — this file is authoritative; Engram is best-effort  
 > Delivery: full vision planned now, implemented in independently testable slices
 
 ## Executive decision
 
-Build the v0.1 Evidence-Driven Accounting (EDA) product vision in `drenyra-pi`: **turn Pi into an evidence-bound accounting operations harness** over the pinned `drenyra-ai@0.2.0` engine.
+Build the v0.1 Evidence-Driven Accounting (EDA) product vision in `drenyra-shell`: **turn Pi into an evidence-bound accounting operations harness** over the pinned `drenyra-ai@0.2.0` engine.
 
 The harness will control how accounting work is scoped, analyzed, prepared, approved, executed, evidenced, resumed, and audited. It will not become an accounting engine or system of record. The operating doctrine is:
 
@@ -36,7 +36,7 @@ The current package has a strong runtime-verification foundation, a partial comp
 
 ### Opportunity
 
-Create a distinct category of **Agentic Accounting Infrastructure**: a Pi-native cockpit that makes accounting operations controlled, verifiable, resumable, and auditable while preserving Drenyra Core and `drenyra-ai` as the deterministic authority.
+Create a distinct category of **Agentic Accounting Infrastructure**: a Shell-native cockpit that makes accounting operations controlled, verifiable, resumable, and auditable while preserving Drenyra Core and `drenyra-ai` as the deterministic authority.
 
 The product separation is deliberate:
 
@@ -54,9 +54,9 @@ The LLM coordinates intent and explains outcomes. It never determines authoritat
 
 ## 2. Positioning
 
-**Product statement:** Turn Pi into an evidence-bound accounting operations harness.
+**Product statement:** Turn Shell into an evidence-bound accounting operations harness.
 
-`gentle-pi` disciplines how software is built. `drenyra-pi` disciplines how accounting work is performed.
+`gentle-pi` disciplines how software is built. `drenyra-shell` disciplines how accounting work is performed.
 
 | Software delivery discipline | Accounting operations discipline |
 | --- | --- |
@@ -112,7 +112,7 @@ A lower mode never implies a higher mode. A user may inspect a higher-mode resul
 6. Preserve provenance through an evidence graph from source to action.
 7. Issue and locally verify Ed25519 receipts against a trusted-key registry.
 8. Deliver all 14 intended `/drenyra:*` commands, production extension modules, v0.1 chains, seven bounded accounting agents, and real packaged contracts/assets.
-9. Keep Pi commands and extensions thin; deterministic and reusable behavior belongs in `lib/` or the pinned engine.
+9. Keep Shell commands and extensions thin; deterministic and reusable behavior belongs in `lib/` or the pinned engine.
 10. Deliver every slice with strict TDD and an independently reviewable rollback boundary.
 
 ### Non-goals
@@ -127,7 +127,7 @@ This change does **not** deliver:
 - silent modification of closed periods;
 - the post-v0.1 roadmap: SIRE purchases/sales, advanced bank reconciliation, AP/AR, monthly taxes, continuous audit, or the v1.0 accounting operations platform.
 
-It also does not move accounting-engine authority into `drenyra-pi`, authorize operations from Engram memory, trust an ambient `PATH` runtime, or import private/unexported `drenyra-ai` implementation files.
+It also does not move accounting-engine authority into `drenyra-shell`, authorize operations from Engram memory, trust an ambient `PATH` runtime, or import private/unexported `drenyra-ai` implementation files.
 
 ### Scope discipline
 
@@ -181,7 +181,7 @@ These invariants apply from the first slice that can exercise them and must rema
 
 | Decision | Choice | Tradeoff / rationale |
 | --- | --- | --- |
-| Pi package boundary | Keep commands/extensions thin; place reusable deterministic behavior in `lib/` and consume `drenyra-ai` as engine authority | More adapter code, but prevents fiscal policy from becoming conversational handler logic |
+| Shell package boundary | Keep commands/extensions thin; place reusable deterministic behavior in `lib/` and consume `drenyra-ai` as engine authority | More adapter code, but prevents fiscal policy from becoming conversational handler logic |
 | Mission model | Map EDA phases to ordered `MissionStep[]` over canonical `drenyra-ai` mission states | Preserves engine transition validation; avoids inventing a competing state machine |
 | Unexported engine surfaces | Implement local adapters for `MissionStore`, `MissionEventStore`, and `IdempotencyStore`; do not deep-import `MissionFileStore` | Duplicates a small persistence pattern, but respects package exports and upgrade safety |
 | Persistence authority | File-backed mission/evidence/receipt state is authoritative; Engram is best-effort context only | Less distributed convenience initially, but deterministic recovery and authorization remain independent of memory availability |

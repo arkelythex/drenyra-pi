@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how `drenyra-pi` documents the mandatory lock-fact recovery sequence
+Defines how `drenyra-shell` documents the mandatory lock-fact recovery sequence
 and keeps its release-facing procedure, version surfaces, and install
 diagnostics consistent with what the repository actually enforces. The
 recovery mechanism, the version-agreement guards, and the release gate already
@@ -225,7 +225,7 @@ This change MUST stop at a verified gate plus honest documentation. It MUST NOT
 add or modify `publishConfig`, MUST NOT add a publish step or publish job, MUST
 NOT create, move, or delete a tag or dist-tag, MUST NOT invoke any registry
 publication command, and MUST NOT check `ROADMAP.md`'s item "Package released
-as `drenyra-pi` on npm". The `release-verify` workflow MUST remain a pure
+as `drenyra-shell` on npm". The `release-verify` workflow MUST remain a pure
 verification gate.
 
 #### Scenario: No publication surface is added

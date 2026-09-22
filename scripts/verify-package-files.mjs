@@ -1,5 +1,5 @@
 /**
- * drenyra-pi package verification — checks the built dist/ tree and the
+ * drenyra-shell package verification — checks the built dist/ tree and the
  * packaged manifest BEFORE the artifact is published. Fails (exit 1) on any
  * missing file or wrong manifest wiring, so a broken package never reaches npm.
  *

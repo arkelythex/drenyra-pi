@@ -1,4 +1,4 @@
-# Drenyra Pi — Brand & Banner
+# Drenyra Shell — Brand & Banner
 
 > **Normative source:** the Drenyra ecosystem brand contract —
 > [`drenyra-ai/contracts/brand-system.md`](https://github.com/arkelythex/drenyra-ai/blob/main/contracts/brand-system.md)
@@ -19,7 +19,7 @@
 
 The canonical set lives in
 [`drenyra-ai/docs/assets/brand/gpt-image-prompts.md`](https://github.com/arkelythex/drenyra-ai/blob/main/docs/assets/brand/gpt-image-prompts.md).
-The Drenyra Pi prompt is the **runtime manifest** motif:
+The Drenyra Shell prompt is the **runtime manifest** motif:
 
 ```text
 Subject: a pinned runtime manifest as a technical institutional document. The hero on the right third is a warm ivory manifest sheet (surface #FFF7EA on #F3EADC paper) that reads like an operating instrument's identity card: fields for RUNTIME, SOURCE, CHECKSUM, SCOPE and AUTHORITY in dark ink #17120D, with a cocoa #824F16 pin passing vertically through the sheet, physically anchoring it. A small sage #315B31 seal marks the verified package-local state.
@@ -33,9 +33,11 @@ Signature detail: the checksum line and the engraved pin seal.
 
 ```bash
 node ../drenyra-ai/scripts/brand-conformance.mjs \
-  assets/branding/drenyra-pi-banner.png
+  assets/branding/drenyra-shell-banner.png
 # expect: ✓ <file> (coverage >= 0.92) ... PASS
 ```
+
+<!-- Note: drenyra-shell-banner.png does not exist on disk yet (pre-existing gap, predates this rename). -->
 
 The checker is referenced from the sibling-checkout layout: clone `drenyra-ai`
 next to this repository so `../drenyra-ai/scripts/brand-conformance.mjs`
@@ -48,6 +50,6 @@ brand-system can freeze to v0.3.
 
 ## Freeze gate
 
-`brand-system` freezes to v0.3 only when every consuming repo (App Web, Pi,
+`brand-system` freezes to v0.3 only when every consuming repo (App Web, Shell,
 Engram, Skills, Guardian Angel) passes the same checker on its brand assets in
 both themes.

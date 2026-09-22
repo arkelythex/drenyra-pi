@@ -2,7 +2,7 @@
 
 **Change:** `pi-engram-integration`
 **Phase:** design — resolves the 4 open questions `proposal.md` §4 left for this phase. No product/scope decision (D1–D3) is reopened.
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Authority:** `proposal.md` (scope), `preproposal.md` (D1–D3), `specs/engram-integration/spec.md` (REQ-ENG-001..004)
 
 ---
@@ -43,7 +43,7 @@
 
 **Decision:** Plain `initialize` handshake (no `DRENYRA_DEFAULT_SCOPE` env var injected at spawn time), followed by explicit tool calls for scope read/write.
 
-**Why not `DRENYRA_DEFAULT_SCOPE`:** per `docs/CONSUMING.md` in the sibling repository, that variable's stated purpose is letting an agent *arrive already knowing* its scope, injected by whatever orchestrates the agent session. In this integration, Pi is the party that **sets** scope (via `/drenyra:company`, `/drenyra:period`, `/drenyra:scope`) and Engram is the persistence target — the data flow is the reverse of what that variable is for. Using it here would mean Pi has to already know the scope before asking Engram for it, which defeats the purpose of persisting scope in Engram at all.
+**Why not `DRENYRA_DEFAULT_SCOPE`:** per `docs/CONSUMING.md` in the sibling repository, that variable's stated purpose is letting an agent *arrive already knowing* its scope, injected by whatever orchestrates the agent session. In this integration, Shell is the party that **sets** scope (via `/drenyra:company`, `/drenyra:period`, `/drenyra:scope`) and Engram is the persistence target — the data flow is the reverse of what that variable is for. Using it here would mean Shell has to already know the scope before asking Engram for it, which defeats the purpose of persisting scope in Engram at all.
 
 **Exact tool names:** left to the tasks/apply phase — this design phase confirms the binding *shape* (explicit tool calls after a plain handshake, not env-var injection), not the literal tool identifiers, which should be read directly from the running `drenyra-engram mcp` server's tool list at implementation time rather than guessed here (the sibling repo's docs enumerate 13 general `engram_*` + 44 `accounting_*` tools by count, not by a name a design phase should hand-copy without verifying against the live server).
 
@@ -73,17 +73,17 @@ Before writing `tasks.md`, the live `drenyra-engram mcp` binary was spawned loca
 - `kind: "company"` **requires** `ruc` (11 digits), `organizationId`, `companyId`.
 - `kind: "institutional"` requires none of those — but its documented meaning is "explicit cross-company knowledge" (e.g., a regulatory fact true across every company), not application/session state.
 
-**Why this breaks D3 as confirmed:** the plan was to persist Pi's active company/period *pointer* in Engram so a new session can recover "what RUC/period was I last in" without already knowing it. But:
+**Why this breaks D3 as confirmed:** the plan was to persist Shell's active company/period *pointer* in Engram so a new session can recover "what RUC/period was I last in" without already knowing it. But:
 
 - Storing that pointer under `kind: "company"` is circular — reading it back requires already supplying the `ruc` you are trying to discover.
-- Storing it under `kind: "institutional"` technically has no schema objection, but is a semantic misuse of a scope kind meant for genuine cross-company accounting facts, not Pi's own UI/session state — this would violate `REQ-ENG-004`'s honesty spirit even if no guard test catches it mechanically, and risks colliding with real institutional-knowledge topic keys a future accounting feature might use.
+- Storing it under `kind: "institutional"` technically has no schema objection, but is a semantic misuse of a scope kind meant for genuine cross-company accounting facts, not Shell's own UI/session state — this would violate `REQ-ENG-004`'s honesty spirit even if no guard test catches it mechanically, and risks colliding with real institutional-knowledge topic keys a future accounting feature might use.
 
 **This was not visible from documentation alone** (`docs/CONSUMING.md` and the CLI `--help` text do not show the `scope.kind` enum) — only the live MCP `tools/list` schema revealed it. Design §2's "reuse the existing fail-closed scope-guard, no local cache" decision is still correct as far as it goes, but it assumed a home for the *positive* case (a reachable Engram *does* return the current scope) that the schema does not actually provide.
 
 **This is now a blocking product decision, not a design-phase call** — it changes what "minimal" can mean. Options surfaced for the maintainer (not decided here):
 
 1. **Narrower minimal slice than D3 intended:** keep the current-scope *pointer* local (i.e., `runtime/context.ts` keeps a minimal local file — just the pointer, not the full dev-grade store it is today), and use Engram only for what its schema actually supports once scope is already known: `engram_context`/`accounting_current_context` reads for that already-known company. This is a smaller, honest slice, but it is not "replace the local file," which is what D3 was understood to mean.
-2. **Use `institutional` scope as a deliberate, documented exception**, with an explicit reserved `topicKey` (e.g. `pi/session/active-scope`) and a clear comment/contract note that this is Pi's own session pointer, not genuine institutional accounting knowledge — accepting the semantic stretch as a pragmatic, disclosed choice.
+2. **Use `institutional` scope as a deliberate, documented exception**, with an explicit reserved `topicKey` (e.g. `pi/session/active-scope`) and a clear comment/contract note that this is Shell's own session pointer, not genuine institutional accounting knowledge — accepting the semantic stretch as a pragmatic, disclosed choice.
 3. **Escalate to `drenyra-engram` maintainers** (a request, not a workaround): ask whether a session/app-state scope kind is planned or acceptable to add, and pause this slice until that's answered.
 4. **Redefine this slice's scope entirely**, moving straight to the "fuller" depth D3 declined (proposal-informing reads only, once scope is already known some other way) — accepting that "just persist scope in Engram" was never a good fit for this engine's domain model.
 
@@ -91,7 +91,7 @@ No option above is selected. `tasks.md` is not written until the maintainer pick
 
 ### Resolution (maintainer, 2026-09-14): Option 1 — narrower slice, pointer stays local
 
-`runtime/context.ts` **keeps its local file** (`~/.drenyra/context.json`) as the sole source of truth for "what is Pi's currently active company/period" — this is not a fit Engram's schema provides, and forcing it (option 2) or abandoning D3's bounded depth (option 4) were both rejected. Engram integration in this slice is narrowed to exactly what `engram_context`/`accounting_current_context` actually do: **once the local pointer already supplies a known, valid RUC + period**, Pi may read institutional context for that scope from Engram.
+`runtime/context.ts` **keeps its local file** (`~/.drenyra/context.json`) as the sole source of truth for "what is Shell's currently active company/period" — this is not a fit Engram's schema provides, and forcing it (option 2) or abandoning D3's bounded depth (option 4) were both rejected. Engram integration in this slice is narrowed to exactly what `engram_context`/`accounting_current_context` actually do: **once the local pointer already supplies a known, valid RUC + period**, Shell may read institutional context for that scope from Engram.
 
 **This changes `spec.md#REQ-ENG-003` and `proposal.md`'s scope section**, both updated in this same pass (not silently — see the correction notes in each file). `REQ-ENG-001` (pinned binary), `REQ-ENG-002` (fail-closed child-process lifecycle), and `REQ-ENG-004` (honest capability state) are unaffected — the dependency, its lifecycle, and the honesty requirement are identical regardless of which Engram call is made once connected.
 

@@ -52,7 +52,7 @@ export async function showStartupPanel(deps: StartupPanelDeps): Promise<StartupP
   } catch (error) {
     safeWrite(
       deps,
-      `drenyra-pi degraded · runtime banner-failed (${error instanceof Error ? error.message : String(error)}) · no mission capability`,
+      `drenyra-shell degraded · runtime banner-failed (${error instanceof Error ? error.message : String(error)}) · no mission capability`,
     );
     return {
       degraded: true,
@@ -69,7 +69,7 @@ export async function showStartupPanel(deps: StartupPanelDeps): Promise<StartupP
     : `incomplete (missing: ${scopeReport.missing.join(", ")})`;
   const bannerWritten = safeWrite(
     deps,
-    `drenyra-pi ${DEFAULT_PIN.package}@${DEFAULT_PIN.version} · runtime ${report.verdict} · scope ${scopeText}`,
+    `drenyra-shell ${DEFAULT_PIN.package}@${DEFAULT_PIN.version} · runtime ${report.verdict} · scope ${scopeText}`,
   );
   if (!bannerWritten) {
     return {
@@ -83,7 +83,7 @@ export async function showStartupPanel(deps: StartupPanelDeps): Promise<StartupP
 
   const degraded = report.verdict !== "verified";
   if (degraded) {
-    safeWrite(deps, "drenyra-pi: runtime not verified — fiscal operations fail closed.");
+    safeWrite(deps, "drenyra-shell: runtime not verified — fiscal operations fail closed.");
   }
   return {
     degraded,

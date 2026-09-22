@@ -33,7 +33,7 @@ const HEX64 = /^[0-9a-f]{64}$/;
 const DIRS: string[] = [];
 
 function tempRoot(): string {
-  const dir = mkdtempSync(join(tmpdir(), "drenyra-pi-evidence-"));
+  const dir = mkdtempSync(join(tmpdir(), "drenyra-shell-evidence-"));
   DIRS.push(dir);
   return dir;
 }

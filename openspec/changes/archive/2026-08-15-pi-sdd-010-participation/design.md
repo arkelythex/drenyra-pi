@@ -1,7 +1,7 @@
-# Design: Pi Participation in SDD-010
+# Design: Shell Participation in SDD-010
 
 > Change: `pi-sdd-010-participation`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Status: designed
 > Artifact store: HYBRID — OpenSpec files are authoritative; Engram is best-effort
 > Date: 2026-08-14
@@ -10,14 +10,14 @@
 
 ## 1. Executive design
 
-This change is a bounded participation/evidence slice, not a new runtime platform. It restores the two known failing tests, freezes Pi's two local contracts after checking their claims against real source and tests, adds a validated master-compatible capability checkpoint, and records final-candidate lock facts without modifying the program master.
+This change is a bounded participation/evidence slice, not a new runtime platform. It restores the two known failing tests, freezes Shell's two local contracts after checking their claims against real source and tests, adds a validated master-compatible capability checkpoint, and records final-candidate lock facts without modifying the program master.
 
 The implementation has four owned outputs:
 
 1. **Frozen local contracts** — final v0.1 bytes plus a regenerated package content manifest.
 2. **Conformance evidence** — an explicit claim-to-source/test matrix; no duplicate conformance test because the inspected suite already binds the 16 commands, seven agents, released pin/checksum, install, doctor, package integrity, and release posture.
-3. **Participant checkpoint artifacts** — root `capability-manifest.yaml` and `docs/architecture/program-lock-facts.json`, both Pi-owned and non-authoritative for program promotion.
-4. **Final-candidate evidence** — a reproducible dirty-candidate identity over an exact Pi-local path set, then ROADMAP/OpenSpec state updated last.
+3. **Participant checkpoint artifacts** — root `capability-manifest.yaml` and `docs/architecture/program-lock-facts.json`, both Shell-owned and non-authoritative for program promotion.
+4. **Final-candidate evidence** — a reproducible dirty-candidate identity over an exact Shell-local path set, then ROADMAP/OpenSpec state updated last.
 
 No output advances Gate 0. The master capability matrix, program lock, gates, and later SDDs remain master-owned.
 
@@ -38,18 +38,18 @@ No output advances Gate 0. The master capability matrix, program lock, gates, an
 
 ```text
 program master (read-only)
-  capability-matrix.yaml Pi row
-  program-lock.json Pi row
+  capability-matrix.yaml Shell row
+  program-lock.json Shell row
              |
              | names and checkpoint shape only
              v
-Pi-owned participation artifacts
+Shell-owned participation artifacts
   capability-manifest.yaml
   docs/architecture/program-lock-facts.json
              |
              | verified against local source/tests
              v
-Pi contracts and runtime truth
+Shell contracts and runtime truth
   contracts/*.md + contracts/SHA256SUMS.json
   extensions/register.ts
   agents/
@@ -60,8 +60,8 @@ Pi contracts and runtime truth
 Ownership invariants:
 
 - `capability-manifest.yaml` and `program-lock-facts.json` are **participant checkpoint inputs**, never replacements for master artifacts.
-- Validators read only the Pi repository and never write either repository.
-- The apply and verify phases may read the master Pi rows but must not write anywhere under `/home/dreamcoder08/Documents/PROYECTOS/drenyra-ai`.
+- Validators read only the Shell repository and never write either repository.
+- The apply and verify phases may read the master Shell rows but must not write anywhere under `/home/dreamcoder08/Documents/PROYECTOS/drenyra-ai`.
 - `scripts/verify-package-files.mjs --update` is the only writer for `contracts/SHA256SUMS.json`.
 - Timestamps are evidence metadata, not candidate identity.
 - No command, agent, chain, runtime behavior, publication path, commit, or PR is introduced.
@@ -105,8 +105,8 @@ To avoid adding a parser dependency to a zero-runtime-dependency package, the fi
 interface CapabilityManifestV1 {
   schemaVersion: "drenyra.capability-manifest.v1";
   repository: {
-    name: "drenyra-pi";
-    package: "drenyra-pi";
+    name: "drenyra-shell";
+    package: "drenyra-shell";
     role: "agentic-runtime";
     version: string; // exactly package.json.version
   };
@@ -222,7 +222,7 @@ Keep it separate from `verify:package`. The capability file is program-participa
 
 ### 6.1 Path and production model
 
-Use `docs/architecture/program-lock-facts.json`. The path keeps machine-readable architecture/checkpoint evidence near the existing architecture documentation without placing a Pi-local record beside master authority.
+Use `docs/architecture/program-lock-facts.json`. The path keeps machine-readable architecture/checkpoint evidence near the existing architecture documentation without placing a Shell-local record beside master authority.
 
 This is a **static artifact authored during apply from actual command output**, not a generator's speculative snapshot. The apply phase writes it after the first complete verification pass, then the final verification phase checks it against the same candidate. A generated artifact would still require trusted capture of test counts and active changes; generation adds machinery without improving authority. Shape and cross-artifact consistency are automated instead.
 
@@ -296,7 +296,7 @@ Add the separate `__tests__/lock-facts.test.ts`, rather than mixing two authorit
 
 ### 7.1 Identity scope
 
-The identity intentionally excludes unrelated dirty files and `.codegraph/`. Its exact intended path set is the apply whitelist in §13 plus these immutable planning inputs: `openspec/changes/pi-sdd-010-participation/proposal.md` and `openspec/changes/pi-sdd-010-participation/design.md`. (`tasks.md` is already in the apply whitelist because apply records task completion.) This prevents pre-existing user work from contaminating Pi's checkpoint while covering every tracked change, deletion, and new file owned by this change through the apply boundary.
+The identity intentionally excludes unrelated dirty files and `.codegraph/`. Its exact intended path set is the apply whitelist in §13 plus these immutable planning inputs: `openspec/changes/pi-sdd-010-participation/proposal.md` and `openspec/changes/pi-sdd-010-participation/design.md`. (`tasks.md` is already in the apply whitelist because apply records task completion.) This prevents pre-existing user work from contaminating Shell's checkpoint while covering every tracked change, deletion, and new file owned by this change through the apply boundary.
 
 Add `scripts/compute-candidate-identity.mjs`. Both apply and verify invoke exactly:
 
@@ -346,13 +346,13 @@ The prefix and inclusion of HEAD make the candidate identity structurally and se
 In `contracts/package-contract.md`:
 
 ```text
-> Version: 0.1-draft · Status: draft · Applies to: `drenyra-pi` npm package.
+> Version: 0.1-draft · Status: draft · Applies to: `drenyra-shell` npm package.
 ```
 
 becomes:
 
 ```text
-> Version: v0.1 · Status: frozen · Applies to: `drenyra-pi` npm package.
+> Version: v0.1 · Status: frozen · Applies to: `drenyra-shell` npm package.
 ```
 
 The content pass retains the exact 16-command list, seven-agent inventory, and released `drenyra-ai@0.2.0` checksum claim, correcting prose only if the source check below finds a mismatch.
@@ -360,13 +360,13 @@ The content pass retains the exact 16-command list, seven-agent inventory, and r
 In `contracts/runtime-dependency.md`:
 
 ```text
-> Version: 0.1-draft · Status: draft · Applies to: Drenyra Pi ↔ Drenyra AI.
+> Version: 0.1-draft · Status: draft · Applies to: Drenyra Shell ↔ Drenyra AI.
 ```
 
 becomes:
 
 ```text
-> Version: v0.1 · Status: frozen · Applies to: Drenyra Pi ↔ Drenyra AI.
+> Version: v0.1 · Status: frozen · Applies to: Drenyra Shell ↔ Drenyra AI.
 ```
 
 Its pin, package-locality, no-PATH, checksum, doctor, and fail-closed claims remain frozen only if they match runtime source and tests.
@@ -508,7 +508,7 @@ The values must equal `program-lock-facts.json.tests`; the candidate identity is
 ## 12. Data flow and verification contracts
 
 ```text
-master Pi row (read-only names/states)
+master Shell row (read-only names/states)
   + local source/tests
   -> claim matrix
   -> frozen contract bytes
@@ -526,7 +526,7 @@ master Pi row (read-only names/states)
 Cross-artifact invariants:
 
 - `package.json.version === capability-manifest.repository.version === program-lock-facts.packageVersion`.
-- Capability keys equal the ten master Pi names exactly.
+- Capability keys equal the ten master Shell names exactly.
 - Capability test counts equal lock-fact test counts and final `current_test_state` counts.
 - Capability manifest digest in lock facts equals current manifest bytes.
 - Pin checksum in lock facts equals `runtime/pin.ts` and the real package-verification result.

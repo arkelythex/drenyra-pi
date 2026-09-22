@@ -1,4 +1,4 @@
-# Drenyra Pi — Codebase Guide
+# Drenyra Shell — Codebase Guide
 
 Maintainer-oriented map of this repository: where things live, how the layers relate, what is frozen, and how to verify a change. For the conceptual architecture, read [Architecture](architecture.md) and the [Trust Model](architecture/trust-model.md) first.
 
@@ -10,7 +10,7 @@ Maintainer-oriented map of this repository: where things live, how the layers re
 ## Repository map
 
 ```text
-extensions/         Flat Pi extension entrypoints — thin handlers + guards only
+extensions/         Flat Shell extension entrypoints — thin handlers + guards only
   ├─ register.ts            registration + /drenyra:* dispatch (single entrypoint)
   ├─ fiscal-guard.ts        the five fiscal tools + /drenyra:persona + money/SQL/RUC write guards
   ├─ scope-guard.ts         per-command scope policy (pre-scope / requires-scope, fail closed)
@@ -25,7 +25,7 @@ lib/                Top-level domain logic (delegated to by handlers)
   ├─ receipt-store.ts           durable receipt store
   ├─ receipt-verification.ts    receipt verification
   ├─ trusted-key-registry.ts    trusted key registry
-  ├─ authority-gates.ts / authority-store.ts   authority modes (never Pi-authorized)
+  ├─ authority-gates.ts / authority-store.ts   authority modes (never Shell-authorized)
   ├─ chain-pipeline.ts / evidence-graph.ts     chain + evidence plumbing
   ├─ accounting-status.ts       read-only status projection
   ├─ configurator.ts            SDD-020 composition helpers (pin-aware, deterministic only)
@@ -38,7 +38,7 @@ runtime/            Pinned drenyra-ai bootstrap + verification
   ├─ status.ts / context.ts   status projection + company/period context store
 
 chains/             RDA command chains (close, reconcile, verify, evidence)
-agents/             Pi-native accounting subagents
+agents/             Shell-native accounting subagents
 skills/             Packaged Drenyra skills (fiscal compliance, review lenses, RUC scope, …)
 prompts/            Persona + command prompts
 contracts/          Package + runtime contracts — versioned; two frozen at v0.1
@@ -65,8 +65,8 @@ runtime/  ──►  vendored/drenyra-ai-0.4.1.tgz (package-local, checksum-veri
 
 - **Extensions are a flat, thin layer.** Each file registers commands, enforces the scope guard, and renders structured results; **no fiscal logic lives there**.
 - **Domain logic lives in top-level `lib/`.** Handlers validate scope, delegate to `lib/` modules and Drenyra AI domain ops, and render results.
-- **Pi-local code holds no authority.** Authoritative operations (missions, candidates, gates, receipts) import **only** the pinned kernel's public entry points; the anti-circularity boundary is enforced by audit (see `docs/architecture/rda-adapter-boundary-audit.md`).
-- **Never the reverse.** Drenyra AI never depends on Drenyra Pi, and Pi never leaks into AI's contracts.
+- **Shell-local code holds no authority.** Authoritative operations (missions, candidates, gates, receipts) import **only** the pinned kernel's public entry points; the anti-circularity boundary is enforced by audit (see `docs/architecture/rda-adapter-boundary-audit.md`).
+- **Never the reverse.** Drenyra AI never depends on Drenyra Shell, and Shell never leaks into AI's contracts.
 
 ## Where a change goes
 
@@ -84,7 +84,7 @@ runtime/  ──►  vendored/drenyra-ai-0.4.1.tgz (package-local, checksum-veri
 2. **SQL writes are guarded.** `extensions/fiscal-guard.ts` blocks SQL write patterns — no mutation path may be introduced through unguarded text.
 3. **RUC/period scope is mandatory.** `extensions/scope-guard.ts` precedes every `/drenyra:*` command: pre-scope commands run read-only diagnostics; mission, chain, evidence-mutation, approval, and receipt-target commands **fail closed, mutating nothing** without a complete canonical scope (a stale scope hash invalidates before any mutation).
 4. **The runtime is pinned and sealed.** `runtime/pin.ts` `DEFAULT_PIN` = `drenyra-ai@0.4.1` (state `released`, entry-artifact checksum `09df8d69…5b7600`), installed package-local from `vendored/`, verified by `doctor` — **never `PATH`**.
-5. **Pi never authorizes.** No Pi-local code implements materiality, gates, approvals, or receipt authority; those come from the pinned kernel.
+5. **Shell never authorizes.** No Shell-local code implements materiality, gates, approvals, or receipt authority; those come from the pinned kernel.
 6. **Contracts are frozen public surface.** `contracts/` is versioned; frozen contracts change only via the contract regime.
 
 ## Testing and verification

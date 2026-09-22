@@ -1,6 +1,6 @@
-# Contributing to Drenyra Pi
+# Contributing to Drenyra Shell
 
-**Status: pre-alpha.** Drenyra Pi is extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. The maintainer (Arkelythex) drives the extraction; external contributions are welcome only after the contracts in `contracts/` stabilize.
+**Status: pre-alpha.** Drenyra Shell is extracted from `arkelythex/drenyra-command-center` (`packages/pi`) through vertical slices. The maintainer (Arkelythex) drives the extraction; external contributions are welcome only after the contracts in `contracts/` stabilize.
 
 ## Ground rules
 

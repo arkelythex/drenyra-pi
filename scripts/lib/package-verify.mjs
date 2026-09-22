@@ -1,5 +1,5 @@
 /**
- * drenyra-pi package integrity core — importable verification building blocks
+ * drenyra-shell package integrity core — importable verification building blocks
  * shared by scripts/verify-package-files.mjs and the vitest suite.
  *
  * Two responsibilities:

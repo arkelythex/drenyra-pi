@@ -133,7 +133,7 @@ export function renderCapabilitiesView(input: CapabilitiesViewInput): CommandOut
     },
   };
   const summary =
-    `drenyra-pi ${input.version} capabilities — engine protocol ${engine.protocolVersion} ` +
+    `drenyra-shell ${input.version} capabilities — engine protocol ${engine.protocolVersion} ` +
     `(${engine.features.length} features) · harness: ${input.commands.length} commands, ` +
     `${input.authorityModes.length} authority modes, ${input.scopeElements.length} scope elements`;
   return { summary, machine };

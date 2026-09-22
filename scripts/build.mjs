@@ -1,11 +1,11 @@
 /**
- * drenyra-pi build script.
+ * drenyra-shell build script.
  *
  * 1. Compiles the TypeScript sources to dist/ (ESM, NodeNext) with declarations.
  * 2. Copies scripts/install-drenyra-ai.mjs → dist/scripts/install-drenyra-ai.js
  *    (the postinstall entry: plain ESM, runs under Node as .js in a
  *    "type": "module" package; .mjs is never compiled by tsc).
- * 3. Patches any emitted shebang to `#!/usr/bin/env node`. drenyra-pi has no
+ * 3. Patches any emitted shebang to `#!/usr/bin/env node`. drenyra-shell has no
  *    bin, so normally there is nothing to patch — absence is tolerated (mirrors
  *    drenyra-ai's approach for a bin-less package).
  *
@@ -40,7 +40,7 @@ console.log("build: scripts/install-drenyra-ai.mjs -> dist/scripts/install-dreny
 
 const patched = patchEmittedShebangs(join(root, "dist"));
 if (patched === 0) {
-  console.log("build: no emitted shebangs to patch (expected: drenyra-pi has no bin)");
+  console.log("build: no emitted shebangs to patch (expected: drenyra-shell has no bin)");
 } else {
   console.log(`build: patched ${patched} emitted shebang(s) to #!/usr/bin/env node`);
 }

@@ -1,4 +1,4 @@
-# drenyra-pi — formatter exclusions
+# drenyra-shell — formatter exclusions
 #
 # These artifacts must stay strict JSON (the JSON-compatible YAML 1.2 profile
 # required by the SDD-010 participation design) so they remain parseable by the

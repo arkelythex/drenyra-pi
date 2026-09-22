@@ -38,7 +38,7 @@ packed_install_output_hash: sha256:074f0433c164b2baf9aa826ef50a89c013e27f64fa06f
 # EVIDENCE-DRIVEN-ACCOUNTING-HARNESS — Verification Report
 
 **Change**: `evidence-driven-accounting-harness`
-**Repo**: `drenyra-pi` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
+**Repo**: `drenyra-shell` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
 **Evidence revision**: `a82a2c2b3b4759ae6ee452d076929c32e52390a6` (main HEAD; tree clean)
 **Date**: verify phase (post-apply, all slices S1..S6 merged)
 **Artifact store**: hybrid (openspec/ authoritative; engram best-effort)
@@ -82,7 +82,7 @@ taskProgress: { total: 31 implementation-owned, complete: 31, remaining: 0, unch
 deferredParentActions: { total: 4 (T-GATE-001..004), complete: 0, remaining: 4 }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: archive (T-GATE-004 verify half done here; archive owned by parent/orchestrator)
 ```

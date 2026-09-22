@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how `drenyra-pi` consumes the `drenyra-engram` memory engine: the pinned dependency, its fail-closed child-process lifecycle, the `/drenyra:context` read contract, the honesty requirement on `capability-manifest.yaml` (`REQ-ENG-001`..`004`, published by `pi-engram-integration`), and one bounded proposal-informing read for `journal-candidate-agent` (`REQ-ENG-005`..`006`, added by `pi-engram-memory-reads`). The active company/period *pointer* itself stays local (`runtime/context.ts`, unchanged) — Engram's own scope model has no session/app-state concept to hold it (see `pi-engram-integration`'s design.md §6).
+Defines how `drenyra-shell` consumes the `drenyra-engram` memory engine: the pinned dependency, its fail-closed child-process lifecycle, the `/drenyra:context` read contract, the honesty requirement on `capability-manifest.yaml` (`REQ-ENG-001`..`004`, published by `pi-engram-integration`), and one bounded proposal-informing read for `journal-candidate-agent` (`REQ-ENG-005`..`006`, added by `pi-engram-memory-reads`). The active company/period *pointer* itself stays local (`runtime/context.ts`, unchanged) — Engram's own scope model has no session/app-state concept to hold it (see `pi-engram-integration`'s design.md §6).
 
 Out of scope, both by design and still open after two changes: any `accounting_*` tool of any kind; any write-shaped `engram_*` tool (`engram_save`/`engram_reject`/`engram_void`/`engram_supersede`); any agent other than `journal-candidate-agent`; any `accounting_approve`/`accounting_review_reject`/`accounting_review_return` call; the full 10-element canonical scope model (`REQ-SCOPE-001`, unaffected — this domain governs RUC + period persistence and one bounded memory read, not scope validation, which stays owned by `scope-binding`).
 
@@ -21,7 +21,7 @@ The `drenyra-engram` binary MUST be vendored at an exact, checksummed version fo
 #### Scenario: No ambient binary is trusted
 
 - GIVEN a `drenyra-engram` binary is present on the system `PATH`
-- WHEN Pi starts the Engram child process
+- WHEN Shell starts the Engram child process
 - THEN it launches the vendored, package-local binary — never the `PATH` one
 
 ### Requirement: REQ-ENG-002 — Fail-closed child-process lifecycle
@@ -31,24 +31,24 @@ Starting, health-checking, and stopping the `drenyra-engram mcp` child process M
 #### Scenario: Healthy start
 
 - GIVEN the vendored binary and a clean environment
-- WHEN Pi spawns `drenyra-engram mcp` and performs the MCP `initialize` handshake
+- WHEN Shell spawns `drenyra-engram mcp` and performs the MCP `initialize` handshake
 - THEN the handshake succeeds within a bounded timeout and the process is usable for scope reads/writes
 
 #### Scenario: Binary absent or unhealthy
 
 - GIVEN the vendored binary is missing, fails to start, or the `initialize` handshake fails
 - WHEN a command needs scope
-- THEN Pi reports a visible, specific diagnostic naming the failure and falls back per the design-phase-decided policy (§ design.md, not restated here) — it does not crash the command and does not silently invent or discard scope
+- THEN Shell reports a visible, specific diagnostic naming the failure and falls back per the design-phase-decided policy (§ design.md, not restated here) — it does not crash the command and does not silently invent or discard scope
 
 #### Scenario: Graceful shutdown
 
 - GIVEN a running `drenyra-engram mcp` child process
-- WHEN the host Pi process exits normally
+- WHEN the host Shell process exits normally
 - THEN the child process is terminated cleanly, with no orphaned process left running
 
 ### Requirement: REQ-ENG-003 — Institutional context read for an already-known scope
 
-**Corrected during design (see `design.md` §6): Engram's `scope.kind` enum (`company` | `institutional`) has no session/app-state kind, so it cannot serve as the source of truth for "what is Pi's currently active company/period" — that would be circular (`company` scope requires the RUC to already be known) or a semantic misuse (`institutional` scope means cross-company accounting knowledge, not app state).** `runtime/context.ts`'s existing local pointer (`~/.drenyra/context.json`) remains the sole source of truth for the active `ScopeContext`; this requirement governs only the read that follows once that pointer already supplies a valid RUC + period.
+**Corrected during design (see `design.md` §6): Engram's `scope.kind` enum (`company` | `institutional`) has no session/app-state kind, so it cannot serve as the source of truth for "what is Shell's currently active company/period" — that would be circular (`company` scope requires the RUC to already be known) or a semantic misuse (`institutional` scope means cross-company accounting knowledge, not app state).** `runtime/context.ts`'s existing local pointer (`~/.drenyra/context.json`) remains the sole source of truth for the active `ScopeContext`; this requirement governs only the read that follows once that pointer already supplies a valid RUC + period.
 
 Once `ScopeContext` (company RUC + fiscal period) is known from the existing local pointer, `/drenyra:context` MUST be able to fetch institutional context for that exact scope from Engram (`engram_context`) and surface it alongside the RUC/period it already reports — read-only, no fiscal-effect claim, no proposal shaped by it in this slice.
 
@@ -120,4 +120,4 @@ The tool's result MUST NOT be connected to any gate (`mission-state`, `receipt`,
 
 ## Out of Scope
 
-Any `accounting_*` tool of any kind; any write-shaped `engram_*` tool (`engram_save`/`engram_reject`/`engram_void`/`engram_supersede`); any agent other than `journal-candidate-agent` receiving a `drenyra-engram`-backed tool; any `accounting_approve`/`accounting_review_reject`/`accounting_review_return` call; widening `ScopeContext` beyond RUC + period; any change to the 10-element canonical scope model (`REQ-SCOPE-001`..`005`, `scope-binding` domain); any change inside the `drenyra-engram` repository; publication of `drenyra-pi` to any registry (`REQ-REL-006`); any change to gate, approval, or materiality logic.
+Any `accounting_*` tool of any kind; any write-shaped `engram_*` tool (`engram_save`/`engram_reject`/`engram_void`/`engram_supersede`); any agent other than `journal-candidate-agent` receiving a `drenyra-engram`-backed tool; any `accounting_approve`/`accounting_review_reject`/`accounting_review_return` call; widening `ScopeContext` beyond RUC + period; any change to the 10-element canonical scope model (`REQ-SCOPE-001`..`005`, `scope-binding` domain); any change inside the `drenyra-engram` repository; publication of `drenyra-shell` to any registry (`REQ-REL-006`); any change to gate, approval, or materiality logic.

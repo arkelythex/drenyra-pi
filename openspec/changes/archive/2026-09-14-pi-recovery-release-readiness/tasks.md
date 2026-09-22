@@ -3,7 +3,7 @@
 **Change:** `pi-recovery-release-readiness` (local SDD 6 of 6)
 **Phase:** tasks — read-only against the repository. **The only write performed by this phase is this file.**
 **Store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Authority:** `design.md` (the authority for this phase), `specs/release-readiness/spec.md` (`REQ-REL-001`..`006`, 21 scenarios), `preproposal.md` §5 + **D11 (binding)**, `exploration.md` §4 (falsification table, binding) and §5.2.
 
 **Scope in one sentence.** Four release-facing documents (plus one link-only dedupe), one version unit across five carriers with one new guard, one small behavioural change to `postinstall`, and one 4-line prose addendum (`U5b`) — plus the indivisible recovery pair after each unit that writes an allowlisted path.

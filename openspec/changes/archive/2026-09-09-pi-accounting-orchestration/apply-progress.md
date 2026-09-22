@@ -67,7 +67,7 @@
 | Evidence | Value |
 |---|---|
 | Focused test command and exact result | `bun run test __tests__/extension.test.ts __tests__/extension-mission-commands.test.ts` → 55/55 passed |
-| Runtime harness command/scenario and exact result | `/drenyra:status` (no flag) and `/drenyra:status route` invoked against a bound scope + a mission started via `/drenyra:mission monthly-close`, through the real `registerDrenyraPiExtension` + mock `PiExtensionApi` — the closest available runtime harness (no live Pi host in this repo's test environment). Confirmed: default invocation leaves the mission snapshot file's bytes and mtime unchanged (zero writes); `route` on a fresh mission fails closed `POLICY_BLOCKED` at `stagePermissions`. |
+| Runtime harness command/scenario and exact result | `/drenyra:status` (no flag) and `/drenyra:status route` invoked against a bound scope + a mission started via `/drenyra:mission monthly-close`, through the real `registerDrenyraShellExtension` + mock `PiExtensionApi` — the closest available runtime harness (no live Pi host in this repo's test environment). Confirmed: default invocation leaves the mission snapshot file's bytes and mtime unchanged (zero writes); `route` on a fresh mission fails closed `POLICY_BLOCKED` at `stagePermissions`. |
 | Rollback boundary | Revert the `statusHandler` diff in `extensions/register.ts` (imports + 3 new helper functions + `statusHandler` body) and the two new tests in `__tests__/extension.test.ts`; `capability-manifest.yaml` and the conformance-matrix row revert independently. `lib/routing/direct-port.ts` (PR1) stays inert and unused if PR2 is reverted alone. |
 
 ### Known limitation (disclosed, not silently absorbed)

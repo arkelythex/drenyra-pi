@@ -1,5 +1,5 @@
 /**
- * Extension registration tests — the Pi surface of drenyra-pi.
+ * Extension registration tests — the Pi surface of drenyra-shell.
  *
  * Verifies the extension factory registers the drenyra:* command surface
  * (status, doctor, company, period, context, capabilities, scope, models,
@@ -26,8 +26,8 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  drenyraPiExtension,
-  registerDrenyraPiExtension,
+  drenyraShellExtension,
+  registerDrenyraShellExtension,
   type PiCommandContext,
   type PiExtensionApi,
 } from "../extensions/register.js";
@@ -141,23 +141,23 @@ const INTENDED_COMMANDS = [
   "persona",
 ] as const;
 
-describe("drenyraPiExtension descriptor", () => {
+describe("drenyraShellExtension descriptor", () => {
   it("declares the runtime pin state and provided capabilities", () => {
-    expect(drenyraPiExtension.name).toBe("drenyra-pi");
-    expect(drenyraPiExtension.provides).toContain("status");
-    expect(drenyraPiExtension.provides).toContain("doctor");
-    expect(drenyraPiExtension.provides).toContain("context");
-    expect(drenyraPiExtension.provides).toContain("capabilities");
-    expect(drenyraPiExtension.provides).toContain("scope");
-    expect(drenyraPiExtension.provides).toContain("models");
-    expect(drenyraPiExtension.provides).toContain("mission");
-    expect(drenyraPiExtension.provides).toContain("continue");
-    expect(drenyraPiExtension.provides).toContain("resume");
-    expect(drenyraPiExtension.provides).toContain("receipt");
-    expect(drenyraPiExtension.provides).toContain("evidence");
-    expect(drenyraPiExtension.provides).toContain("verify");
-    expect(drenyraPiExtension.provides).toContain("reconcile");
-    expect(drenyraPiExtension.commands).toEqual([
+    expect(drenyraShellExtension.name).toBe("drenyra-shell");
+    expect(drenyraShellExtension.provides).toContain("status");
+    expect(drenyraShellExtension.provides).toContain("doctor");
+    expect(drenyraShellExtension.provides).toContain("context");
+    expect(drenyraShellExtension.provides).toContain("capabilities");
+    expect(drenyraShellExtension.provides).toContain("scope");
+    expect(drenyraShellExtension.provides).toContain("models");
+    expect(drenyraShellExtension.provides).toContain("mission");
+    expect(drenyraShellExtension.provides).toContain("continue");
+    expect(drenyraShellExtension.provides).toContain("resume");
+    expect(drenyraShellExtension.provides).toContain("receipt");
+    expect(drenyraShellExtension.provides).toContain("evidence");
+    expect(drenyraShellExtension.provides).toContain("verify");
+    expect(drenyraShellExtension.provides).toContain("reconcile");
+    expect(drenyraShellExtension.commands).toEqual([
       "/drenyra:status",
       "/drenyra:doctor",
       "/drenyra:preflight",
@@ -179,16 +179,16 @@ describe("drenyraPiExtension descriptor", () => {
       "/drenyra:sync",
       "/drenyra:persona",
     ]);
-    expect(drenyraPiExtension.runtime.package).toBe("drenyra-ai");
-    expect(drenyraPiExtension.runtime.version).toBe("0.4.1");
-    expect(drenyraPiExtension.runtime.state).toBe("released");
+    expect(drenyraShellExtension.runtime.package).toBe("drenyra-ai");
+    expect(drenyraShellExtension.runtime.version).toBe("0.4.1");
+    expect(drenyraShellExtension.runtime.state).toBe("released");
   });
 });
 
-describe("registerDrenyraPiExtension", () => {
+describe("registerDrenyraShellExtension", () => {
   it("registers the full current command surface with descriptions", () => {
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi);
+    registerDrenyraShellExtension(pi);
     expect(registered.map((c) => c.name)).toEqual([
       "drenyra:status",
       "drenyra:doctor",
@@ -218,7 +218,7 @@ describe("registerDrenyraPiExtension", () => {
 
   it("/drenyra:doctor fails closed when the pinned runtime is absent (repo root)", async () => {
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi);
+    registerDrenyraShellExtension(pi);
     const output = await runHandler(registered[1].handler, "");
     // drenyra-ai is installed as a devDependency (the postinstall artifact in
     // a real consumer), so the doctor reports "verified" against the repo root.
@@ -241,7 +241,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
   it("registers drenyra:capabilities with a structured pre-scope handler", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const command = registered.find((c) => c.name === "drenyra:capabilities");
     expect(command).toBeDefined();
     const output = await runHandler(command!.handler, "");
@@ -264,7 +264,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
   it("binds and reads the full 10-element scope through /drenyra:scope", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const scopeCmd = registered.find((c) => c.name === "drenyra:scope");
     expect(scopeCmd).toBeDefined();
     // Read path first: incomplete until bound.
@@ -286,7 +286,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
   it("rejects an invalid scope binding through /drenyra:scope without persisting", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const scopeCmd = registered.find((c) => c.name === "drenyra:scope");
     expect(scopeCmd).toBeDefined();
     let output = await runHandler(
@@ -305,7 +305,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
   it("registers drenyra:models with the documented model-routing registry", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const command = registered.find((c) => c.name === "drenyra:models");
     expect(command).toBeDefined();
     const output = await runHandler(command!.handler, "");
@@ -322,7 +322,7 @@ describe("entrypoint packaging (T-S4A-004)", () => {
   it("keeps /drenyra:close fail-closed without a complete scope (S3b intact)", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const closeCmd = registered.find((c) => c.name === "drenyra:close");
     expect(closeCmd).toBeDefined();
     const output = await runHandler(closeCmd!.handler, "approver-1");
@@ -341,7 +341,7 @@ describe("selector-change isolation at protected command handlers", () => {
     try {
       const { pi, registered } = makeMockPi();
       const store = new ScopeContextStore(join(root, "context.json"));
-      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
       const command = (name: string) => registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
       const canonical = makeCanonicalScope();
       const bindOutput = await runHandler(
@@ -374,7 +374,7 @@ describe("selector-change isolation at protected command handlers", () => {
 describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () => {
   it("registers the 15 intended commands plus company, context, install and sync (19 commands)", () => {
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi);
+    registerDrenyraShellExtension(pi);
     const names = registered.map((c) => c.name);
     for (const name of INTENDED_COMMANDS) {
       expect(names, name).toContain(`drenyra:${name}`);
@@ -383,8 +383,8 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     expect(names).toContain("drenyra:context");
     expect(registered).toHaveLength(20);
     // Descriptor mirrors the registered surface (SC-CMD-001 conformance).
-    expect(drenyraPiExtension.commands).toHaveLength(20);
-    expect(drenyraPiExtension.provides).toHaveLength(14);
+    expect(drenyraShellExtension.commands).toHaveLength(20);
+    expect(drenyraShellExtension.provides).toHaveLength(14);
   });
 
   it("wires /drenyra:verify and /drenyra:evidence to their chains (REQ-CMD-004/008)", async () => {
@@ -411,7 +411,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     {
       const { pi, registered } = makeMockPi();
       const store = makeTempStore();
-      registerDrenyraPiExtension(pi, { contextStore: store });
+      registerDrenyraShellExtension(pi, { contextStore: store });
       const command = registered.find((c) => c.name === "drenyra:verify");
       expect(command).toBeDefined();
       const output = await runHandler(
@@ -429,7 +429,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       try {
         const { pi, registered } = makeMockPi();
         const store = new ScopeContextStore(join(root, "context.json"));
-        registerDrenyraPiExtension(pi, {
+        registerDrenyraShellExtension(pi, {
           contextStore: store,
           storesRoot: root,
         });
@@ -471,7 +471,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       try {
         const { pi, registered } = makeMockPi();
         const store = new ScopeContextStore(join(root, "context.json"));
-        registerDrenyraPiExtension(pi, {
+        registerDrenyraShellExtension(pi, {
           contextStore: store,
           storesRoot: root,
         });
@@ -514,7 +514,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
     {
       const { pi, registered } = makeMockPi();
       const store = makeTempStore();
-      registerDrenyraPiExtension(pi, { contextStore: store });
+      registerDrenyraShellExtension(pi, { contextStore: store });
       const command = registered.find((c) => c.name === "drenyra:evidence");
       expect(command).toBeDefined();
       const output = await runHandler(command!.handler, "{}");
@@ -528,7 +528,7 @@ describe("T-S4B-004 complete command surface (REQ-CMD-001/002; SC-CMD-001)", () 
       try {
         const { pi, registered } = makeMockPi();
         const store = new ScopeContextStore(join(root, "context.json"));
-        registerDrenyraPiExtension(pi, {
+        registerDrenyraShellExtension(pi, {
           contextStore: store,
           storesRoot: root,
         });
@@ -677,7 +677,7 @@ describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () =>
   it("fails closed without a complete canonical scope (SC-CMD-002)", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const command = registered.find((c) => c.name === "drenyra:reconcile");
     expect(command).toBeDefined();
     const output = await runHandler(command!.handler, RECONCILE_MANIFEST);
@@ -688,7 +688,7 @@ describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () =>
   it("denies detection below the ANALYZE authority minimum", async () => {
     const { pi, registered } = makeMockPi();
     const store = makeTempStore();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "ASK" }));
     const command = registered.find((c) => c.name === "drenyra:reconcile");
     expect(command).toBeDefined();
@@ -708,7 +708,7 @@ describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () =>
     try {
       const { pi, registered } = makeMockPi();
       const store = new ScopeContextStore(join(root, "context.json"));
-      registerDrenyraPiExtension(pi, {
+      registerDrenyraShellExtension(pi, {
         contextStore: store,
         storesRoot: root,
       });
@@ -744,7 +744,7 @@ describe("T-S5A-002 /drenyra:reconcile wired to the reconciliation chain", () =>
     try {
       const { pi, registered } = makeMockPi();
       const store = new ScopeContextStore(join(root, "context.json"));
-      registerDrenyraPiExtension(pi, {
+      registerDrenyraShellExtension(pi, {
         contextStore: store,
         storesRoot: root,
       });
@@ -824,7 +824,7 @@ describe("REQ-ROUTE-001 /drenyra:status routing-adapter wiring (pi-accounting-or
     try {
       const { pi, registered } = makeMockPi();
       const store = new ScopeContextStore(join(root, "context.json"));
-      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
       const command = (name: string) =>
         registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
       store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "EXECUTE" }));
@@ -864,7 +864,7 @@ describe("REQ-ROUTE-001 /drenyra:status routing-adapter wiring (pi-accounting-or
     try {
       const { pi, registered } = makeMockPi();
       const store = new ScopeContextStore(join(root, "context.json"));
-      registerDrenyraPiExtension(pi, { contextStore: store, storesRoot: root });
+      registerDrenyraShellExtension(pi, { contextStore: store, storesRoot: root });
       const command = (name: string) =>
         registered.find((entry) => entry.name === `drenyra:${name}`)!.handler;
       store.setCanonicalScope(makeCanonicalScope({ authorityLevel: "EXECUTE" }));
@@ -918,7 +918,7 @@ describe("/drenyra:context — Engram-backed institutional context (REQ-ENG-003)
     store.setCompany(VALID_RUC);
     store.setPeriod(VALID_PERIOD);
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () =>
         healthyClientStub(
@@ -940,7 +940,7 @@ describe("/drenyra:context — Engram-backed institutional context (REQ-ENG-003)
     store.setCompany(VALID_RUC);
     store.setPeriod(VALID_PERIOD);
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({
         status: "spawn-failed",
@@ -961,7 +961,7 @@ describe("/drenyra:context — Engram-backed institutional context (REQ-ENG-003)
     store.setCompany(VALID_RUC);
     store.setPeriod(VALID_PERIOD);
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => healthyClientStub("[]"),
     });
@@ -976,7 +976,7 @@ describe("/drenyra:context — Engram-backed institutional context (REQ-ENG-003)
     const store = makeTempStore();
     const { pi, registered } = makeMockPi();
     let spawnAttempted = false;
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => {
         spawnAttempted = true;
@@ -997,7 +997,7 @@ describe("/drenyra:context — Engram-backed institutional context (REQ-ENG-003)
     store.setPeriod(VALID_PERIOD);
     const { pi, registered } = makeMockPi();
     let calledTool: string | undefined;
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({
         status: "healthy",
@@ -1026,7 +1026,7 @@ describe("/drenyra:context — engram_context tool-level error (triangulation)",
     const store = makeTempStore();
     store.setCompany("20123456786");
     const { pi, registered } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({
         status: "healthy",
@@ -1060,7 +1060,7 @@ describe("drenyra_institutional_memory tool (REQ-ENG-005, REQ-ENG-006)", () => {
 
   it("is registered with a query-only parameter shape", () => {
     const { pi, registeredTools } = makeMockPi();
-    registerDrenyraPiExtension(pi);
+    registerDrenyraShellExtension(pi);
     const tool = findTool(registeredTools);
     expect(tool.name).toBe("drenyra_institutional_memory");
   });
@@ -1068,7 +1068,7 @@ describe("drenyra_institutional_memory tool (REQ-ENG-005, REQ-ENG-006)", () => {
   it("returns no-scope-known when no company RUC is set", async () => {
     const store = makeTempStore();
     const { pi, registeredTools } = makeMockPi();
-    registerDrenyraPiExtension(pi, { contextStore: store });
+    registerDrenyraShellExtension(pi, { contextStore: store });
     const tool = findTool(registeredTools);
     const result = (await tool.execute("call-1", { query: "detracción" })) as {
       content: Array<{ type: string; text: string }>;
@@ -1082,7 +1082,7 @@ describe("drenyra_institutional_memory tool (REQ-ENG-005, REQ-ENG-006)", () => {
     const store = makeTempStore();
     store.setCompany(VALID_RUC);
     const { pi, registeredTools } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({ status: "spawn-failed", error: "not available in test" }),
     });
@@ -1101,7 +1101,7 @@ describe("drenyra_institutional_memory tool (REQ-ENG-005, REQ-ENG-006)", () => {
     const { pi, registeredTools } = makeMockPi();
     let calledTool: string | undefined;
     let calledArgs: unknown;
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({
         status: "healthy",
@@ -1137,7 +1137,7 @@ describe("drenyra_institutional_memory tool (REQ-ENG-005, REQ-ENG-006)", () => {
     const store = makeTempStore();
     store.setCompany(VALID_RUC);
     const { pi, registeredTools } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({
         status: "healthy",
@@ -1164,7 +1164,7 @@ describe("drenyra_institutional_memory — tool-level error (triangulation)", ()
     const store = makeTempStore();
     store.setCompany("20123456786");
     const { pi, registeredTools } = makeMockPi();
-    registerDrenyraPiExtension(pi, {
+    registerDrenyraShellExtension(pi, {
       contextStore: store,
       spawnEngramClient: async () => ({
         status: "healthy",

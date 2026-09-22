@@ -1,7 +1,7 @@
 {
-  "name": "drenyra-pi",
+  "name": "drenyra-shell",
   "version": "0.1.0",
-  "description": "Pi-native Accounting Operations Harness — consumes a pinned, verified, package-local Drenyra AI runtime. Zero runtime dependencies.",
+  "description": "Shell-native Accounting Operations Harness — consumes a pinned, verified, package-local Drenyra AI runtime. Zero runtime dependencies.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -41,7 +41,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "postinstall": "node -e \"const{existsSync}=require('node:fs');const{spawnSync}=require('node:child_process');const t='dist/scripts/install-drenyra-ai.js';if(!existsSync(t)){console.warn('drenyra-pi: WARNING — '+t+' is missing, so the pinned Drenyra AI runtime was NOT installed. Run bun run build, then re-run your install.');process.exit(0);}process.exit(spawnSync(process.execPath,[t],{stdio:'inherit'}).status??1)\"",
+    "postinstall": "node -e \"const{existsSync}=require('node:fs');const{spawnSync}=require('node:child_process');const t='dist/scripts/install-drenyra-ai.js';if(!existsSync(t)){console.warn('drenyra-shell: WARNING — '+t+' is missing, so the pinned Drenyra AI runtime was NOT installed. Run bun run build, then re-run your install.');process.exit(0);}process.exit(spawnSync(process.execPath,[t],{stdio:'inherit'}).status??1)\"",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "verify:package": "node scripts/build.mjs && bun run test && node scripts/verify-package-files.mjs",

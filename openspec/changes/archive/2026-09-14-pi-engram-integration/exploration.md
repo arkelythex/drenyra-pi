@@ -2,7 +2,7 @@
 
 **Change:** `pi-engram-integration` (candidate, local SDD — first change after the six-change program closed)
 **Phase:** explore — read-only against the repository (and the sibling `drenyra-engram` checkout, read-only)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Sibling repository read for context (read-only, not modified):** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-engram`
 **Topic:** `ROADMAP.md` Phase 2, unchecked: "Slice 5: Drenyra Engram integration (context, memory reads)"
 
@@ -14,12 +14,12 @@ Confirmed by direct inspection, not assumption:
 
 - `package.json#/dependencies` is `{}`; `drenyra-engram` is not a dependency of any kind (compare `drenyra-ai`, which is a real `devDependencies` entry: `"file:./vendored/drenyra-ai-0.4.1.tgz"`).
 - No `.ts` source file in this repository references "engram" at all. Every reference is in docs (`README.md`, `docs/architecture/*.md`, `contracts/package-contract.md`) or in `capability-manifest.yaml`.
-- `capability-manifest.yaml#/capabilities/engram-integration`: `state: partial`, `verificationLevel: unit-or-contract-tested`, with the limitation stated verbatim: *"Pi reads Drenyra Engram context at the memory boundary and never authorizes operations, but no complete executable Engram integration is evidenced; context persistence is a development-grade local JSON store and canonical memory integration is a later concern (REQ-BOUND-001)."*
-- `runtime/context.ts`'s own doc comment: *"Persistence is a development-grade JSON file (`~/.drenyra/context.json`) with atomic writes... canonical storage is a later concern."* This is Pi's company/period **scope** store — it stands in for, but is not, Engram integration.
+- `capability-manifest.yaml#/capabilities/engram-integration`: `state: partial`, `verificationLevel: unit-or-contract-tested`, with the limitation stated verbatim: *"Shell reads Drenyra Engram context at the memory boundary and never authorizes operations, but no complete executable Engram integration is evidenced; context persistence is a development-grade local JSON store and canonical memory integration is a later concern (REQ-BOUND-001)."*
+- `runtime/context.ts`'s own doc comment: *"Persistence is a development-grade JSON file (`~/.drenyra/context.json`) with atomic writes... canonical storage is a later concern."* This is Shell's company/period **scope** store — it stands in for, but is not, Engram integration.
 - `__tests__/capability-manifest.test.ts` has three guard assertions specifically preventing this capability from silently claiming `operational=end-to-end` or `ownership` escalation without deliberate work (lines 961–978, 1095–1118) — the test suite treats this gap as a known, fenced boundary, not an oversight.
 - `docs/architecture/harness-draft-conformance.md:139`: *"Engram integration | Dev-grade local JSON store | Canonical Engram MCP integration deferred (REQ-BOUND-001)."* — explicitly names **MCP** as the deferred integration mode.
 
-**Verdict: real, unstarted, deliberately-deferred work exists here.** REQ-BOUND-001 is a Pi-local decision to defer, not an external gate — unlike SDD-020 (configurator), this is not blocked by the `drenyra-ai` master program's Gate 0. Nothing in `ROADMAP.md`'s "Program alignment" section names Engram integration as one of the master-owned SDD numbers (SDD-000/010/050/060/070/080/090/100/110).
+**Verdict: real, unstarted, deliberately-deferred work exists here.** REQ-BOUND-001 is a Shell-local decision to defer, not an external gate — unlike SDD-020 (configurator), this is not blocked by the `drenyra-ai` master program's Gate 0. Nothing in `ROADMAP.md`'s "Program alignment" section names Engram integration as one of the master-owned SDD numbers (SDD-000/010/050/060/070/080/090/100/110).
 
 ---
 
@@ -27,13 +27,13 @@ Confirmed by direct inspection, not assumption:
 
 `/home/dreamcoder08/Documents/PROYECTOS/drenyra-engram` is a real, local, buildable TypeScript package:
 
-- `package.json`: `"name": "drenyra-engram"`, `"version": "0.0.1-prealpha.1"` — **pre-alpha, same maturity tier as drenyra-pi itself.** Not yet published to any registry (no evidence checked here of an npm publish; matches this repo's own "no publication" posture).
+- `package.json`: `"name": "drenyra-engram"`, `"version": "0.0.1-prealpha.1"` — **pre-alpha, same maturity tier as drenyra-shell itself.** Not yet published to any registry (no evidence checked here of an npm publish; matches this repo's own "no publication" posture).
 - README states explicitly: *"Drenyra Engram is the open component of the Drenyra ecosystem... mirroring `Gentleman-Programming/engram`."* — i.e., it is the same underlying memory engine as the `engram` CLI/MCP tool already installed and running on this machine (used for this very session's memory), rebranded/scoped for the Drenyra accounting domain with fiscal-specific tools layered on top.
 - `docs/CONSUMING.md` documents two consumption modes:
-  - **MCP stdio**: `drenyra-engram mcp` — 57 tools (13 general `engram_*` + 44 fiscal `accounting_*`). **No `authorize`/`approve` tool exists** — memory genuinely cannot authorize, matching Pi's `trust-model.md` §5 ("Memory informs; it never authorizes") by construction, not just by policy.
+  - **MCP stdio**: `drenyra-engram mcp` — 57 tools (13 general `engram_*` + 44 fiscal `accounting_*`). **No `authorize`/`approve` tool exists** — memory genuinely cannot authorize, matching Shell's `trust-model.md` §5 ("Memory informs; it never authorizes") by construction, not just by policy.
   - **HTTP REST**: `drenyra-engram serve` on `127.0.0.1:8787`, `/v1/observations`, `/v1/search`, `/v1/context`, `/v1/chain`, `/accounting/review/queue`, `/accounting/rules/.../impact`.
-- The scope model matches Pi's exactly: `{"kind":"company","organizationId":...,"companyId":...,"ruc":...,"period":...}` is structurally the same RUC + period pair `runtime/context.ts#ScopeContext` already carries.
-- Fiscal-specific tools relevant to Pi's command surface: `accounting_current_context` (read), `accounting_record` (propose an observation), `accounting_object_store` (WORM evidence), `accounting_review_queue` (read). Explicitly excluded from agent capability: `accounting_approve`, `accounting_review_reject/return` — human-only.
+- The scope model matches Shell's exactly: `{"kind":"company","organizationId":...,"companyId":...,"ruc":...,"period":...}` is structurally the same RUC + period pair `runtime/context.ts#ScopeContext` already carries.
+- Fiscal-specific tools relevant to Shell's command surface: `accounting_current_context` (read), `accounting_record` (propose an observation), `accounting_object_store` (WORM evidence), `accounting_review_queue` (read). Explicitly excluded from agent capability: `accounting_approve`, `accounting_review_reject/return` — human-only.
 
 ---
 
@@ -58,11 +58,11 @@ Confirmed by direct inspection, not assumption:
 - A `contracts/engram-dependency.md`-shaped contract, if the maintainer wants the same frozen-contract discipline `runtime-dependency.md` gives `drenyra-ai`.
 - Updating `capability-manifest.yaml#/capabilities/engram-integration` state, with the existing guard tests in `__tests__/capability-manifest.test.ts` as the acceptance bar for any claimed state change.
 
-**Explicitly out of scope for a first slice** (mirrors `trust-model.md` and Pi's own non-goals, and SDD 6's own discipline of small, bounded changes):
-- Any `accounting_approve`/`accounting_review_reject`/`accounting_review_return` call — these are human-only by the sibling repo's own design; Pi must never call them regardless of scope decisions.
+**Explicitly out of scope for a first slice** (mirrors `trust-model.md` and Shell's own non-goals, and SDD 6's own discipline of small, bounded changes):
+- Any `accounting_approve`/`accounting_review_reject`/`accounting_review_return` call — these are human-only by the sibling repo's own design; Shell must never call them regardless of scope decisions.
 - Building or modifying anything inside the `drenyra-engram` repository itself — this change only consumes it.
 - A pin/version-freeze contract as rigorous as `runtime-dependency.md`'s if `drenyra-engram` has no stable release yet (see D2 below) — freezing against a moving pre-alpha target may not be meaningful yet.
-- Publication of drenyra-pi to any registry (carried forward from SDD 6/`REQ-REL-006`, unaffected by this change).
+- Publication of drenyra-shell to any registry (carried forward from SDD 6/`REQ-REL-006`, unaffected by this change).
 
 ---
 
@@ -82,6 +82,6 @@ Non-blocking / deferrable to the design phase (not asked now): the exact contrac
 
 1. `drenyra-engram` is not a hypothetical dependency — it exists as a real, local, buildable pre-alpha TypeScript package at `/home/dreamcoder08/Documents/PROYECTOS/drenyra-engram`, version `0.0.1-prealpha.1`.
 2. `drenyra-engram` explicitly mirrors `Gentleman-Programming/engram`, the same memory engine already running as an MCP server for this Claude Code session's own persistent memory.
-3. REQ-BOUND-001 is a deliberate Pi-local deferral, not a master-program gate like SDD-020's Gate 0 — this change is not blocked by the Drenyra Dominion master program.
-4. `drenyra-engram`'s MCP surface has no `authorize`/`approve` tool by construction, structurally enforcing the same "memory never authorizes" rule Pi's own `trust-model.md` already states as policy.
+3. REQ-BOUND-001 is a deliberate Shell-local deferral, not a master-program gate like SDD-020's Gate 0 — this change is not blocked by the Drenyra Dominion master program.
+4. `drenyra-engram`'s MCP surface has no `authorize`/`approve` tool by construction, structurally enforcing the same "memory never authorizes" rule Shell's own `trust-model.md` already states as policy.
 5. Three existing guard tests in `__tests__/capability-manifest.test.ts` (lines 961-978, 1095-1118) will need to keep passing (or be deliberately and honestly updated) by any real integration work — they currently block silent claims of operational/end-to-end status for this capability.
