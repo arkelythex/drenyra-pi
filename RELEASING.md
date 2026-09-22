@@ -8,7 +8,7 @@
 
 Drenyra Shell is currently a **public repository** (`arkelythex/drenyra-shell`, source-available under a proprietary license — see [LICENSE](LICENSE)). Publication of the npm **package** stays off until an explicit, recorded decision flips the package to a publishing state (see below); the release process is **verification only**:
 
-> **Note:** the GitHub repository rename (`arkelythex/drenyra-pi` → `arkelythex/drenyra-shell`) is a separate external step the maintainer runs manually — `gh repo rename drenyra-shell --repo arkelythex/drenyra-pi` — and is **not** executed by this change; until it runs, the repository is still reachable at the old `arkelythex/drenyra-pi` path (GitHub auto-redirects once renamed).
+> **Note:** the GitHub repository was renamed from `arkelythex/drenyra-pi` to `arkelythex/drenyra-shell` on 2026-09-21 (`gh repo rename`). The old `arkelythex/drenyra-pi` path still resolves via GitHub's automatic redirect.
 
 - **No publication happens anywhere in automation**: no npm registry publication, no dist-tag mutations, no GitHub releases, no tag pushes.
 - The release gate is `.github/workflows/release-verify.yml`, a manually dispatched workflow whose single input is the exact annotated `v<semver>` tag. It must be dispatched from the protected default `main` branch.
