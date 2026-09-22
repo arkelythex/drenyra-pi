@@ -1,7 +1,7 @@
-# Drenyra Pi Participation in SDD-010 — Specification
+# Drenyra Shell Participation in SDD-010 — Specification
 
 > Change: `pi-sdd-010-participation`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Phase: specs (real SDD pipeline)
 > Date: 2026-08-14
 > Baseline: checked-out `main` (`c354274`) with an intentionally dirty worktree; no commit boundary
@@ -10,11 +10,11 @@
 
 ## Purpose
 
-Defines what must be true after Drenyra Pi delivers its bounded participation slice in
+Defines what must be true after Drenyra Shell delivers its bounded participation slice in
 the program master's active SDD-010 (Ecosystem Contracts and Release Train): a green
 local baseline, two frozen v0.1 local contracts whose claims agree with canonical specs
 and runtime source, proportional conformance evidence, a validated machine-readable
-Pi-local capability manifest, verified dated lock-delta facts for the master's next
+Shell-local capability manifest, verified dated lock-delta facts for the master's next
 checkpoint, and planning state that reflects only delivered evidence — all without
 advancing master Gate 0, editing master-owned files, publishing, or committing.
 
@@ -210,10 +210,10 @@ test MUST be added.
 
 ### Requirement: REQ-CAP-001 — Machine-readable per-repository capability manifest
 
-The system MUST provide a machine-readable Pi-local capability manifest whose shape
-aligns with the Pi row of the master `capability-matrix.yaml`, declaring repository
+The system MUST provide a machine-readable Shell-local capability manifest whose shape
+aligns with the Shell row of the master `capability-matrix.yaml`, declaring repository
 identity, role `agentic-runtime`, and explicit states for the master's established
-Pi capability names: `persona-startup-panel`, `drenyra-commands`, `pi-subagents`,
+Shell capability names: `persona-startup-panel`, `drenyra-commands`, `pi-subagents`,
 `model-routing`, `packaged-skills`, `rda-chains`, `tool-safety-broad-deny`,
 `engram-integration`, `pinned-ai-runtime`, and `configurator-install-doctor-sync`.
 Capability states MUST use the master's vocabulary (`implemented`, `partial`,
@@ -223,8 +223,8 @@ capability names MUST NOT be invented.
 
 #### Scenario: SC-CAP-001 — Manifest matches master row vocabulary
 
-- GIVEN the Pi-local capability manifest
-- WHEN it is parsed and compared against the master `capability-matrix.yaml` Pi row
+- GIVEN the Shell-local capability manifest
+- WHEN it is parsed and compared against the master `capability-matrix.yaml` Shell row
 - THEN the manifest declares role `agentic-runtime`, uses exactly the master's
   capability names for the states it reports, and each state is backed by cited
   executable evidence
@@ -260,7 +260,7 @@ and structurally invalid documents.
 ### Requirement: REQ-CAP-004 — Manifest never mutates the master matrix
 
 The system MUST ensure the local capability manifest, its validator, and its test
-operate on Pi-owned artifacts only and MUST NOT write to the master
+operate on Shell-owned artifacts only and MUST NOT write to the master
 `capability-matrix.yaml` or any other master-owned file in `arkelythex/drenyra-ai`.
 
 #### Scenario: SC-CAP-004 — Master matrix untouched
@@ -309,7 +309,7 @@ derive the mutable facts.
 ### Requirement: REQ-LOCK-003 — No master lock or matrix edit
 
 The system MUST NOT edit the master `program-lock.json` or `capability-matrix.yaml`
-(or any master-owned file); the lock-fact record is a Pi-local input for the master's
+(or any master-owned file); the lock-fact record is a Shell-local input for the master's
 next integrated checkpoint.
 
 #### Scenario: SC-LOCK-003 — Master lock untouched

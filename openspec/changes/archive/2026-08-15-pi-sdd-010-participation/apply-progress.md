@@ -1,6 +1,6 @@
 # Apply Progress — pi-sdd-010-participation
 
-> Change: `pi-sdd-010-participation` · Repo: `drenyra-pi` · Phase: apply (implementation)
+> Change: `pi-sdd-010-participation` · Repo: `drenyra-shell` · Phase: apply (implementation)
 > Date: 2026-08-14 · Baseline HEAD: `c354274dd5f5f6e83f291dafe9284ad9210be080`
 > Delivery: uncommitted by design (REQ-BOUND-003) — no commit / PR / publish / master edit
 > Strict TDD: `bun test` (vitest). RED → GREEN → TRIANGULATE → REFACTOR.
@@ -103,7 +103,7 @@ Out-of-scope untracked paths (must remain untouched, never staged/cleaned): `.co
 ### T2.2 — GREEN: capability manifest + validator + wiring
 
 - Created `capability-manifest.yaml` at repository root — JSON-compatible YAML 1.2 profile (JSON bytes + final newline, verified: `JSON.parse` OK, `endsWith("\n")` true), schema `drenyra.capability-manifest.v1`, role `agentic-runtime`, version `0.0.1-prealpha.1` === `package.json.version`.
-- Exactly the ten master Pi capability names (REQ-CAP-001) with states per design §5.2: implemented = `persona-startup-panel` (source `extensions/startup-panel.ts`, test `__tests__/extension.test.ts`), `drenyra-commands` (`extensions/register.ts`, `__tests__/extension.test.ts`), `pi-subagents` (ten `agents/*.md`, `__tests__/agents.test.ts`), `packaged-skills` (`skills/scope-discipline/SKILL.md`, `__tests__/content.test.ts`), `rda-chains` (`chains/monthly-close.ts`, `chains/__tests__/monthly-close-flow.test.ts`), `tool-safety-broad-deny` (`agents/accounting-scout.md`, `__tests__/agents.test.ts`), `pinned-ai-runtime` (`runtime/pin.ts`, `__tests__/pin.test.ts`); partial = `model-routing` (limitation: advisory registry only, no host model-routing API, G30), `engram-integration` (limitation: memory boundary/content only, no complete executable integration); planned = `configurator-install-doctor-sync` (plan: master SDD-020/Gate 0 only). All cited evidence paths verified to exist in the repo. DOWNGRADE never upgrade: no state upgraded beyond the design table.
+- Exactly the ten master Shell capability names (REQ-CAP-001) with states per design §5.2: implemented = `persona-startup-panel` (source `extensions/startup-panel.ts`, test `__tests__/extension.test.ts`), `drenyra-commands` (`extensions/register.ts`, `__tests__/extension.test.ts`), `pi-subagents` (ten `agents/*.md`, `__tests__/agents.test.ts`), `packaged-skills` (`skills/scope-discipline/SKILL.md`, `__tests__/content.test.ts`), `rda-chains` (`chains/monthly-close.ts`, `chains/__tests__/monthly-close-flow.test.ts`), `tool-safety-broad-deny` (`agents/accounting-scout.md`, `__tests__/agents.test.ts`), `pinned-ai-runtime` (`runtime/pin.ts`, `__tests__/pin.test.ts`); partial = `model-routing` (limitation: advisory registry only, no host model-routing API, G30), `engram-integration` (limitation: memory boundary/content only, no complete executable integration); planned = `configurator-install-doctor-sync` (plan: master SDD-020/Gate 0 only). All cited evidence paths verified to exist in the repo. DOWNGRADE never upgrade: no state upgraded beyond the design table.
 - `testState` at WU2 reflects the last observed full-suite run (T1.1 RED baseline: files 35, total 557, passed 555, failed 2, result `failing`); finalized in WU5 (T5.2).
 - Created `scripts/verify-capability-manifest.mjs` — zero-dependency ESM CLI, read-only; exit 0 `verify-capability-manifest: OK`; exit 1 `verify-capability-manifest: FAILED` + one line per violation; exit 2 usage/unreadable. Diagnostics per design §5.3 (invalid serialization, missing role, unknown/missing capability, unsupported state, implemented-without-evidence, partial-without-limitation, planned-without-plan, missing evidence path, count arithmetic).
 - Added ONLY `"verify:capability": "node scripts/verify-capability-manifest.mjs"` to `package.json`; `prepack`/`prepublishOnly` untouched, no publish gate added.
@@ -306,7 +306,7 @@ which carries **seven** agent definitions. The merged repository reality
 (REQ-AGENT-001: adds `invoice-sire-agent`, `journal-candidate-agent`,
 `guardian-angel`). Before the final commit, this change's frozen claims were
 corrected to the ten-agent reality: `contracts/package-contract.md` (Ten
-Pi-native accounting agents + names), `capability-manifest.yaml`
+Shell-native accounting agents + names), `capability-manifest.yaml`
 (`pi-subagents` sources → 10 `agents/*.md`), and this claim matrix
 (ten-agent row, observed 10 files). `__tests__/agents.test.ts` and
 `__tests__/extension.test.ts` were aligned to the origin 10-agent versions.

@@ -2,7 +2,7 @@
 
 **Change**: `pi-engram-memory-reads` (second follow-on to `pi-engram-integration`)
 **Change root (pre-archive)**: `openspec/changes/pi-engram-memory-reads/`
-**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Artifact store**: `openspec` (file-backed, authoritative; `openspec/config.yaml` also declares `store_mode: hybrid`)
 **Archive date**: `2026-09-14`
 **Archived path**: `openspec/changes/archive/2026-09-14-pi-engram-memory-reads/`
@@ -126,7 +126,7 @@ Same boundaries as `pi-engram-integration`'s own archive, plus: no agent file ot
 ## 9. Reproduce this archive
 
 ```sh
-cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
 git log --oneline -3
 node scripts/refresh-program-lock-facts.mjs --check
 bun test

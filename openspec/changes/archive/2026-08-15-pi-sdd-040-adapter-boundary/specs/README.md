@@ -1,7 +1,7 @@
 # OpenSpec Specs — pi-sdd-040-adapter-boundary
 
 This directory indexes the change-local requirement domain for
-`pi-sdd-040-adapter-boundary` (Prove Drenyra Pi Is a Replaceable RDA Host).
+`pi-sdd-040-adapter-boundary` (Prove Drenyra Shell Is a Replaceable RDA Host).
 
 This is change-local organization only (design D1, following the
 `pi-sdd-010-participation` precedent). A canonical

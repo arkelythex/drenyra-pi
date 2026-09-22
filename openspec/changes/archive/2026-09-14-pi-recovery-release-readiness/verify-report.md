@@ -3,7 +3,7 @@
 **Change:** `pi-recovery-release-readiness` (local SDD 6 of 6)
 **Phase:** verify
 **Store:** `openspec` (file-backed, authoritative; `store_mode: hybrid`)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Branch:** `feat/sdd-6-recovery-release-readiness`
 **HEAD at verification time:** `280658e` (`fix(docs): remove ambiguous tilde-path wording that blocks native SDD verify`)
 **Authority:** `specs/release-readiness/spec.md` (`REQ-REL-001`..`006`, 21 scenarios), `tasks.md` (26 rows, hard boundaries), `design.md`, `apply-progress.md` (§1–§49).
@@ -164,7 +164,7 @@ Two extra carriers beyond the spec's three (design commitment, `tasks.md` D11): 
 | Scenario | Verdict | Evidence |
 | --- | --- | --- |
 | No publication surface is added | **PASS** | `grep -n "publishConfig\|npm publish\|registry.npmjs" package.json .github/workflows/*.yml` → no matches. |
-| Roadmap npm item stays unchecked | **PASS** | `ROADMAP.md:54` — `- [ ] Package released as \`drenyra-pi\` on npm with pinned \`drenyra-ai\`` — unchecked. |
+| Roadmap npm item stays unchecked | **PASS** | `ROADMAP.md:54` — `- [ ] Package released as \`drenyra-shell\` on npm with pinned \`drenyra-ai\`` — unchecked. |
 | Verification-only gate is preserved | **PASS** | `.github/workflows/release-verify.yml` `permissions: contents: read` only; no publish step; re-confirmed by direct read. |
 
 **All 21 scenarios: PASS** (18 freshly re-verified in this pass; 3 accepted from apply-progress's own verbatim evidence where re-execution would only reproduce an already-measured, environment-dependent result at the cost of dirtying the tree — flagged explicitly above, not silently reused).

@@ -1,7 +1,7 @@
-# Change: Pi Participation in SDD-010 Ecosystem Contracts and Release Train
+# Change: Shell Participation in SDD-010 Ecosystem Contracts and Release Train
 
 > Change: `pi-sdd-010-participation`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Status: proposed (real SDD pipeline: `proposal → specs → design → tasks → apply → verify → archive`)
 > Artifact store: hybrid (OpenSpec files authoritative; Engram best-effort)
 > Date: 2026-08-14
@@ -10,15 +10,15 @@
 
 ## 0. What this change is — and is not
 
-**This is a real Pi-local SDD change.** It delivers Drenyra Pi's bounded
+**This is a real Shell-local SDD change.** It delivers Drenyra Shell's bounded
 participation slice in the program master's active **SDD-010 — Ecosystem
 Contracts and Release Train**. It proceeds through the complete local SDD
 pipeline and produces implementation plus verification evidence.
 
-- It first restores the known red local baseline, then freezes Pi's two remaining
+- It first restores the known red local baseline, then freezes Shell's two remaining
   draft contracts, adds proportional machine-readable conformance, and records
   verified facts for the master's next integrated checkpoint.
-- It implements only obligations that Pi can own locally while master Gate 0 is
+- It implements only obligations that Shell can own locally while master Gate 0 is
   pending. It does not start any gated vertical or later integration.
 - It references, but does not duplicate, program-master SDD artifacts. The master
   remains authoritative for the federated capability matrix, program lock, gates,
@@ -30,7 +30,7 @@ pipeline and produces implementation plus verification evidence.
 
 ## 1. Executive summary
 
-Drenyra Pi already implements much of the runtime surface that the program
+Drenyra Shell already implements much of the runtime surface that the program
 master currently describes as partial, but its participation evidence is not yet
 checkpoint-ready:
 
@@ -41,42 +41,42 @@ checkpoint-ready:
 2. **Two local contracts remain drafts.** `contracts/package-contract.md` and
    `contracts/runtime-dependency.md` are still marked `0.1-draft`, while ROADMAP
    Phase 1 requires both v0.1 contracts to be frozen.
-3. **Implemented claims lack one proportional contract-to-runtime check.** Pi has
+3. **Implemented claims lack one proportional contract-to-runtime check.** Shell has
    existing install, doctor, pin, package, and release verification coverage, but
    the SDD must confirm whether those tests adequately bind frozen claims such as
    the 16-command surface, released pin/checksum, and seven-agent inventory.
-4. **The master cannot consume a current Pi checkpoint from this repository.**
-   The master `program-lock.json` Pi row is stale relative to local HEAD and test
-   reality. Pi needs a local machine-readable capability manifest and a dated,
+4. **The master cannot consume a current Shell checkpoint from this repository.**
+   The master `program-lock.json` Shell row is stale relative to local HEAD and test
+   reality. Shell needs a local machine-readable capability manifest and a dated,
    verified lock-fact record without writing master-owned files.
 5. **Local planning state is stale.** ROADMAP Phase 1 and
    `openspec/config.yaml.current_test_state` must reflect only evidence actually
    delivered and verified by this SDD.
 
-The intended outcome is a green, internally consistent Pi repository with frozen
+The intended outcome is a green, internally consistent Shell repository with frozen
 v0.1 local contracts, proportional conformance checks, and checkpoint facts that
 the program master can consume without inference.
 
 ## 2. Program alignment — active SDD-010 only
 
-Drenyra Pi participates in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/4975f4f/openspec/programs/drenyra-dominion)
-as participant `drenyra-pi` with role `agentic-runtime`. The master owns the
+Drenyra Shell participates in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/4975f4f/openspec/programs/drenyra-dominion)
+as participant `drenyra-shell` with role `agentic-runtime`. The master owns the
 federated program artifacts; this repository owns only its local implementation
 and evidence.
 
-| Program item | Pi-local treatment in this change | Boundary |
+| Program item | Shell-local treatment in this change | Boundary |
 | --- | --- | --- |
 | SDD-010 — Ecosystem Contracts and Release Train | Deliver the local contract-freeze, capability-manifest, conformance, and checkpoint-fact slice | **In scope; active Wave 0 work** |
-| Six frozen v0.1 program contracts and protection rule | Report Pi's consumed/produced contract facts where locally verifiable; do not redefine master contracts | Reference and checkpoint evidence only |
-| Per-repository capability manifest | Add a Pi-local machine-readable manifest matching the master matrix row shape: role, capability states, and tests | Pi-owned artifact; master remains authoritative for aggregation |
-| Versioning/compatibility policy and release train | Ensure Pi's local frozen contracts and verification-only release facts are explicit and consumable | No master policy edits and no npm publish |
+| Six frozen v0.1 program contracts and protection rule | Report Shell's consumed/produced contract facts where locally verifiable; do not redefine master contracts | Reference and checkpoint evidence only |
+| Per-repository capability manifest | Add a Shell-local machine-readable manifest matching the master matrix row shape: role, capability states, and tests | Shell-owned artifact; master remains authoritative for aggregation |
+| Versioning/compatibility policy and release train | Ensure Shell's local frozen contracts and verification-only release facts are explicit and consumable | No master policy edits and no npm publish |
 | `program-lock.json` composition | Produce a verified dated delta record for the master's next checkpoint | Do not edit the master's lock |
 | SDD-020 — Universal Agent Configurator | Keep blocked: master Gate 0 is pending and R10 says it **MUST NOT be started** | **Out of scope and gated** |
 | SDD-030, SDD-040, and later integrations | Preserve references only; no implementation or local surrogate artifacts | **Out of scope and gated by master sequencing/Gate 0** |
 
 Master Gate 0 remains `pending` at the reconciled program revision. In
 particular, cross-repository visibility alignment and attributable approvals
-(E-009) remain pending, and R10 blocks SDD-020. This Pi-local SDD neither claims
+(E-009) remain pending, and R10 blocks SDD-020. This Shell-local SDD neither claims
 those gates complete nor uses local progress to bypass them. The authoritative
 gate evidence is the program master's `openspec/programs/drenyra-dominion/gate-0.md`
 §4 at `arkelythex/drenyra-ai@4975f4f` (reconciled 2026-08-14).
@@ -97,7 +97,7 @@ marked complete.
 | Implemented surface to reconcile | 16 registered commands, seven agents, released `drenyra-ai@0.2.0` pin, entry checksum `e4e81914f5f069121fe281f18be69b4f8099e111b51fe30a7de52dca7078c047` | `extensions/register.ts`; `agents/`; `runtime/pin.ts` |
 | Existing conformance coverage | Doctor, installer, pin, package verification, release verification, extension/status/authority/evidence/style tests and package/style verification scripts already exist | `__tests__/*.test.ts`; `scripts/verify-package-files.mjs`; `scripts/verify-packed-install.mjs`; `scripts/verify-style.mjs`; `package.json` |
 | Planning state | ROADMAP Phase 1 contract items remain open; OpenSpec test state still records archived 493-test evidence | `ROADMAP.md`; `openspec/config.yaml` |
-| Master lock drift | Master Pi row records commit `ea0518b…`, version `0.0.1-prealpha.1`, zero tests, no active changes, and incomplete local facts; local baseline is `c354274` with 557 tests executed (555 passing, 2 failing) | Master `program-lock.json` at `4975f4f`; current local baseline evidence |
+| Master lock drift | Master Shell row records commit `ea0518b…`, version `0.0.1-prealpha.1`, zero tests, no active changes, and incomplete local facts; local baseline is `c354274` with 557 tests executed (555 passing, 2 failing) | Master `program-lock.json` at `4975f4f`; current local baseline evidence |
 
 ## 4. Proposed scope and work units
 
@@ -114,7 +114,7 @@ Follow strict TDD discipline for the two known failures:
 - Run focused checks, then the full test suite, before treating the baseline as
   green.
 
-### 4.2 Freeze the two Pi-local contracts at v0.1
+### 4.2 Freeze the two Shell-local contracts at v0.1
 
 Perform a final evidence-backed content pass over
 `contracts/package-contract.md` and `contracts/runtime-dependency.md`:
@@ -146,13 +146,13 @@ agents. It must not duplicate coverage merely to create a new filename. Any new
 check must be deterministic, machine-readable where applicable, and run under the
 existing Vitest command.
 
-### 4.4 Add the Pi-local capability manifest
+### 4.4 Add the Shell-local capability manifest
 
 Add one machine-readable per-repository manifest whose shape can align directly
-with the Pi row in the master `capability-matrix.yaml`:
+with the Shell row in the master `capability-matrix.yaml`:
 
 - repository identity and role (`agentic-runtime`);
-- the master's named Pi capabilities with explicit states;
+- the master's named Shell capabilities with explicit states;
 - test/conformance state derived from current evidence;
 - sufficient version or schema identity to validate the artifact safely.
 
@@ -163,7 +163,7 @@ it does not supersede or mutate the master matrix.
 
 ### 4.5 Record verified program-lock delta facts
 
-Create a dated Pi-local machine-readable record for the master's next integrated
+Create a dated Shell-local machine-readable record for the master's next integrated
 checkpoint. The exact design and path belong to the design phase, but the record
 must include only facts verified at the final candidate:
 
@@ -200,7 +200,7 @@ After implementation verification succeeds:
 | Tests | Correct one stale visibility assertion; possibly add one proportional contract-conformance test; retain all verification-only release safeguards |
 | Contracts | Freeze two Markdown contracts at v0.1, update their index status, and refresh the package content manifest |
 | Verification tooling | Reuse existing package verification; add narrowly scoped manifest validation where required |
-| Program participation artifacts | Add a Pi-local capability manifest and dated program-lock delta facts |
+| Program participation artifacts | Add a Shell-local capability manifest and dated program-lock delta facts |
 | Planning/configuration | Update ROADMAP and OpenSpec test evidence only after successful verification |
 | Program master | No files changed; receives consumable facts only at a later master-owned checkpoint |
 | User worktree | Unrelated dirty style/evidence-status work remains untouched |
@@ -246,7 +246,7 @@ same final candidate:
    conformance tests.
 5. Existing conformance coverage is explicitly mapped; a dedicated test exists
    only if a real gap required it, and that gap is named.
-6. A validated Pi-local capability manifest uses the master's capability names
+6. A validated Shell-local capability manifest uses the master's capability names
    and row semantics, with explicit role, capability states, and test state.
 7. A validated dated lock-fact record distinguishes HEAD from uncommitted
    candidate state and reports version, contracts, checksums, capability states,
@@ -310,7 +310,7 @@ publishing is explicitly out of scope.
 ## 11. Result contract
 
 - `status`: `proposed`
-- `executive_summary`: restore Pi's red baseline, freeze its two remaining local
+- `executive_summary`: restore Shell's red baseline, freeze its two remaining local
   v0.1 contracts against canonical specs and runtime evidence, add proportional
   conformance plus a validated local capability manifest, and produce verified
   lock-delta facts for the master SDD-010 checkpoint without advancing Gate 0 or

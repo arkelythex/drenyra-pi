@@ -1,6 +1,6 @@
 # Apply Progress — Evidence-Driven Accounting Harness
 
-> Change: `evidence-driven-accounting-harness` · Repo: `drenyra-pi` · Store: HYBRID (this file authoritative; Engram best-effort)
+> Change: `evidence-driven-accounting-harness` · Repo: `drenyra-shell` · Store: HYBRID (this file authoritative; Engram best-effort)
 > PR #1 (S1 — Contracts, complete scope, canonicalization) · Branch: `eda/s1-contracts-scope-canonicalization` (off main@b5e5815)
 > Chain: 9-PR stacked-to-main (confirmed by user). This batch = PR #1 only. NOT committed (orchestrator commits).
 
@@ -15,7 +15,7 @@ applyState: ready              # -> completed for PR #1 implementation tasks
 dependencies: { apply: ready -> all_done (PR #1), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: PR #2 / S2 (stacked-to-main)
 ```
@@ -115,7 +115,7 @@ applyState: ready              # -> completed for PR #2 implementation tasks
 dependencies: { apply: ready -> all_done (PR #2), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: PR #3 S3a (stacked-to-main)
 ```
@@ -219,7 +219,7 @@ applyState: ready              # -> completed for PR #3 implementation tasks
 dependencies: { apply: ready -> all_done (PR #3), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: PR #4 S3b (stacked-to-main)
 ```
@@ -315,7 +315,7 @@ applyState: ready              # -> completed for PR #4 implementation tasks
 dependencies: { apply: ready -> all_done (PR #4), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: PR #5 S4a (stacked-to-main)
 ```
@@ -415,7 +415,7 @@ applyState: ready              # -> completed for PR #5 implementation tasks
 dependencies: { apply: ready -> all_done (PR #5), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: PR #6 S4b (stacked-to-main)
 ```
@@ -519,7 +519,7 @@ applyState: ready              # -> completed for PR #6 implementation tasks
 dependencies: { apply: ready -> all_done (PR #6), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: PR #7 S5a (stacked-to-main)
 ```
@@ -644,7 +644,7 @@ applyState: ready              # -> completed for PR #9 implementation tasks (AL
 dependencies: { apply: ready -> all_done (chain complete), verify: blocked (parent review owns) }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: verify + archive (parent-owned; T-GATE-004)
 ```

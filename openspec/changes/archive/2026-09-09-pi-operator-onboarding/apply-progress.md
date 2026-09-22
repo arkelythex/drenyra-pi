@@ -1,7 +1,7 @@
 # Apply progress: pi-operator-onboarding safety slice
 
 ## Status consumed
-- Native status: apply `ready`, 0/13 initially complete, repo-local workspace `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`, and no `actionContext` warnings.
+- Native status: apply `ready`, 0/13 initially complete, repo-local workspace `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`, and no `actionContext` warnings.
 - Parent proceed token: `sha256:35b5212dbae2d82bcd597fd4493954d473bddf4bfe63f879023eb0cb8def8d57`; work unit `scope-selection-isolation`; parent retains acquire/settle ownership.
 - Strict TDD and the 400-line single-review-unit limit were honored.
 

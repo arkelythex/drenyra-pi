@@ -1,7 +1,7 @@
 # OpenSpec Specs — pi-sdd-010-participation
 
 This directory indexes the change-local requirement domains for
-`pi-sdd-010-participation` (Drenyra Pi participation in the program master's
+`pi-sdd-010-participation` (Drenyra Shell participation in the program master's
 active SDD-010, Ecosystem Contracts and Release Train).
 
 This is change-local organization only (design D1). A canonical

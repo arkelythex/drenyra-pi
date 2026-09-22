@@ -1,7 +1,7 @@
 # ARCHIVE REPORT — pi-sdd-040-adapter-boundary
 
-**Change**: `pi-sdd-040-adapter-boundary` — prove Drenyra Pi is a replaceable RDA host
-**Repo**: `drenyra-pi` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
+**Change**: `pi-sdd-040-adapter-boundary` — prove Drenyra Shell is a replaceable RDA host
+**Repo**: `drenyra-shell` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
 **Archived at**: `openspec/changes/archive/2026-08-15-pi-sdd-040-adapter-boundary/`
 **Archive date**: 2026-08-15
 **Artifact store**: HYBRID (openspec/ files authoritative; engram best-effort)
@@ -11,7 +11,7 @@
 
 ## 1. Executive summary
 
-This change proved, rather than merely documented, that Drenyra Pi is a
+This change proved, rather than merely documented, that Drenyra Shell is a
 replaceable agentic-runtime host for Drenyra AI's deterministic fiscal-authority
 kernel. It audited every prohibited authority behavior, delivered an independent
 two-host replacement harness comparing Pi against a minimal substitute host over

@@ -2,7 +2,7 @@
 
 **Change:** `pi-engram-integration` (first local SDD change after the six-change program closed)
 **Phase:** proposal (openspec artifact store, file-backed authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Inputs:** `exploration.md`, `preproposal.md` (gate **CLOSED**, decisions D1–D3 confirmed by the maintainer)
 **Authority:** the preproposal's confirmed decision record. The human was not re-interviewed for this proposal; no settled decision is reopened — one baseline correction (§2) is reported, not a re-litigated decision.
 **Writes performed by this phase:** this file only. No source, test, contract, config, or lock fact was written. Nothing was committed.
@@ -13,7 +13,7 @@
 
 ## 1. Intent
 
-`REQ-BOUND-001` deliberately deferred "canonical memory integration" while Pi's own program (SDD 1–6) was still being built. That program is now closed. The deferred capability is still marked `partial` in `capability-manifest.yaml`, with an honest limitation string and three guard tests (`__tests__/capability-manifest.test.ts`) actively preventing anyone from silently claiming otherwise. This proposal closes the smallest honest piece of that gap: the scope store Pi already has (`ScopeContext` — RUC + period, the same shape every `/drenyra:*` command threads) moves from a bespoke local JSON file to Engram's own scope-first storage, reached the same way this very development environment already reaches its own Engram-backed memory (MCP stdio).
+`REQ-BOUND-001` deliberately deferred "canonical memory integration" while Shell's own program (SDD 1–6) was still being built. That program is now closed. The deferred capability is still marked `partial` in `capability-manifest.yaml`, with an honest limitation string and three guard tests (`__tests__/capability-manifest.test.ts`) actively preventing anyone from silently claiming otherwise. This proposal closes the smallest honest piece of that gap: the scope store Shell already has (`ScopeContext` — RUC + period, the same shape every `/drenyra:*` command threads) moves from a bespoke local JSON file to Engram's own scope-first storage, reached the same way this very development environment already reaches its own Engram-backed memory (MCP stdio).
 
 **Why now.** The gap is real (confirmed in exploration, not assumed), not blocked by the Drenyra Dominion master program's gates (unlike SDD-020), and the dependency it needs (`drenyra-engram`) is a real, locally buildable sibling repository — not a future promise.
 
@@ -55,10 +55,10 @@ This does not change D1, D2, or D3 — all three still hold — it refines *how*
 
 ### Out of scope (carried from preproposal.md, unchanged)
 
-- `accounting_approve` / `accounting_review_reject` / `accounting_review_return` — human-only, never called by Pi.
+- `accounting_approve` / `accounting_review_reject` / `accounting_review_return` — human-only, never called by Shell.
 - Any code change inside the `drenyra-engram` repository.
 - Command-level proposal-informing memory reads (`engram_search`, `accounting_current_context` used to shape a proposal) — a later slice, not this change.
-- Publication of `drenyra-pi` to any registry (`REQ-REL-006`, unaffected).
+- Publication of `drenyra-shell` to any registry (`REQ-REL-006`, unaffected).
 - Widening the canonical 10-element scope model beyond RUC + period.
 - A pin/version-freeze contract as rigorous as `runtime-dependency.md`'s final form, if design finds `0.2.1-SNAPSHOT`'s pre-release nature makes that premature — design may recommend a lighter "tracked, not yet frozen" record instead, consistent with D2's "accept pre-alpha" spirit.
 
@@ -67,9 +67,9 @@ This does not change D1, D2, or D3 — all three still hold — it refines *how*
 ## 4. Open questions for design (not blocking proposal, not reopening D1–D3)
 
 1. Exact vendoring shape for a per-platform compiled binary (one platform now, matrix later? which checksum manifest entry pattern?).
-2. Whether `~/.drenyra/context.json` is fully replaced or kept as a fail-open local cache when the Engram child process is unreachable (fail-closed for fiscal operations is Pi's existing posture generally, but scope-read failure specifically may warrant a narrower policy — design's call, with `trust-model.md` as the authority to reconcile against).
+2. Whether `~/.drenyra/context.json` is fully replaced or kept as a fail-open local cache when the Engram child process is unreachable (fail-closed for fiscal operations is Shell's existing posture generally, but scope-read failure specifically may warrant a narrower policy — design's call, with `trust-model.md` as the authority to reconcile against).
 3. Where the new dependency's contract record lives: extend `runtime-dependency.md`, or a new sibling `contracts/engram-dependency.md`.
-4. Whether `DRENYRA_DEFAULT_SCOPE`-shaped MCP initialize metadata (`docs/CONSUMING.md` §2 in the sibling repo) is the right binding point, or whether Pi should call explicit `engram_*`/`accounting_*` tools after a plain `initialize`.
+4. Whether `DRENYRA_DEFAULT_SCOPE`-shaped MCP initialize metadata (`docs/CONSUMING.md` §2 in the sibling repo) is the right binding point, or whether Shell should call explicit `engram_*`/`accounting_*` tools after a plain `initialize`.
 
 ---
 

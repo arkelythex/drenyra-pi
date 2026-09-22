@@ -26,7 +26,7 @@ This change successfully established an evidence-cited capability conformance ma
    - 10-row evidence-cited table, one per capability in `capability-manifest.yaml`
    - Concrete `file:line` and/or test-name citations per row
    - Four-tier verification level taxonomy: `declared-only`, `implemented`, `unit-or-contract-tested`, `validated-end-to-end`
-   - Explicit synthesis disclaimer: "This scheme is Drenyra Pi's own synthesis of Kubernetes-style evidence gating and Backstage-style manifest embedding, not a 1:1 copy of either standard"
+   - Explicit synthesis disclaimer: "This scheme is Drenyra Shell's own synthesis of Kubernetes-style evidence gating and Backstage-style manifest embedding, not a 1:1 copy of either standard"
    - Snapshot identity: `dirty-sha256:a4ea5d711584c94b175f585384991c37714a8b5e9690192a2d84655456ba601c`
    - Evidence date: 2026-09-09
    - Non-evergreen disclaimer: explicitly states this is a point-in-time snapshot, not a live/auto-updating document

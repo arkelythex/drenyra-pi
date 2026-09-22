@@ -3,7 +3,7 @@
 **Change:** `pi-engram-memory-reads`
 **Phase:** tasks — read-only against the repository. **The only write performed by this phase is this file.**
 **Store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Authority:** `design.md` (authority for this phase), `specs/engram-integration/spec.md` delta (`REQ-ENG-005`, `REQ-ENG-006`, 5 scenarios), `proposal.md`.
 
 **Scope in one sentence.** One new Pi tool (`drenyra_institutional_memory`), backed by the already-built Engram client, reachable only by `journal-candidate-agent`, calling only `engram_search` — nothing else changes.

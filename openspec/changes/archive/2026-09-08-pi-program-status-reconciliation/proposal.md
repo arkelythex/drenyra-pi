@@ -1,7 +1,7 @@
 # Change: Pi Program Status Reconciliation
 
 > Change: `pi-program-status-reconciliation`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Status: reconciled (documentation/state reconciliation — **NOT an SDD**)
 > Artifact store: openspec (files authoritative; engram best-effort)
 > Date: 2026-08-14
@@ -49,14 +49,14 @@ The repository's documentation lagged its own `main` baseline in four places:
 
 ## 2. Program alignment — links to the master SDDs (no duplication)
 
-Drenyra Pi is a participant in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion)
+Drenyra Shell is a participant in the [Drenyra Dominion Program](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion)
 (the federated program master in `arkelythex/drenyra-ai`). Per the program's
 master + vertical SDD model, this repository holds only its local change plus a
 reference to the master; **full specs are never copied here**.
 
-| Master SDD (in `arkelythex/drenyra-ai`) | Role in Drenyra Pi | Reference status |
+| Master SDD (in `arkelythex/drenyra-ai`) | Role in Drenyra Shell | Reference status |
 | --- | --- | --- |
-| [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) | Served primarily by Drenyra Pi: `install`, `doctor`, `sync`, `upgrade`, `rollback` plus host integration | Referenced from this repo's `README.md`; master artifacts **not** present here |
+| [SDD-020 — Universal Agent Configurator](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-020-configurator) | Served primarily by Drenyra Shell: `install`, `doctor`, `sync`, `upgrade`, `rollback` plus host integration | Referenced from this repo's `README.md`; master artifacts **not** present here |
 | [SDD-030 — Organic Accounting Work Routing](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-030-routing) | Direct / delegated / durable-mission routing from evidence and risk | Referenced from this repo's `README.md`; master artifacts **not** present here |
 | [SDD-040 — Receipt-Driven Accounting v2](https://github.com/arkelythex/drenyra-ai/tree/main/openspec/programs/drenyra-dominion/sdds/sdd-040-rda-v2) | Frozen candidate, proportional review, bounded correction, reusable receipt (RDA v2 chains) | Referenced from this repo's `README.md`; master artifacts **not** present here |
 | SDD-010, SDD-050, SDD-070, SDD-080, SDD-090, SDD-110 | Program-master SDDs identified by the broad audit (Gate 0 / fiscal-authority-kernel / capability-matrix / program-lock lineage) | **Reference-only, verified 2026-08-14** — master `drenyra-ai/openspec/programs/drenyra-dominion/` catalog defines SDDs 000–110 incl. 010/050/070/080/090/110; **not copied here, no Pi-local artifacts** |
@@ -85,7 +85,7 @@ no tests or package verification were re-run (documentation-only change), so
 | Agents | **7 roles** with mirrored assets: accounting-scout, evidence-builder, ledger-analyst, reconciliation-agent, tax-controller-pe, anomaly-refuter, close-controller | `agents/` + `agents/README.md`; `assets/agents/` |
 | Contracts — frozen | 15 versioned JSON schemas + `contracts/SHA256SUMS.json`; 9 canonical specs in `openspec/specs/` | `contracts/`; `openspec/specs/` |
 | Contracts — still open (draft) | `package-contract` and `runtime-dependency` remain **0.1-draft** — not frozen; contract freeze is ROADMAP Phase 1, still open | `contracts/package-contract.md`, `contracts/runtime-dependency.md`, `contracts/README.md` |
-| Package | `drenyra-pi@0.0.1-prealpha.1` (ESM, node ≥22, zero runtime deps, `drenyra-ai` pinned tgz devDependency) | `package.json` (read-only) |
+| Package | `drenyra-shell@0.0.1-prealpha.1` (ESM, node ≥22, zero runtime deps, `drenyra-ai` pinned tgz devDependency) | `package.json` (read-only) |
 | Release gate | Verification-only gate (`release-verify` workflow); no publication anywhere in automation | `RELEASING.md`; `.github/workflows/release-verify.yml` |
 | Test evidence (archived) | 493 tests / 29 files passing at revision `a82a2c2` (2026-08-04, archived change verify-report); **not re-run** in this change | `openspec/changes/archive/2026-08-04-evidence-driven-accounting-harness/verify-report.md` |
 

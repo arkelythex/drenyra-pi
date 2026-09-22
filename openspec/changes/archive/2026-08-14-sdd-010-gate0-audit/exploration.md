@@ -1,6 +1,6 @@
 # Exploration — SDD-010 Gate 0 Audit
 
-**Repo**: `drenyra-pi` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0`)
+**Repo**: `drenyra-shell` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0`)
 **Phase**: `sdd-explore` (read-only) — Gate 0 audit only
 **Artifact store**: openspec (files authoritative; engram best-effort)
 **Scope discipline**: fail-closed on missing/misreferenced scope
@@ -15,13 +15,13 @@ The Gate 0 audit cannot be closed from the evidence available in this worktree.
 Every audited item except the "frozen contracts / root documents" item references
 program-level artifacts (`SDD-010`, `Gate 0`, `fiscal-authority-kernel`,
 `bounded-agent-roles`, `capability-matrix` recalculation, `program-lock`) that do
-**not exist anywhere** in `drenyra-pi`. The repository's own documentation
+**not exist anywhere** in `drenyra-shell`. The repository's own documentation
 (`README.md`, `ROADMAP.md`) locates the SDD program master — including `SDD-020`,
 `SDD-030`, `SDD-040` — in the **parent** `arkelythex/drenyra-ai` repository under
 `openspec/programs/drenyra-dominion/sdds/`, which is **not present in this worktree**.
 The only change in this repo's OpenSpec store is fully archived and closed.
 
-Recommendation: **do NOT create a proposal** in `drenyra-pi` until the orchestrator
+Recommendation: **do NOT create a proposal** in `drenyra-shell` until the orchestrator
 supplies the Drenyra Dominion program-master context (the SDD-010/Gate 0 artifacts)
 or confirms the intended planning location is the parent program repo. Creating a
 proposal here would fabricate scope outside the authoritative store.
@@ -161,7 +161,7 @@ either:
 1. **Supply the Drenyra Dominion program-master context** — the SDD-010 / Gate 0
    definitions, `fiscal-authority-kernel`, `bounded-agent-roles`, `capability-matrix`,
    and `program-lock` — which live in `arkelythex/drenyra-ai` (per README/ROADMAP), or
-2. **Confirm the planning location** is the parent program repo (not `drenyra-pi`),
+2. **Confirm the planning location** is the parent program repo (not `drenyra-shell`),
    or
 3. **Restore/persist the missing planning artifacts** into this store so the audit
    can be re-run against real evidence.
@@ -186,7 +186,7 @@ in which case the planning context must be injected or persisted to `openspec/`.
 - `status`: `blocked`
 - `executive_summary`: Gate 0 audit cannot close — every referenced program artifact
   (SDD-010, Gate 0, fiscal-authority-kernel, bounded-agent-roles, capability-matrix,
-  program-lock) lives in the parent Drenyra Dominion program, not in `drenyra-pi`;
+  program-lock) lives in the parent Drenyra Dominion program, not in `drenyra-shell`;
   no active SDD change exists; frozen contracts/root documents are identified and
   untouched; issue-first is preserved by inaction but the required approved issue is
   unverified.

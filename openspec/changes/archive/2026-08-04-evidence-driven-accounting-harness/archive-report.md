@@ -1,7 +1,7 @@
 # ARCHIVE REPORT — Evidence-Driven Accounting Harness
 
 **Change**: `evidence-driven-accounting-harness`
-**Repo**: `drenyra-pi` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
+**Repo**: `drenyra-shell` (Bun + TS ESM, vitest, Pi extension package, pinned `drenyra-ai@0.2.0` vendored)
 **Archived at**: `openspec/changes/archive/2026-08-04-evidence-driven-accounting-harness/`
 **Evidence revision**: `a82a2c2b3b4759ae6ee452d076929c32e52390a6` (main HEAD; verified before archive)
 **Archive date**: 2026-08-04
@@ -137,7 +137,7 @@ taskProgress: { total: 31 implementation-owned, complete: 31, remaining: 0, unch
 deferredParentActions: { total: 4 (T-GATE-001..004), complete: 0, remaining: 4 -> archive completes T-GATE-004 }
 actionContext:
   mode: repo-local
-  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+  workspaceRoot: /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
   allowedEditRoots: [workspace root]   # no warnings
 nextRecommended: none (change complete)
 ```
@@ -158,7 +158,7 @@ No blockers; `nextRecommended` at verify was `archive`, which this phase execute
 | `sdd/evidence-driven-accounting-harness/state` | updated → archived, archive path | ✅ / ⚠️ (see observation IDs below) |
 | `sdd/evidence-driven-accounting-harness/archive-report` | saved (hybrid rule) | ✅ / ⚠️ (see observation IDs below) |
 
-Engram server is flaky in this environment; files under `openspec/` remain authoritative. Observation IDs: state → **9372**, archive-report → **9373** (both `saved`; project `drenyra-pi`).
+Engram server is flaky in this environment; files under `openspec/` remain authoritative. Observation IDs: state → **9372**, archive-report → **9373** (both `saved`; project `drenyra-shell`).
 
 ## 13. Next steps (follow-ups, not blockers)
 

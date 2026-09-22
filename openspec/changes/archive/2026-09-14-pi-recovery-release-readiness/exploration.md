@@ -1,7 +1,7 @@
 # Exploration — pi-recovery-release-readiness
 
-**Change:** `pi-recovery-release-readiness` (local SDD 6 of 6 in the Drenyra Pi program)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Change:** `pi-recovery-release-readiness` (local SDD 6 of 6 in the Drenyra Shell program)
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Artifact store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
 **Phase:** explore — read-only. No source, test, contract, spec, config, or lock-fact file was written by this phase. The only write is this artifact.
 **Status:** explored; proposal not written. Scope is **discovered, not invented** — the bounded gap list below is offered as candidate scope for a human decision, not as a settled scope.
@@ -153,7 +153,7 @@ and `__tests__/capability-manifest.test.ts:1393` runs that validator **against t
 - The step omits the `config.yaml` mirror, so a pin bump performed exactly as documented leaves `verify:capability` red (G2).
 - It omits `--check` entirely.
 
-**Why this is a release-readiness finding and not typo-hunting:** step 7 is inside the **pin-bump procedure** — the repository's definition of a release event. `contracts/runtime-dependency.md` rule 6 ("Upgrade is explicit") makes a pin change a release of Drenyra Pi itself. So the documented release procedure currently tells an operator to hand-edit the trust anchor, contrary to the enforced rule.
+**Why this is a release-readiness finding and not typo-hunting:** step 7 is inside the **pin-bump procedure** — the repository's definition of a release event. `contracts/runtime-dependency.md` rule 6 ("Upgrade is explicit") makes a pin change a release of Drenyra Shell itself. So the documented release procedure currently tells an operator to hand-edit the trust anchor, contrary to the enforced rule.
 
 ### G4 — GAP. Checklist item 3 ("conformance vectors") has no executable implementation
 
@@ -281,7 +281,7 @@ Each item below is measured directly:
 3. The native `sdd-attempt acquire`/`settle` digest folds an eligible-untracked inventory; machine-local cache bytes inflate it and can change it for reasons unrelated to the work.
 4. It is reproducible: the same shape re-appeared as an SDD-1 repair target.
 
-**Correct disposition (recommended, not executed):** remove it as its own explicitly authorized unit — `rm -rf` on the **absolute** path `…/drenyra-pi/~` — and add a defensive `~*` (or `~`) entry to `.gitignore` so a repetition cannot reach a commit. **This explore phase did not delete it, per its authority boundary.** Note the hazard in the remediation itself: `rm -rf ~` would be catastrophic, so the command must use the absolute repository path.
+**Correct disposition (recommended, not executed):** remove it as its own explicitly authorized unit — `rm -rf` on the **absolute** path `…/drenyra-shell/~` — and add a defensive `~*` (or `~`) entry to `.gitignore` so a repetition cannot reach a commit. **This explore phase did not delete it, per its authority boundary.** Note the hazard in the remediation itself: `rm -rf ~` would be catastrophic, so the command must use the absolute repository path.
 
 ### G12 — HAZARD (product decision). `postinstall` silently no-ops when the compiled installer is absent
 
@@ -394,7 +394,7 @@ Arguments to be wary:
 | **D5** | **`postinstall`.** Keep the silent skip, or fail closed when `dist/scripts/install-drenyra-ai.js` is absent? | (a) keep (CI installs before build); (b) fail closed and move CI's `bun install` after the build; (c) add a loud warning but exit 0. | A fail-open at the boundary whose doctrine is fail-closed. The current behavior means a source-clone `bun install` can silently install no runtime. |
 | **D6** | **`REQ-CONF-005`.** May a second change folder be open? | (a) archive the active change first; (b) bind SDD 6's scope to exclude the named surfaces; (c) record an explicit interpretation. | Determines whether this change may exist at all under canonical spec, and constrains U3/U4 (which need `openspec/config.yaml` and possibly `capability-manifest.yaml`). |
 | **D7** | **Authority over identity-bearing surfaces.** May the change touch `openspec/config.yaml`, `package.json`, `capability-manifest.yaml`, `RELEASING.md`, `docs/architecture/program-lock-facts.md`, and `__tests__/**` — and will the "refresh is a post-step of every unit" rule be honored as the generalized rule states? | as stated | `openspec/config.yaml`, `package.json`, `capability-manifest.yaml`, `ROADMAP.md`, `contracts/README.md`, and the two guard files are all members of `PARTICIPATION_PATHS_V1`; every write to them moves the candidate identity and forces the recovery pair. |
-| **D8** | **Publication posture.** Confirm SDD 6 stops at *verified gate + honest docs* and does **not** enable npm publication, add `publishConfig`, or add a publish step. | as stated | `RELEASING.md` requires an explicit recorded decision; the ROADMAP item "Package released as `drenyra-pi` on npm" stays unchecked. |
+| **D8** | **Publication posture.** Confirm SDD 6 stops at *verified gate + honest docs* and does **not** enable npm publication, add `publishConfig`, or add a publish step. | as stated | `RELEASING.md` requires an explicit recorded decision; the ROADMAP item "Package released as `drenyra-shell` on npm" stays unchecked. |
 | **D9** | **"Conformance vectors" (G4).** Implement a vector runner, or rewrite checklist item 3 to name the gates that actually run? | (a) rewrite the checklist item; (b) build a runner; (c) both. | Bounded, cheap, and it removes an uncitable gate from the release record. |
 | **D10** | **`pi-skills-memory-integration`'s missing artifacts.** `state.yaml` cites `upstream-contract-proposal.md` (absent) and native status expects `tasks.md` (absent). Record the absence as-is, or require the missing artifact before any status change? | as stated | Prevents a status change from silently laundering a missing artifact into "done". Belongs with D3. |
 

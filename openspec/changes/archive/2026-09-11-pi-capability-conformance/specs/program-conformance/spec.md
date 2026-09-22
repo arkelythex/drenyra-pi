@@ -96,23 +96,23 @@ README.md, ROADMAP.md, `capability-manifest.yaml`, the capability conformance ma
 
 ### Requirement: REQ-CONF-007 — Ownership and authority boundaries
 
-Capability evidence MUST identify whether behavior is Pi-local, consumed from the pinned kernel, referenced-only under Dominion/master ownership, or unavailable as an operational integration. Pi-local documentation, tests, and conformance records MUST NOT upgrade kernel or Dominion/master-owned behavior to Pi ownership, grant Pi fiscal authority, or represent referenced-only behavior as locally validated end-to-end.
+Capability evidence MUST identify whether behavior is Shell-local, consumed from the pinned kernel, referenced-only under Dominion/master ownership, or unavailable as an operational integration. Shell-local documentation, tests, and conformance records MUST NOT upgrade kernel or Dominion/master-owned behavior to Shell ownership, grant Shell fiscal authority, or represent referenced-only behavior as locally validated end-to-end.
 
 #### Scenario: Kernel-consumed behavior retains kernel ownership
 
-- GIVEN Pi invokes behavior exposed by the pinned Drenyra AI kernel
+- GIVEN Shell invokes behavior exposed by the pinned Drenyra AI kernel
 - WHEN the capability is documented or verified
-- THEN the record identifies the behavior as kernel-consumed and does not attribute fiscal authority to Pi
+- THEN the record identifies the behavior as kernel-consumed and does not attribute fiscal authority to Shell
 
 #### Scenario: Referenced-only capability remains bounded
 
-- GIVEN a Dominion/master-owned capability is referenced by Pi
+- GIVEN a Dominion/master-owned capability is referenced by Shell
 - WHEN current conformance is published
-- THEN it is identified as referenced-only and is not represented as Pi-local implementation or validation
+- THEN it is identified as referenced-only and is not represented as Shell-local implementation or validation
 
 #### Scenario: Ownership escalation is rejected
 
-- GIVEN a current capability claim upgrades referenced-only or kernel-consumed behavior to Pi-local ownership
+- GIVEN a current capability claim upgrades referenced-only or kernel-consumed behavior to Shell-local ownership
 - WHEN conformance verification runs
 - THEN verification MUST fail
 

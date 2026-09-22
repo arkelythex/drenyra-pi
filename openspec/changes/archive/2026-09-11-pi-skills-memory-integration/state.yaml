@@ -15,7 +15,7 @@ decisions:
   scope: skills_only_wiring
   scope_reason: >-
     (Orchestrator's own decision, now superseded -- see phases.specs note.)
-    User chose to wire Pi as a thin consumer of the Core's existing
+    User chose to wire Shell as a thin consumer of the Core's existing
     drenyra-ai/skills SkillRegistry.resolveAt() (real task+jurisdiction+
     validity selection, fail-closed on stale/wrong-jurisdiction). Engram
     memory explicitly deferred as blocked-on-master -- no Core API exists

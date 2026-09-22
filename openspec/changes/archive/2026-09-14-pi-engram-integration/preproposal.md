@@ -10,11 +10,11 @@
 
 ### D1 — Consumption mode: **MCP stdio**
 
-Pi will spawn `drenyra-engram mcp` as a child process and speak the same Model Context Protocol every other agent on this machine already uses to reach it (`docs/CONSUMING.md` §2 in the sibling repo). Not HTTP REST (`drenyra-engram serve`), and not deferred.
+Shell will spawn `drenyra-engram mcp` as a child process and speak the same Model Context Protocol every other agent on this machine already uses to reach it (`docs/CONSUMING.md` §2 in the sibling repo). Not HTTP REST (`drenyra-engram serve`), and not deferred.
 
 **Why:** matches the existing, already-proven consumption pattern on this machine (this very Claude Code session reaches its own `engram` memory the same way); avoids standing up and supervising a separate long-lived HTTP service; the MCP surface has no `authorize`/`approve` tool by construction, which is a stronger structural guarantee of "memory never authorizes" than an HTTP client would need to enforce itself.
 
-**Consequence for design:** Pi needs a child-process lifecycle (spawn, health-check, graceful shutdown, restart-on-crash policy) for `drenyra-engram mcp`, analogous to how `runtime/doctor.ts` already fail-closes on a verification failure for the `drenyra-ai` pin. This lifecycle management is a real design surface, not a one-liner.
+**Consequence for design:** Shell needs a child-process lifecycle (spawn, health-check, graceful shutdown, restart-on-crash policy) for `drenyra-engram mcp`, analogous to how `runtime/doctor.ts` already fail-closes on a verification failure for the `drenyra-ai` pin. This lifecycle management is a real design surface, not a one-liner.
 
 ### D2 — Dependency maturity: **accept pre-alpha, pin exact version**
 
@@ -36,9 +36,9 @@ This first slice reads and persists company/period scope (`ScopeContext` — RUC
 
 ## Explicitly out of scope (unchanged from exploration.md §4)
 
-- `accounting_approve` / `accounting_review_reject` / `accounting_review_return` — human-only, never called by Pi, regardless of any future slice.
+- `accounting_approve` / `accounting_review_reject` / `accounting_review_return` — human-only, never called by Shell, regardless of any future slice.
 - Any change inside the `drenyra-engram` repository itself.
-- Publication of `drenyra-pi` to any registry.
+- Publication of `drenyra-shell` to any registry.
 - Command-level proposal-informing memory reads (deferred to a later slice, not this change).
 
 ## Not selected

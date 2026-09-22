@@ -1,6 +1,6 @@
-# OpenSpec — drenyra-pi
+# OpenSpec — drenyra-shell
 
-Spec-Driven Development (SDD) artifacts for the **Pi-native Accounting Operations Harness**.
+Spec-Driven Development (SDD) artifacts for the **Shell-native Accounting Operations Harness**.
 
 ## What this is
 

@@ -1,9 +1,9 @@
-# Design: Prove the Drenyra Pi Adapter Boundary
+# Design: Prove the Drenyra Shell Adapter Boundary
 
 > Change: `pi-sdd-040-adapter-boundary`  
 > Runtime baseline: published, pinned `drenyra-ai@0.2.0`  
 > Authority-side record: `drenyra-ai/openspec/changes/sdd-040-rda-v2/`, coordinated 2026-08-15  
-> Host-side evidence owner: this Drenyra Pi change
+> Host-side evidence owner: this Drenyra Shell change
 
 ## 1. Decision summary
 

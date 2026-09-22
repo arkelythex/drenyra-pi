@@ -18,7 +18,7 @@ build_output_hash: sha256:627d23ef6f9b2d3ee904fad69af3c60a8fac8899a4657fbfd54343
 
 **Change:** `pi-engram-memory-reads`
 **Phase:** verify
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Branch:** `feat/pi-engram-memory-reads`
 **HEAD at verification time:** `c660656` (`feat(engram): drenyra_institutional_memory tool for journal-candidate-agent`)
 **Runtime attempt token:** `sha256:2afbcebb4302b202d8cac8cf5f3b89f880de6a429a0af0892b82587793cf0553`

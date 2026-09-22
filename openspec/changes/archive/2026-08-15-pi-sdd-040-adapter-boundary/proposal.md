@@ -1,7 +1,7 @@
-# Change: Prove Drenyra Pi Is a Replaceable RDA Host
+# Change: Prove Drenyra Shell Is a Replaceable RDA Host
 
 > Change: `pi-sdd-040-adapter-boundary`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Status: proposed (real SDD pipeline: `proposal → specs → design → tasks → apply → verify → archive`)
 > Artifact store: OpenSpec
 > Date: 2026-08-15
@@ -10,7 +10,7 @@
 
 ## 0. Decision
 
-Drenyra Pi will prove, rather than merely document, that it is a replaceable
+Drenyra Shell will prove, rather than merely document, that it is a replaceable
 agentic-runtime host for Drenyra AI's deterministic fiscal-authority kernel.
 This change audits every prohibited authority behavior, fixes any Pi-local
 boundary violation found, adds a harness-replacement test that compares Pi with

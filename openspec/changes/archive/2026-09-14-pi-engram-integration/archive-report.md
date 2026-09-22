@@ -2,7 +2,7 @@
 
 **Change**: `pi-engram-integration` (first local SDD change after the six-change program closed)
 **Change root (pre-archive)**: `openspec/changes/pi-engram-integration/`
-**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Artifact store**: `openspec` (file-backed, authoritative; `openspec/config.yaml` also declares `store_mode: hybrid`)
 **Archive date**: `2026-09-14`
 **Archived path**: `openspec/changes/archive/2026-09-14-pi-engram-integration/`
@@ -106,7 +106,7 @@ All moved by `git mv`, byte-identical to their pre-move content.
 
 **Not delivered, honestly disclosed:** the active company/period scope pointer itself remains `runtime/context.ts`'s local JSON store (Engram's schema has no session-pointer concept to hold it — a real, tested finding, not an assumption); no command reads institutional memory to shape a proposal yet. `capability-manifest.yaml#/capabilities/engram-integration` stays `"partial"`; `ROADMAP.md`'s Slice 5 checkbox stays unchecked, reworded to state precisely what shipped.
 
-**Known, disclosed gap carried forward:** `scripts/verify-package-files.mjs`'s pre-publish reconciliation does not cover the four vendored `drenyra-engram` binaries (only the single `drenyra-ai` pin). No live consequence — `drenyra-pi` publication remains unauthorized (`REQ-REL-006`). Must be closed before any future publication authorization.
+**Known, disclosed gap carried forward:** `scripts/verify-package-files.mjs`'s pre-publish reconciliation does not cover the four vendored `drenyra-engram` binaries (only the single `drenyra-ai` pin). No live consequence — `drenyra-shell` publication remains unauthorized (`REQ-REL-006`). Must be closed before any future publication authorization.
 
 ---
 
@@ -134,7 +134,7 @@ Verify's attempt (ordinal 1, `work_unit: verify`) required an explicit maintaine
 ## 10. Reproduce this archive
 
 ```sh
-cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
 git log --oneline -3
 node scripts/refresh-program-lock-facts.mjs --check
 bun test

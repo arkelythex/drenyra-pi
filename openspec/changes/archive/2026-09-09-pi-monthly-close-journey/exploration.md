@@ -1,10 +1,10 @@
 # Exploration: pi-monthly-close-journey
 
-Phase: sdd-explore. Audited against dirty working tree, drenyra-pi @ main, 2026-09-09.
+Phase: sdd-explore. Audited against dirty working tree, drenyra-shell @ main, 2026-09-09.
 
 ## Master linkage (CRITICAL — verbatim from README)
 
-README's Dominion Program table states: *"The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Pi references only and never duplicates."*
+README's Dominion Program table states: *"The master owns the full program catalog — SDD-010 (ecosystem contracts / release train), SDD-050 (monthly close), SDD-070 (skills), SDD-080 (Engram memory), SDD-090 (Guardian), SDD-110 (production), plus SDD-000/060/100 — which Drenyra Shell references only and never duplicates."*
 
 SDD-050 (monthly close) sits in the **master-owned-only, referenced-not-duplicated** bucket — the same bucket as SDD-070/080/090/110 — and is explicitly **not** in the Pi-served bucket (SDD-020 configurator, SDD-030 routing, SDD-040 RDA v2).
 
@@ -20,7 +20,7 @@ This is sharpened further by `docs/architecture/harness-draft-conformance.md`: a
 
 3. **Exceptions**: No distinct stage or concept exists. Anomalies (`ReconcileDifference`) are simply the `RECONCILE` phase's own output field inside `chains/reconcile.ts`, appended as evidence `CONCLUSION` nodes with a `WARNING`/`ERROR` blocker — folded entirely into reconciliation's output, never a first-class "exceptions" stage.
 
-4. **Candidates**: `drenyra-ai/candidates` supplies only `Materiality`/`MaterialityInput`/`deriveMateriality` (materiality-tier gating), consumed by `lib/authority-gates.ts:28-29` and `chains/monthly-close.ts:62`. `CandidateLifecycle` (propose → inspect → submitForReview → accept/reject/correct, noted in the archived 2026-08-04 evidence-driven-accounting-harness exploration) exists in the pinned package but has **zero production or test usage anywhere in drenyra-pi** — grep confirmed only a `node_modules` package test and the archived doc reference it. The closest analog is `mission.proposal` (`buildProposal` in `monthly-close.ts`/`reconcile.ts`), a flat summary+evidenceHash bundle, not a structured multi-state candidate.
+4. **Candidates**: `drenyra-ai/candidates` supplies only `Materiality`/`MaterialityInput`/`deriveMateriality` (materiality-tier gating), consumed by `lib/authority-gates.ts:28-29` and `chains/monthly-close.ts:62`. `CandidateLifecycle` (propose → inspect → submitForReview → accept/reject/correct, noted in the archived 2026-08-04 evidence-driven-accounting-harness exploration) exists in the pinned package but has **zero production or test usage anywhere in drenyra-shell** — grep confirmed only a `node_modules` package test and the archived doc reference it. The closest analog is `mission.proposal` (`buildProposal` in `monthly-close.ts`/`reconcile.ts`), a flat summary+evidenceHash bundle, not a structured multi-state candidate.
 
 5. **Review**: `chains/verify.ts` is the closest bounded-review mechanism — a fixed 7-check list (`source-integrity`, `normalization`, `ledger-equations`, `reconciliation-correctness`, `graph-integrity`, `scope-binding`, `receipt-binding`), read-only (`readOnly: true`), first blocking verdict throws `VerifyChainBlockedError` (no further stages run). It is its own separate mission/chain, invoked explicitly via `/drenyra:verify` or directly from tests — never auto-run inside the monthly-close journey.
 

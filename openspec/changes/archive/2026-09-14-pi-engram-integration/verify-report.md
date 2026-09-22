@@ -18,7 +18,7 @@ build_output_hash: sha256:627d23ef6f9b2d3ee904fad69af3c60a8fac8899a4657fbfd54343
 
 **Change:** `pi-engram-integration`
 **Phase:** verify
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Branch:** `feat/pi-engram-integration`
 **HEAD at verification time:** `8eca6b4` (`feat(engram): read-only institutional context on /drenyra:context`)
 **Runtime attempt token:** `sha256:67c279a32ac9cfcec42b5f5248bcc241200c1d7e5cb1ab92724b809c42743998` (acquired via `gentle-ai sdd-attempt acquire`, `--untracked-scope=exclude` for the pre-existing `.pi/` local state)
@@ -140,7 +140,7 @@ Exactly one tool-call site, calling exactly `engram_context`. No `accounting_*` 
 
 | # | Note | Severity |
 | --- | --- | --- |
-| 1 | `scripts/verify-package-files.mjs`'s pre-publish reconciliation does not cover the four vendored `drenyra-engram` binaries (disclosed in `contracts/engram-dependency.md`'s "Known, disclosed gap" section). No live consequence — `drenyra-pi` publication is unauthorized (`REQ-REL-006`). Must be closed before any future publication authorization. | Medium (deferred, disclosed) |
+| 1 | `scripts/verify-package-files.mjs`'s pre-publish reconciliation does not cover the four vendored `drenyra-engram` binaries (disclosed in `contracts/engram-dependency.md`'s "Known, disclosed gap" section). No live consequence — `drenyra-shell` publication is unauthorized (`REQ-REL-006`). Must be closed before any future publication authorization. | Medium (deferred, disclosed) |
 | 2 | `drenyra-engram` pin (`0.2.1-SNAPSHOT-6a371a9`) is a pre-release build, not a tagged release; `contracts/engram-dependency.md` states `Status: tracked, not frozen` rather than overclaiming stability (per `preproposal.md` D2). | Low (disclosed, matches confirmed decision) |
 | 3 | `runtime/engram-client.ts` extracts the vendored tarball fresh on every spawn (no cross-call cache) — a deliberate, disclosed scope cut for correctness-first delivery; a future change may add caching for performance. | Low (disclosed) |
 | 4 | `ROADMAP.md`'s Slice 5 checkbox stays unchecked — this change delivers only the "context" half, not "memory reads" (proposal-informing). Correctly not overclaimed. | Informational |

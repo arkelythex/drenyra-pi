@@ -3,7 +3,7 @@
 **Change:** `pi-recovery-release-readiness` (local SDD 6 of 6)
 **Phase:** apply — **Slices 1 and 2**. Slice 1 (U2 + U3 + U5 + U5b, documentation) is recorded in §1–§11 exactly as written; Slice 2 (D5, the `postinstall` warning, `REQ-REL-004`) is appended in §12–§25.
 **Store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Branch:** `feat/sdd-6-recovery-release-readiness`
 **Authority:** `design.md` (the authority for this phase), `tasks.md` (Slice 1 and Slice 2 rows), `specs/release-readiness/spec.md` (`REQ-REL-001`, `REQ-REL-002`, `REQ-REL-005` for Slice 1; `REQ-REL-004` for Slice 2).
 **Committed / branched / pushed by this phase:** **no.** No `git add`, `git commit`, `git push`, branch, or PR was run.
@@ -18,7 +18,7 @@ Structured SDD status (injected by the parent, `gentle-pi.sdd-status`, schemaVer
 - `changeName`: `pi-recovery-release-readiness`
 - `artifactStore`: `openspec`; `applyState`: `ready`; `nextRecommended`: `sdd-apply`
 - `isNonAuthoritative`: `false`; `blockedReasons`: `[]`
-- `actionContext.mode`: `repo-local`; `workspaceRoot`: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; `allowedEditRoots`: `[/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi]`; `warnings`: `[]`
+- `actionContext.mode`: `repo-local`; `workspaceRoot`: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; `allowedEditRoots`: `[/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell]`; `warnings`: `[]`
 - `taskProgress`: 26 implementation tasks, 0 complete at start; **9 are Slice 1** and were assigned to this run.
 - `deferredParentActions`: 0/0.
 
@@ -105,7 +105,7 @@ unchecked S3: 10
 | `CHANGELOG.md` | U5 | `themes/Drenyra.json` (non-existent) → the two real themes. Unreleased-section correction; the historical `## 0.0.1-prealpha.1 — 2026-08-01` entry and its `drenyra-ai@0.2.0` reference stay byte-identical. |
 | `README.md` | U5b | Status line → contracts-frozen pre-release (`v0.1.0`); closing policy sentence updated. `conformance:surface` / `conformance:snapshot` markers untouched. |
 | `docs/intended-usage.md` | U5b | Status cell → pre-release, contracts frozen at v0.1, version `0.1.0`. |
-| `docs/architecture/ecosystem-boundaries.md` | U5b | Release-cadence line → pre-release with contracts frozen at v0.1 (`drenyra-pi@0.1.0`). |
+| `docs/architecture/ecosystem-boundaries.md` | U5b | Release-cadence line → pre-release with contracts frozen at v0.1 (`drenyra-shell@0.1.0`). |
 
 ### Not touched (confirmed absent from `git status`)
 
@@ -351,7 +351,7 @@ Structured SDD status injected by the parent (`gentle-pi.sdd-status`, schemaVers
 
 - `changeName`: `pi-recovery-release-readiness`; `artifactStore`: `openspec`; `isNonAuthoritative`: `false`; `nextRecommended`: `sdd-apply`.
 - `applyState`: `ready`; `blockedReasons`: `[]`; `deferredParentActions`: 0/0.
-- `actionContext.mode`: `repo-local`; `workspaceRoot`: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; `allowedEditRoots`: `[/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi]`; **`warnings`: `[]`**.
+- `actionContext.mode`: `repo-local`; `workspaceRoot`: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; `allowedEditRoots`: `[/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell]`; **`warnings`: `[]`**.
 - `taskProgress` at start: 26 implementation rows, 9 complete (Slice 1), 17 remaining (Slice 2 + Slice 3).
 - **Owner markers:** every Slice 2 row carries a terminal `<!-- sdd-owner: implementation -->`; no parent-owned row and no malformed `sdd-owner` marker exists. Only implementation-owned rows were selected, checked, and reported.
 
@@ -434,7 +434,7 @@ error: expect(received).toMatch(expected)
 Expected substring or pattern: /WARNING/i
 Received: ""
 
-      at <anonymous> (/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi/__tests__/postinstall-hook.test.ts:78:25)
+      at <anonymous> (/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell/__tests__/postinstall-hook.test.ts:78:25)
 ✗ package.json postinstall hook > warns on stderr and still exits 0 when the compiled installer is absent [93.56ms]
 ✓ package.json postinstall hook > runs the compiled installer, propagates success, and prints no warning [151.18ms]
 ✓ package.json postinstall hook > propagates a failing installer's exit status instead of the ?? 1 fallback [135.80ms]
@@ -627,7 +627,7 @@ $ git diff -- openspec/config.yaml
 status=0  stdout=[]
 stderr verbatim:
 error: Script not found "build"
-drenyra-pi: WARNING — dist/scripts/install-drenyra-ai.js is missing, so the pinned Drenyra AI runtime was NOT installed. Run , then re-run your install.
+drenyra-shell: WARNING — dist/scripts/install-drenyra-ai.js is missing, so the pinned Drenyra AI runtime was NOT installed. Run , then re-run your install.
 stderr line count (non-empty)=2
 ```
 
@@ -718,7 +718,7 @@ Measured now, all three already read `0.1.0` and are **byte-identical to `HEAD`*
 | --- | --- | --- |
 | `README.md:7`, `:11` | ``> **Status: contracts frozen, pre-release (`v0.1.0`).**`` … ``which is the `0.1.0` step of the version policy`` | already `0.1.0` — **no edit** |
 | `docs/intended-usage.md:27` | ``Status is **pre-release**: contracts are frozen at v0.1 and the package version is `0.1.0`.`` | already `0.1.0` — **no edit** |
-| `docs/architecture/ecosystem-boundaries.md:274` | ``(`drenyra-pi@0.1.0`).`` | already `0.1.0` — **no edit** |
+| `docs/architecture/ecosystem-boundaries.md:274` | ``(`drenyra-shell@0.1.0`).`` | already `0.1.0` — **no edit** |
 
 ```
 $ git diff --stat README.md docs/intended-usage.md docs/architecture/ecosystem-boundaries.md docs/architecture/capability-conformance-matrix.md
@@ -763,7 +763,7 @@ All ten Slice 3 rows were flipped `- [ ]` → `- [x]` in `openspec/changes/pi-re
 | C2 | `capability-manifest.yaml#/repository/version` | `0.1.0` | `capability-manifest.yaml:7` `version: 0.1.0` |
 | C3 | `docs/architecture/program-lock-facts.json#/packageVersion` — **generated, never hand-edited** | `0.1.0` | `program-lock-facts.json:7`; `--check` → `program lock facts are current` |
 | C4 | `extensions/register.ts` `DRENYRA_PI_VERSION` | `0.1.0` | `extensions/register.ts:95`, consumed at `:195`, `:497`, `:546`, `:569`, `:648` |
-| C5 | `extensions/fiscal-guard.ts` `FISCAL_GUARD_VERSION` | `0.1.0` | `extensions/fiscal-guard.ts:53` (`export const FISCAL_GUARD_VERSION = "0.1.0";`), single internal use at `:239` (`drenyra-pi v${FISCAL_GUARD_VERSION}`), session-status output unchanged |
+| C5 | `extensions/fiscal-guard.ts` `FISCAL_GUARD_VERSION` | `0.1.0` | `extensions/fiscal-guard.ts:53` (`export const FISCAL_GUARD_VERSION = "0.1.0";`), single internal use at `:239` (`drenyra-shell v${FISCAL_GUARD_VERSION}`), session-status output unchanged |
 | C6 | `__tests__/configurator.test.ts` `PACKAGED_VERSION` | **mirror eliminated** | `:31` `const PACKAGED_VERSION = drenyraPiExtension.version;` — header at `:27-29` records that a literal is no longer mirrored |
 
 **Line-citation drift vs `design.md`** (content-identical, no requirement affected): the design cites `extensions/fiscal-guard.ts:49` and its internal use at `:235`; the tree has `:53` and `:239` because the rename moved them. Design cites `__tests__/configurator.test.ts:26`; the tree has `:31`.
@@ -825,7 +825,7 @@ verify-package-files: OK (dist tree + packaged files + content hashes reconciled
 $ node scripts/verify-packed-install.mjs
 npm notice package size: 1.1 MB
 npm notice total files: 297
-drenyra-pi-0.1.0.tgz
+drenyra-shell-0.1.0.tgz
 install: npm install --no-save the tgz into a clean dir
 packed-install: pi manifest present with a ./dist/extensions entry — OK
 packed-install: extension factory resolves — OK
@@ -845,7 +845,7 @@ $ git status --short
 ?? __tests__/harness-version.test.ts
 ```
 
-Note the packed artifact name `drenyra-pi-0.1.0.tgz` — the bump is visible at the pack boundary, and publication surfaces are still absent (§28.6).
+Note the packed artifact name `drenyra-shell-0.1.0.tgz` — the bump is visible at the pack boundary, and publication surfaces are still absent (§28.6).
 
 ### 28.4 `DR-6` count sync (T-S3-006) — verified consistent
 
@@ -880,7 +880,7 @@ The **trap is stated, and it did not fire:** a refresh *without* the mirror rewr
 | --- | --- | --- |
 | no `publishConfig` / no publish command added to the manifest | `git diff -U0 -- package.json` piped through `grep -i publish` | **no matches** |
 | no publish step or job in the workflow | `git status --porcelain .github/workflows/release-verify.yml` | **empty — byte-identical, unmodified** |
-| the roadmap's npm item is still unchecked | `grep -n "Package released" ROADMAP.md` | line 54 — `- [ ] Package released as drenyra-pi on npm with pinned drenyra-ai` (checkbox still unchecked) |
+| the roadmap's npm item is still unchecked | `grep -n "Package released" ROADMAP.md` | line 54 — `- [ ] Package released as drenyra-shell on npm with pinned drenyra-ai` (checkbox still unchecked) |
 | no frozen/authority path touched | `git status --porcelain -- contracts openspec/specs scripts/compute-candidate-identity.mjs` | **empty** |
 
 ```
@@ -1207,6 +1207,6 @@ $ git diff --numstat -- openspec/changes/pi-recovery-release-readiness/apply-pro
 ## 49. Skill resolution (Slice 3b)
 
 - `skills/drenyra-sdd/SKILL.md` — **present and read** (injected path). Its FSD framing (fail-closed gates, "a material action needs its evidence") shaped the decision to run the D-1 command rather than assert it, and to refuse the `--check` clause instead of paraphrasing it green.
-- `skills/cognitive-doc-design/SKILL.md` — **NOT loaded: the injected path does not exist in this repository** (`/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi/skills/cognitive-doc-design/SKILL.md` → no such file; a directory listing of `skills/` shows no `cognitive-doc-design`). Reported as unavailable, **not** substituted from another checkout, exactly as the prompt instructed.
+- `skills/cognitive-doc-design/SKILL.md` — **NOT loaded: the injected path does not exist in this repository** (`/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell/skills/cognitive-doc-design/SKILL.md` → no such file; a directory listing of `skills/` shows no `cognitive-doc-design`). Reported as unavailable, **not** substituted from another checkout, exactly as the prompt instructed.
 
 `skill_resolution`: **fallback-path** — one injected project path existed and was read; the second injected path does not exist and is reported unavailable. No registry discovery and no substitution from another repository were performed.

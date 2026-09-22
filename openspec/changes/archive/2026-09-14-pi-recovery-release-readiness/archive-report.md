@@ -1,8 +1,8 @@
 # Archive Report — pi-recovery-release-readiness
 
-**Change**: `pi-recovery-release-readiness` (local SDD 6 of 6 — the last change in the Drenyra Pi program)
+**Change**: `pi-recovery-release-readiness` (local SDD 6 of 6 — the last change in the Drenyra Shell program)
 **Change root (pre-archive)**: `openspec/changes/pi-recovery-release-readiness/`
-**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root**: `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Artifact store**: `openspec` (file-backed, authoritative; `openspec/config.yaml` also declares `store_mode: hybrid`)
 **Archive date**: `2026-09-14`
 **Archived path**: `openspec/changes/archive/2026-09-14-pi-recovery-release-readiness/`
@@ -122,7 +122,7 @@ All eight files moved by `git mv` into `openspec/changes/archive/2026-09-14-pi-r
 
 ## 6. Program state at close
 
-`openspec/changes/` now contains only `archive/` — **zero active local SDD changes remain**. This closes the local Drenyra Pi SDD program (SDD 1 `pi-capability-conformance` through SDD 6 `pi-recovery-release-readiness`), consistent with this change's own framing as "local SDD 6 of 6, the last change in the program" (`proposal.md`).
+`openspec/changes/` now contains only `archive/` — **zero active local SDD changes remain**. This closes the local Drenyra Shell SDD program (SDD 1 `pi-capability-conformance` through SDD 6 `pi-recovery-release-readiness`), consistent with this change's own framing as "local SDD 6 of 6, the last change in the program" (`proposal.md`).
 
 ---
 
@@ -151,7 +151,7 @@ No new defect was found during archive. All items above were already disclosed i
 ## 9. Reproduce this archive
 
 ```sh
-cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-pi
+cd /home/dreamcoder08/Documents/PROYECTOS/drenyra-shell
 git log --oneline -3
 node scripts/refresh-program-lock-facts.mjs --check
 bun test

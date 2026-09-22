@@ -1,7 +1,7 @@
-# Drenyra Pi Routing Adapter — Specification
+# Drenyra Shell Routing Adapter — Specification
 
 > Change: `pi-sdd-030-routing-adapter`
-> Product: `drenyra-pi`
+> Product: `drenyra-shell`
 > Phase: specs (real SDD pipeline)
 > Date: 2026-08-15
 > Runtime baseline: published and pinned `drenyra-ai@0.3.0`
@@ -10,7 +10,7 @@
 
 ## Purpose
 
-Defines what must be true after Drenyra Pi consumes the published
+Defines what must be true after Drenyra Shell consumes the published
 `drenyra-ai@0.3.0` routing surface as a deterministic, fail-closed host-side
 adapter for Organic Accounting Work Routing: a fixed seven-stage preflight that
 produces a bounded `WorkUnit` request only when every stage is complete and

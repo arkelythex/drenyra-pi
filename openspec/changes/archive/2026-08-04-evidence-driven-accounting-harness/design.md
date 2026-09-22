@@ -1,14 +1,14 @@
 # Design: Evidence-Driven Accounting Harness
 
 > Change: `evidence-driven-accounting-harness`  
-> Product: `drenyra-pi`  
+> Product: `drenyra-shell`  
 > Status: designed  
 > Artifact store: HYBRID — this file is authoritative; Engram is best-effort  
 > Runtime baseline: pinned `drenyra-ai@0.2.0`
 
 ## 1. Executive design
 
-Build a thin Pi cockpit over the public `drenyra-ai@0.2.0` APIs. Pi handlers gather intent, validate the bound scope, invoke deterministic libraries or chains, and render results. The engine remains authoritative for mission lifecycle transitions, approval semantics, receipt signatures, and recovery rules. File-backed state under the active workspace's `.local/` directory is authoritative; chat and memory are never authority.
+Build a thin Shell cockpit over the public `drenyra-ai@0.2.0` APIs. Shell handlers gather intent, validate the bound scope, invoke deterministic libraries or chains, and render results. The engine remains authoritative for mission lifecycle transitions, approval semantics, receipt signatures, and recovery rules. File-backed state under the active workspace's `.local/` directory is authoritative; chat and memory are never authority.
 
 The implementation has four layers:
 

@@ -1,10 +1,10 @@
-# Proposal: Pi Capability Conformance
+# Proposal: Shell Capability Conformance
 
 **Status:** Proposal ready for specification, subject to native SDD status validation.
 
 ## Intent
 
-Make Drenyra-Pi's public capability story truthful and reproducible. README, roadmap, capability manifest, conformance matrix, OpenSpec project context, and lock-facts must distinguish current implementation, test evidence, operational validation, master-owned references, and historical snapshots. This change is the first local SDD in the six-change sequence and establishes the evidence discipline used by later changes.
+Make Drenyra-Shell's public capability story truthful and reproducible. README, roadmap, capability manifest, conformance matrix, OpenSpec project context, and lock-facts must distinguish current implementation, test evidence, operational validation, master-owned references, and historical snapshots. This change is the first local SDD in the six-change sequence and establishes the evidence discipline used by later changes.
 
 ## Problem
 
@@ -15,7 +15,7 @@ The repository currently contains multiple point-in-time test counts and candida
 1. Define one explicit snapshot convention for current evidence, including command, timestamp, candidate identity, test count, and baseline/dirty distinction.
 2. Reconcile README, ROADMAP, `capability-manifest.yaml`, `docs/architecture/capability-conformance-matrix.md`, `openspec/config.yaml`, and program lock-facts where they make current-state claims.
 3. Align capability verification terminology with the existing matrix vocabulary without changing frozen public contract schemas or inventing a new capability state.
-4. Make ownership boundaries explicit: Pi consumes the pinned kernel; Dominion/master-owned capabilities remain referenced-only; local partial behavior is not advertised as end-to-end validation.
+4. Make ownership boundaries explicit: Shell consumes the pinned kernel; Dominion/master-owned capabilities remain referenced-only; local partial behavior is not advertised as end-to-end validation.
 5. Add narrowly scoped static/conformance tests or verifier assertions only where they prevent the same contradiction from recurring.
 6. Inventory legacy surfaces and document a safe removal criterion. Do not delete a legacy helper solely because it is unused.
 
@@ -24,7 +24,7 @@ The repository currently contains multiple point-in-time test counts and candida
 - Implementing new fiscal, routing, skill, memory, monthly-close, recovery, or release capabilities.
 - Implementing Engram or selecting a memory backend.
 - Changing `drenyra-ai`, its pin, public contracts, receipts, gates, or authority decisions.
-- Adding Pi-local mission-to-skill mappings or replacing kernel-owned policy.
+- Adding Shell-local mission-to-skill mappings or replacing kernel-owned policy.
 - Deleting archived OpenSpec artifacts, legacy helpers, compatibility paths, or frozen contract files without a separately verified migration boundary.
 - Refreshing generated checksums or lock facts opportunistically from an unverified dirty worktree.
 - Advancing SDDs 2–6 inside this change.
@@ -41,7 +41,7 @@ Current evidence identifies its exact test command, result, date, and candidate 
 
 ### R3 — Ownership boundaries
 
-Documentation and tests preserve the distinction between Pi-local implementation, kernel-consumed behavior, referenced-only Dominion capabilities, and unavailable operational integrations. No local evidence upgrades master ownership or grants fiscal authority.
+Documentation and tests preserve the distinction between Shell-local implementation, kernel-consumed behavior, referenced-only Dominion capabilities, and unavailable operational integrations. No local evidence upgrades master ownership or grants fiscal authority.
 
 ### R4 — Cross-surface consistency
 

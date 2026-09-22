@@ -2,7 +2,7 @@
 
 **Change:** `pi-engram-memory-reads`
 **Phase:** design — resolves implementation shape for `proposal.md`'s bounded scope. No product decision (D1–D3) is reopened; §1 below is the one shape correction the proposal already disclosed.
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Authority:** `proposal.md` (scope, including its §2 correction), `preproposal.md` (D1–D3), `specs/engram-integration/spec.md` delta (`REQ-ENG-005`, `REQ-ENG-006`)
 
 ---

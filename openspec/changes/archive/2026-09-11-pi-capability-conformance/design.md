@@ -1,4 +1,4 @@
-# Design: Pi Capability Conformance
+# Design: Shell Capability Conformance
 
 ## Technical approach
 
@@ -22,7 +22,7 @@ A current snapshot must be represented by a command, complete result, date, cand
 
 ### Ownership and legacy
 
-Ownership is a documentation/conformance concern, not a new runtime authority. The validator checks that referenced-only/kernel-consumed rows are not advertised as Pi-owned or operationally complete. Legacy inventory is additive evidence. Deletion is intentionally deferred until a later work unit has replacement and compatibility proof.
+Ownership is a documentation/conformance concern, not a new runtime authority. The validator checks that referenced-only/kernel-consumed rows are not advertised as Shell-owned or operationally complete. Legacy inventory is additive evidence. Deletion is intentionally deferred until a later work unit has replacement and compatibility proof.
 
 ## Data flow
 
@@ -83,7 +83,7 @@ Rollback each unit independently by reverting its owned files. Never revert pre-
 
 ## Security and authority boundaries
 
-The verifier is read-only with respect to fiscal authority, network, credentials, receipts, and approvals. It must not invoke fiscal operations or interpret a conformance pass as authorization. It runs offline and must not read secrets or ambient user data. Pi remains an operator and evidence consumer; the pinned kernel remains the authority for fiscal semantics.
+The verifier is read-only with respect to fiscal authority, network, credentials, receipts, and approvals. It must not invoke fiscal operations or interpret a conformance pass as authorization. It runs offline and must not read secrets or ambient user data. Shell remains an operator and evidence consumer; the pinned kernel remains the authority for fiscal semantics.
 
 ## Open decisions for tasks
 

@@ -1,17 +1,17 @@
-# drenyra-pi — Visión completa (fuente: usuario)
+# drenyra-shell — Visión completa (fuente: usuario)
 
 > Documento fuente del usuario. Se preserva como material de partida para el
 > cambio SDD `evidence-driven-accounting-harness`. Idioma original: español.
 
 ---
 
-`drenyra-pi` convierte Pi en un entorno operativo contable controlado, verificable y auditable.
+`drenyra-shell` convierte Shell en un entorno operativo contable controlado, verificable y auditable.
 
 No debería ser simplemente "un chatbot que sabe contabilidad", ni una versión CLI de Drenyra. Debe ser la **capa de disciplina operativa** que controla cómo una IA analiza, propone, verifica y entrega trabajo contable.
 
 ## La equivalencia exacta
 
-| `gentle-pi` — software | `drenyra-pi` — contabilidad |
+| `gentle-pi` — software | `drenyra-shell` — contabilidad |
 | ---------------------- | --------------------------- |
 | Código fuente | Libros, comprobantes, bancos y declaraciones |
 | SDD/OpenSpec | Protocolo de misión contable |
@@ -26,7 +26,7 @@ No debería ser simplemente "un chatbot que sabe contabilidad", ni una versión 
 | Scope control | Tenant, empresa, periodo, libro y autorización |
 | Merge | Registro/exportación/presentación autorizada |
 
-La gran diferencia: el software puede corregirse después de desplegarse. Un asiento, cierre o presentación tributaria incorrecta puede afectar dinero, impuestos, auditorías y responsabilidad profesional. Por eso `drenyra-pi` deberá ser incluso **más restrictivo** que `gentle-pi`.
+La gran diferencia: el software puede corregirse después de desplegarse. Un asiento, cierre o presentación tributaria incorrecta puede afectar dinero, impuestos, auditorías y responsabilidad profesional. Por eso `drenyra-shell` deberá ser incluso **más restrictivo** que `gentle-pi`.
 
 ## La doctrina central
 
@@ -44,7 +44,7 @@ Coincide con la tesis de Drenyra: **AI assists; the system validates; the profes
 
 ```text
 +--------------------------------------------------+
-|                    DRENYRA-PI                    |
+|                  DRENYRA-SHELL                   |
 | Intención, conversación, routing y coordinación |
 +--------------------------------------------------+
 |              DRENYRA MISSION PROTOCOL           |
@@ -64,7 +64,7 @@ Coincide con la tesis de Drenyra: **AI assists; the system validates; the profes
 +--------------------------------------------------+
 ```
 
-**Drenyra Core debe seguir siendo la autoridad.** `drenyra-pi` es el cockpit operativo y el orquestador; el LLM nunca debe convertirse en el sistema de registro contable.
+**Drenyra Core debe seguir siendo la autoridad.** `drenyra-shell` es el cockpit operativo y el orquestador; el LLM nunca debe convertirse en el sistema de registro contable.
 
 ## El equivalente contable de SDD — EDA
 
@@ -194,7 +194,7 @@ Patrón de memoria de `gentle-pi`: cada fase lee sus entradas directamente del b
 ## La estructura del paquete
 
 ```text
-drenyra-pi/
+drenyra-shell/
 +-- assets/
 |   +-- agents/
 |   +-- chains/
@@ -223,11 +223,11 @@ drenyra-pi/
 +-- package.json
 ```
 
-El paquete Pi debe permanecer relativamente delgado. La lógica contable seria debe residir en librerías y servicios deterministas reutilizables.
+El paquete Shell debe permanecer relativamente delgado. La lógica contable seria debe residir en librerías y servicios deterministas reutilizables.
 
 ## Tu ventaja: gran parte del núcleo ya existe
 
-Piezas que `drenyra-pi` necesita y ya existen en Drenyra:
+Piezas que `drenyra-shell` necesita y ya existen en Drenyra:
 
 - `@drenyra/mission-protocol`;
 - estados y predicados canónicos;
@@ -245,7 +245,7 @@ Piezas que `drenyra-pi` necesita y ya existen en Drenyra:
 
 ```text
 Drenyra existente = motor y autoridad
-drenyra-pi        = interfaz agentic y harness
+drenyra-shell        = interfaz agentic y harness
 ```
 
 ## El primer producto: Monthly Close Harness
@@ -291,9 +291,9 @@ v1.0 -> accounting operations platform
 
 ## La frase de posicionamiento
 
-- EN: **Turn Pi into an evidence-bound accounting operations harness.**
-- ES: **Convierte Pi en un entorno operativo contable controlado, verificable y auditable.**
-- Comparación: `gentle-pi` disciplines how software is built. `drenyra-pi` disciplines how accounting work is performed.
+- EN: **Turn Shell into an evidence-bound accounting operations harness.**
+- ES: **Convierte Shell en un entorno operativo contable controlado, verificable y auditable.**
+- Comparación: `gentle-pi` disciplines how software is built. `drenyra-shell` disciplines how accounting work is performed.
 
 ## Veredicto
 
@@ -307,7 +307,7 @@ Drenyra
   +-- Drenyra Mission Protocol
   +-- Drenyra Runtime
   +-- Drenyra CLI
-  +-- Drenyra Pi
+  +-- Drenyra Shell
 ```
 
 Nota del usuario: el análisis del lado de Drenyra se apoya en la arquitectura y avances que compartió; el análisis de `gentle-pi` proviene de su repositorio público actual. `arkelythex/Drenyra` es privado, sin acceso desde el conector.

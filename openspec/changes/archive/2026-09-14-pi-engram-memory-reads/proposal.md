@@ -2,7 +2,7 @@
 
 **Change:** `pi-engram-memory-reads`
 **Phase:** proposal (openspec artifact store, file-backed authoritative; `openspec/config.yaml` declares `store_mode: hybrid`)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Inputs:** `exploration.md`, `preproposal.md` (gate **CLOSED**, D1–D3 confirmed by the maintainer)
 **Authority:** the preproposal's confirmed decision record. One shape correction is reported below, not a re-litigated decision.
 

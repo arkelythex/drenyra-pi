@@ -1,9 +1,9 @@
 # Design — pi-recovery-release-readiness
 
-**Change:** `pi-recovery-release-readiness` (local SDD 6 of 6 in the Drenyra Pi program)
+**Change:** `pi-recovery-release-readiness` (local SDD 6 of 6 in the Drenyra Shell program)
 **Phase:** design — read-only against the repository. **The only write performed by this phase is this file.**
 **Store:** `openspec` (file-backed, authoritative; `openspec/config.yaml` declares `store_mode: hybrid`, so Engram is best-effort only)
-**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`
+**Repository root:** `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`
 **Inputs read by this phase:** `proposal.md`, `specs/release-readiness/spec.md`, `preproposal.md` (§5 + **D11 binding**), `exploration.md` (§4 falsification table and §5.2 out-of-scope table binding), and the current bytes of every file named for edit in the proposal's §7.
 **Authority:** the preproposal's confirmed decision record. No settled decision is re-opened; no new product decision is invented.
 
@@ -336,7 +336,7 @@ Constraints the validator enforces (`scripts/verify-capability-manifest.mjs:838-
 Replace the whole `postinstall` value (`package.json:44`):
 
 ```json
-"postinstall": "node -e \"const{existsSync}=require('node:fs');const{spawnSync}=require('node:child_process');const t='dist/scripts/install-drenyra-ai.js';if(!existsSync(t)){console.warn('drenyra-pi: WARNING — '+t+' is missing, so the pinned Drenyra AI runtime was NOT installed. Run `bun run build`, then re-run your install.');process.exit(0);}process.exit(spawnSync(process.execPath,[t],{stdio:'inherit'}).status??1)\""
+"postinstall": "node -e \"const{existsSync}=require('node:fs');const{spawnSync}=require('node:child_process');const t='dist/scripts/install-drenyra-ai.js';if(!existsSync(t)){console.warn('drenyra-shell: WARNING — '+t+' is missing, so the pinned Drenyra AI runtime was NOT installed. Run `bun run build`, then re-run your install.');process.exit(0);}process.exit(spawnSync(process.execPath,[t],{stdio:'inherit'}).status??1)\""
 ```
 
 Properties, each one a requirement:
@@ -383,7 +383,7 @@ This is the change's only strict-TDD behavioural unit (proposal §6.10): `bun te
  * Run the postinstall for a package root.
  *
  * The "released" branch installs the exact pinned version package-local
- * (drenyra-pi never trusts an ambient binary) and then runs the same doctor()
+ * (drenyra-shell never trusts an ambient binary) and then runs the same doctor()
  * used by /drenyra:doctor — the install is only accepted when the verdict is
  * "verified". The released path is the one in force: `DEFAULT_PIN.state` is
  * "released" in `runtime/pin.ts`, with the entry-artifact checksum pinned, so
@@ -432,7 +432,7 @@ Not named by `REQ-REL-005`, and **not required** by any requirement. Recommended
 | --- | --- | --- |
 | `README.md:7-12` | `**Status: pre-alpha (v0.0.1-prealpha.1).**` … `version policy is \`0.0.1-prealpha.x\` until the first frozen contract, then \`0.1.0\`.` | `**Status: contracts frozen, pre-release (\`v0.1.0\`).**` … `Nothing here is production-ready; the two produced contracts are frozen at v0.1, which is the \`0.1.0\` step of the version policy.` |
 | `docs/intended-usage.md:27` | `Status is **pre-alpha** (\`0.0.1-prealpha.1\`).` | `Status is **pre-release**: contracts are frozen at v0.1 and the package version is \`0.1.0\`.` |
-| `docs/architecture/ecosystem-boundaries.md:273-274` | `Release cadence remains pre-alpha (\`drenyra-pi@0.0.1-prealpha.1\`).` | `Release cadence remains pre-release, with the produced contracts frozen at v0.1 (\`drenyra-pi@0.1.0\`).` |
+| `docs/architecture/ecosystem-boundaries.md:273-274` | `Release cadence remains pre-alpha (\`drenyra-shell@0.0.1-prealpha.1\`).` | `Release cadence remains pre-release, with the produced contracts frozen at v0.1 (\`drenyra-shell@0.1.0\`).` |
 
 Safety analysis: none of the three is in `PARTICIPATION_PATHS_V1`, so no recovery pair; `README.md` is a declared projection surface (`capability-manifest.yaml` `currentProjection.surfaces`), and its `conformance:surface` / `conformance:snapshot` markers (`README.md:46-47`) are the delegation form and must be left untouched — the prose edit around them cannot break the marker validation.
 

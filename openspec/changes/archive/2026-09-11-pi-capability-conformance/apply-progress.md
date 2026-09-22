@@ -1,4 +1,4 @@
-# Apply Progress: Pi Capability Conformance
+# Apply Progress: Shell Capability Conformance
 
 ## PR 1 — Manifest evidence schema and deterministic offline guard
 
@@ -7,7 +7,7 @@
 ### Structured status consumed
 
 - Native status: `gentle-ai.sdd-status` v2; `changeName: pi-capability-conformance`; `artifactStore: openspec`; `applyState: ready`; `nextRecommended: apply`.
-- `actionContext`: `repo-local`; authoritative workspace and allowed edit root both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`.
+- `actionContext`: `repo-local`; authoritative workspace and allowed edit root both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`.
 - Warning: none. The supplied native attempt token was treated as opaque and was not persisted.
 
 ### Allowlist and pre-existing work
@@ -57,7 +57,7 @@ The six implementation-owned PR 1 rows are visibly marked `- [x]` in `openspec/c
 | `bun test __tests__/capability-manifest.test.ts && bun run typecheck` | 20 pass, 0 fail; `tsc --noEmit` passed after fixture type hardening |
 | `bun run verify:capability` | `verify-capability-manifest: OK` |
 | `bun run verify:style` | `verify-style: OK (diff-scoped · 107 owned files · 4 rules)` |
-| Runtime-harness verification | N/A — the guard is read-only/offline and invokes no Pi runtime boundary |
+| Runtime-harness verification | N/A — the guard is read-only/offline and invokes no Shell runtime boundary |
 
 No network, ambient secrets, fiscal operations, authority, receipts, or runtime boundary were invoked.
 
@@ -75,7 +75,7 @@ No network, ambient secrets, fiscal operations, authority, receipts, or runtime 
 - [ ] **RED:** Add deterministic fixture/repository assertions in `__tests__/capability-manifest.test.ts` for conflicting current command/result/identity/classification across manifest and matrix, an unlabeled historical count, ownership escalation of kernel-consumed or referenced-only behavior, and Engram/packaged-skills or fixture-only evidence falsely advertised as operational end-to-end. <!-- sdd-owner: implementation -->
 - [ ] **GREEN:** Extend `scripts/verify-capability-manifest.mjs` using repository-relative, read-only parsing of the manifest, matrix, README, and ROADMAP; validate explicit source links/markers and reject the PR 2 negative cases while retaining a deterministic offline CLI interface. <!-- sdd-owner: implementation -->
 - [ ] Reconcile `capability-manifest.yaml`, `docs/architecture/capability-conformance-matrix.md`, `README.md`, and `ROADMAP.md` to one current point-in-time vocabulary: every advertised capability has state, verification level, ownership, authority boundary, source/test evidence, and an honest local/operational limitation; label all preserved baseline or historical statements rather than treating them as the dirty candidate. <!-- sdd-owner: implementation -->
-- [ ] **TRIANGULATE:** Cover matrix-only historical labels, generated-value source labels, case/order-independent deterministic diagnostics, kernel-consumed versus referenced-only ownership, and a valid all-local non-E2E repository projection; confirm no local text grants Pi fiscal authority or represents the master/Dominion program as Pi delivery. <!-- sdd-owner: implementation -->
+- [ ] **TRIANGULATE:** Cover matrix-only historical labels, generated-value source labels, case/order-independent deterministic diagnostics, kernel-consumed versus referenced-only ownership, and a valid all-local non-E2E repository projection; confirm no local text grants Shell fiscal authority or represents the master/Dominion program as Shell delivery. <!-- sdd-owner: implementation -->
 - [ ] **REFACTOR:** Centralize cross-surface marker names and ownership/verification comparisons in the verifier, remove only duplicated conformance prose, and retain human-readable matrix evidence citations and explicit limitations. <!-- sdd-owner: implementation -->
 - [ ] Verify PR 2 with `bun test __tests__/capability-manifest.test.ts`, `bun run verify:capability`, `bun test`, `bun run typecheck`, and `bun run verify:style`; record exact outputs, with runtime-harness verification `N/A` because the changed behavior is a read-only offline conformance guard. <!-- sdd-owner: implementation -->
 - [ ] **RED:** Add focused conformance cases that fail when `openspec/config.yaml` or `docs/architecture/program-lock-facts.json` presents stale/current snapshot facts without the required command, complete result, date, identity, classification, and historical/generated source distinction. <!-- sdd-owner: implementation -->
@@ -107,9 +107,9 @@ The four parent-owned bounded-review rows remain byte-for-byte unchecked and def
 ### Structured status consumed
 
 - Native status: `gentle-ai.sdd-status` v2; `changeName: pi-capability-conformance`; `artifactStore: openspec`; `applyState: ready`; `nextRecommended: apply`.
-- `actionContext`: `repo-local`; authoritative workspace and allowed edit root both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`.
+- `actionContext`: `repo-local`; authoritative workspace and allowed edit root both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`.
 - Assigned delivery boundary: PR 2 only (cross-surface consistency and truthful public projections); PR 1 is recorded complete. No PR 3–4 or parent-owned lifecycle work was started.
-- Native attempt continuity was read from provider authority only. **Correction by the parent orchestrator (this session):** an earlier revision of this entry pasted the opaque native attempt token into this artifact, which violates the rule that attempt tokens are never persisted in OpenSpec artifacts or any Pi-owned state. That token text has been removed here. Its authority remains in the native attempt ledger under the Git common directory, which is the sole attempt and changed-line authority; no attempt state is reconstructed from this file.
+- Native attempt continuity was read from provider authority only. **Correction by the parent orchestrator (this session):** an earlier revision of this entry pasted the opaque native attempt token into this artifact, which violates the rule that attempt tokens are never persisted in OpenSpec artifacts or any Shell-owned state. That token text has been removed here. Its authority remains in the native attempt ledger under the Git common directory, which is the sole attempt and changed-line authority; no attempt state is reconstructed from this file.
 
 ### Blocker
 
@@ -155,7 +155,7 @@ PR 3's refresh tasks would have corrected this, but PR 3 runs after PR 2, so PR 
 | `bun test` | **752 pass, 0 fail** (50 files); before this unit: 749 pass, 3 fail |
 | `bun run typecheck` | `tsc --noEmit` passed |
 | `bun run verify:capability` | `verify-capability-manifest: OK` |
-| Runtime-harness verification | N/A — generator run and directory removal only; no Pi runtime boundary invoked |
+| Runtime-harness verification | N/A — generator run and directory removal only; no Shell runtime boundary invoked |
 
 ### TDD note
 
@@ -178,7 +178,7 @@ No network, ambient secrets, fiscal operations, authority, receipts, or runtime 
 ### Structured status consumed
 
 - Native status: `gentle-ai.sdd-status` v2; `changeName: pi-capability-conformance`; `artifactStore: openspec` (file-backed, authoritative); `applyState: ready`; `nextRecommended: apply`; `blockedReasons: []`.
-- `actionContext`: `mode: repo-local`; `workspaceRoot` and the only allowed edit root are both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; warnings: none.
+- `actionContext`: `mode: repo-local`; `workspaceRoot` and the only allowed edit root are both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; warnings: none.
 - `taskProgress` on entry: 32 total, 9 completed, 23 pending. Assigned boundary: PR 2 only. PR 3, PR 4, and the four parent-owned lifecycle rows were not started.
 - Native attempt continuity was read from provider authority only; the opaque attempt token is not persisted in this artifact or anywhere else in OpenSpec state. The attempt ledger under the Git common directory is the sole attempt and changed-line authority.
 
@@ -207,7 +207,7 @@ The sixth row, "Verify PR 2 with ...", **remains `- [ ]`** because `bun test` is
 - `conformance:surface` — must self-identify and must carry `authority=pi-operates-never-authorizes` plus a non-empty `source` link;
 - `conformance:snapshot` — `scope` must be `current` or `historical`; every snapshot marker needs a `source`; a `historical` marker without a source is rejected as an **unlabeled historical snapshot**; a `current` marker that restates a snapshot fact must agree with `evidenceSnapshot` in `command`, `result`, `date`, `classification`, and `identity`, and a marker with no values is the accepted delegation form;
 - `conformance:capability` — `name` must exist, `state`/`verification`/`ownership` must agree with the manifest (case-insensitively), a `pi-local` ownership claim over `kernel-consumed`, `referenced-only`, or `unavailable-operational-integration` is rejected as **ownership escalation**, and a `validated-end-to-end` verification or `operational=end-to-end` claim for a capability the manifest does not record as end-to-end is rejected as an **unsupported operational end-to-end claim**;
-- a normalized forbidden-phrase scan rejects any declared surface that claims Pi fiscal authority or Pi delivery of the master program.
+- a normalized forbidden-phrase scan rejects any declared surface that claims Shell fiscal authority or Shell delivery of the master program.
 
 Diagnostics are deterministic and surface-order independent. No network, secret, ambient user data, fiscal operation, receipt, or approval is read; the guard cannot authorize anything.
 
@@ -234,7 +234,7 @@ One implementation defect was found and fixed during GREEN, not by weakening a t
 | `bun run typecheck` | `tsc --noEmit` passed (no diagnostics) |
 | `bun run verify:style` | `verify-style: OK (diff-scoped · 107 owned files · 4 rules)` |
 | `node scripts/refresh-program-lock-facts.mjs --check` | `refresh-program-lock-facts: FAILED: program lock facts are stale; run bun run refresh:lock-facts` |
-| Runtime-harness verification | **N/A** — the changed behavior is a read-only, offline conformance guard that invokes no Pi runtime boundary |
+| Runtime-harness verification | **N/A** — the changed behavior is a read-only, offline conformance guard that invokes no Shell runtime boundary |
 
 ### Blocker 1 — `bun test` cannot be green inside PR 2's allowlist
 
@@ -327,7 +327,7 @@ The author-set bound was 400 changed lines; the measured slice was 892. The appl
 | `bun run typecheck` | `tsc --noEmit` passed |
 | `bun run verify:capability` | `verify-capability-manifest: OK` |
 | `bun run verify:style` | `verify-style: OK (diff-scoped · 107 owned files · 4 rules)` |
-| Runtime-harness verification | N/A — generator run plus a read-only offline guard; no Pi runtime boundary invoked |
+| Runtime-harness verification | N/A — generator run plus a read-only offline guard; no Shell runtime boundary invoked |
 
 ### Independent gatekeeper validation of the PR 2 report
 
@@ -352,7 +352,7 @@ Re-run `bun run refresh:lock-facts` after reverting `docs/architecture/program-l
 ### Structured status consumed
 
 - Native status: `gentle-ai.sdd-status` v2; `changeName: pi-capability-conformance`; `artifactStore: openspec` (file-backed, authoritative); `applyState: ready`; `nextRecommended: apply`; `blockedReasons: []`.
-- `actionContext`: `mode: repo-local`; `workspaceRoot` and the only allowed edit root are both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; warnings: none.
+- `actionContext`: `mode: repo-local`; `workspaceRoot` and the only allowed edit root are both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; warnings: none.
 - `taskProgress` on entry: 35 total, 18 completed, 17 pending. Assigned boundary: **PR 3 only**. PR 4 and the parent lifecycle rows were not started.
 - Candidate-carrier decision recorded as an explicit deviation below, because the manifest's `evidenceSnapshot.candidateIdentity` could not be kept live.
 
@@ -409,7 +409,7 @@ Defects found and fixed during the cycle (none by weakening a check):
 
 ### Verification evidence
 
-Final run, canonical repository root `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`, 2026-09-11 (records frozen at this candidate identity):
+Final run, canonical repository root `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`, 2026-09-11 (records frozen at this candidate identity):
 
 | Command | Result |
 | --- | --- |
@@ -520,7 +520,7 @@ Re-run `bun run refresh:lock-facts` and restore the prior `candidate_identity` v
 ### Structured status consumed
 
 - Native status: `gentle-ai.sdd-status` v2; `changeName: pi-capability-conformance`; `artifactStore: openspec` (file-backed, authoritative); `applyState: ready`; `dependencies.apply: ready`; verify/archive `blocked`; `nextRecommended: apply`; `blockedReasons: []`.
-- `actionContext`: `mode: repo-local`; `workspaceRoot` and the only allowed edit root are both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; warnings: none.
+- `actionContext`: `mode: repo-local`; `workspaceRoot` and the only allowed edit root are both `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; warnings: none.
 - `taskProgress` on entry: 38 total, 28 completed, 10 pending (6 PR 4 implementation rows, 4 parent lifecycle rows). Assigned boundary: **PR 4 only**.
 - Native attempt continuity was read from provider authority only (`gentle-ai sdd-attempt status`: active attempt ordinal 11, work unit `PR 4 legacy-surface inventory`, max 400 changed lines). The opaque attempt token is not persisted in this artifact or anywhere in OpenSpec state.
 - Review Workload Forecast gate: `Decision needed before apply: No`, `Chained PRs recommended: Yes`, `Chain strategy: feature-branch-chain`, `400-line budget risk: High`. The confirmed delivery decision is `auto-chain`, so the assigned PR 4 slice was implemented as its own unit with no new decision required.
@@ -574,7 +574,7 @@ Two findings are worth the reviewer's attention because they raise the bar for a
 
 ### Verification evidence
 
-Canonical repository root `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; candidate identity at the stable evidence run `dirty-sha256:134dae5298fc0214ab76ed581ce633370c93db325c2ac4ea0c6b1aa474649de1` — **unchanged** from the pre-unit baseline, which proves no identity input was mutated.
+Canonical repository root `/home/dreamcoder08/Documents/PROYECTOS/drenyra-shell`; candidate identity at the stable evidence run `dirty-sha256:134dae5298fc0214ab76ed581ce633370c93db325c2ac4ea0c6b1aa474649de1` — **unchanged** from the pre-unit baseline, which proves no identity input was mutated.
 
 | Command | Result |
 | --- | --- |
@@ -585,7 +585,7 @@ Canonical repository root `/home/dreamcoder08/Documents/PROYECTOS/drenyra-pi`; c
 | `bun run verify:package` | `Test Files 50 passed (50)`; `Tests 767 passed (767)`; `verify-package-files: OK (dist tree + packaged files + content hashes reconciled)`; vendored runtime `drenyra-ai@0.4.1` entry artifact sha256 `09df8d696204337a9b62ddd28c354b414b62e81924caaf68a50b61131d5b7600` |
 | `node scripts/refresh-program-lock-facts.mjs --check` | `program lock facts are current` |
 | `bun test` (full suite, canonical command) | `767 pass`, `0 fail`, 3715 `expect()` calls — `Ran 767 tests across 50 files` |
-| Runtime-harness verification | **N/A** — this unit is documentation and conformance-record only. No Pi runtime boundary was invoked beyond the real-installed-package reconciliation already performed by `verify:package` against the vendored pinned runtime, recorded above with its checksum. |
+| Runtime-harness verification | **N/A** — this unit is documentation and conformance-record only. No Shell runtime boundary was invoked beyond the real-installed-package reconciliation already performed by `verify:package` against the vendored pinned runtime, recorded above with its checksum. |
 
 ### Sequencing case that applied — no lock-fact recovery was needed
 

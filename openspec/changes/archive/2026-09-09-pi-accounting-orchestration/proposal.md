@@ -36,11 +36,11 @@ own test suite.
 - Any change to `BudgetLedger`'s per-work-unit design.
 - Any change to `missionHandler` / `/drenyra:mission`'s existing behavior
   (`coordinator.advance()` call path stays untouched).
-- Fiscal authority, materiality, or Core route-decision logic — Pi delegates
+- Fiscal authority, materiality, or Core route-decision logic — Shell delegates
   the route decision to the pinned `drenyra-ai` Core `route()` (same
   `REQ-BOUND-001` constraint the archived `pi-sdd-030-routing-adapter`
   change enforced).
-- Claiming SDD-030 completion — Pi serves/scaffolds SDD-030, never owns it.
+- Claiming SDD-030 completion — Shell serves/scaffolds SDD-030, never owns it.
 
 ## Capabilities
 

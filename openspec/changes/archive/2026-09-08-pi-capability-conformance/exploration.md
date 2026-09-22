@@ -2,18 +2,18 @@
 
 Phase: sdd-explore
 Status: partial (content complete; persisted by orchestrator — the sdd-explore execution context had no Write/Edit tool)
-Audited against: dirty working tree, drenyra-pi @ main, 2026-09-08 (see git status note under Risks — several files are uncommitted at the time of this audit)
+Audited against: dirty working tree, drenyra-shell @ main, 2026-09-08 (see git status note under Risks — several files are uncommitted at the time of this audit)
 
 ## Current State
 
-`drenyra-pi` is materially more implemented than a first read of ROADMAP.md alone suggests, and the drift is not one contradiction but a *pattern* of stale point-in-time audit artifacts that no longer agree with each other or with `main`:
+`drenyra-shell` is materially more implemented than a first read of ROADMAP.md alone suggests, and the drift is not one contradiction but a *pattern* of stale point-in-time audit artifacts that no longer agree with each other or with `main`:
 
 - **`extensions/register.ts`** registers **20 real `/drenyra:*` commands** (19 in `register.ts` + `persona` in `extensions/fiscal-guard.ts`, confirmed by reading the full command-registration block, lines 1147–1249). Every handler traced (`statusHandler`, `closeHandler`, `reconcileHandler`, `verifyHandler`, `evidenceHandler`, `missionHandler`, `receiptHandler`) calls real chain/lib code — `MonthlyCloseChain.run()`, `runChainStep(reconcileChain, …)`, `runChainStep(verifyChain, …)`, `runChainStep(evidenceChain, …)` — not stubs. The historical `not_available` denial pattern an older reconciliation doc describes is gone.
 - **`chains/`** has 4 wired chains: `monthly-close.ts`, `reconcile.ts`, `verify.ts`, `evidence.ts`.
 - **Two brand-new, currently-uncommitted lib modules** (`lib/accounting-semantics.ts`, `lib/evidence-projection.ts`, both git-status `??`) are **already consumed in production**, not orphaned: `chains/verify.ts:30` and `chains/reconcile.ts:35` import from `accounting-semantics.js`; `chains/evidence.ts:40`, `lib/accounting-status.ts:50`, and `lib/evidence-status.ts:24` import from `evidence-projection.js` (confirmed by grepping for the exact import specifiers, not filename coincidence). Both have dedicated unit tests (`__tests__/accounting-semantics.test.ts`, `__tests__/evidence-projection.test.ts`, also uncommitted). This is genuinely mid-flight hardening work on the reconcile/verify/evidence path.
 - **`lib/routing/executor.ts`** — `BudgetLedger` (types.ts:227–339) and `executeRoutingWork` — implements real fail-closed budget/context/scope re-verification (context/evidence checks via `verifyResponse()` and `bindScope()` re-derivation, budget control via `ledger.check()`/`ledger.recordConsumption()` failing closed with `BUDGET_EXHAUSTED`, UNKNOWN-state halting with no auto-advance).
 - **`extensions/register.ts:1186–1190`** (`modelsHandler`/`drenyra:models` description) explicitly says "advisory; no Pi model-routing API in this slice". `capability-manifest.yaml` independently marks `model-routing: partial` with an honest limitation string — this is the one place in the repo that already does the implemented/partial distinction correctly.
-- **Contradiction is bidirectional, not just README-overstates-vs-ROADMAP-understates**: root `ROADMAP.md` Phase 2 still shows `- [ ]` for persona+panel, status+company+period, mission+receipt+ledger, monthly-close chain, Engram integration, and npm release — all of which are demonstrably wired and tested in the code above (ROADMAP *understates*). Simultaneously, `README.md`'s `## Install` section (`pi install npm:drenyra-pi`) implies a published npm package that ROADMAP's own unchecked item ("Package released as `drenyra-pi` on npm") says hasn't happened (README *overstates*).
+- **Contradiction is bidirectional, not just README-overstates-vs-ROADMAP-understates**: root `ROADMAP.md` Phase 2 still shows `- [ ]` for persona+panel, status+company+period, mission+receipt+ledger, monthly-close chain, Engram integration, and npm release — all of which are demonstrably wired and tested in the code above (ROADMAP *understates*). Simultaneously, `README.md`'s `## Install` section (`pi install npm:drenyra-shell`) implies a published npm package that ROADMAP's own unchecked item ("Package released as `drenyra-shell` on npm") says hasn't happened (README *overstates*).
 
 **Three separate stale/contradictory reconciliation artifacts were found, beyond the README/ROADMAP pair:**
 
@@ -65,7 +65,7 @@ Approach 3. The deliverable bar ("capability matrix with code/test references...
 - Demonstrated recurring-staleness pattern (3 independent stale artifacts found in one pass) means any new matrix not backed by tooling will likely repeat the failure within weeks — flag this explicitly in the proposal rather than implying the new document is permanent.
 - The SDD-020/configurator governance tension (README says gated, but `/drenyra:install`/`/drenyra:sync` are shipped) is a substantive claim conflict, not merely a doc-staleness issue, and needs an explicit human-owned resolution direction before the matrix can state a single unambiguous status for that row.
 - No existing in-repo convention tags tests as unit/contract/e2e; that taxonomy needs to be defined from scratch in `sdd-spec`/`sdd-design`, using `__tests__/adapter-boundary-replacement.test.ts`'s full-cycle Pi-branch fixture (`runPiBranch`, close to "validated end-to-end" but still fixture/substitute-host, not a live network call to `drenyra-ai`) as the closest existing precedent for the "validated end-to-end" tier.
-- Any capability gap that traces back to `drenyra-ai` itself (e.g., the absent model-routing enforcement API, `G30`) is out of scope for this drenyra-pi-only change (`allowedEditRoots` is drenyra-pi only) and must be recorded as an external finding for a drenyra-ai change, not resolved here.
+- Any capability gap that traces back to `drenyra-ai` itself (e.g., the absent model-routing enforcement API, `G30`) is out of scope for this drenyra-shell-only change (`allowedEditRoots` is drenyra-shell only) and must be recorded as an external finding for a drenyra-ai change, not resolved here.
 
 ## Ready for Proposal
 

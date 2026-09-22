@@ -1,7 +1,7 @@
 # ARCHIVE REPORT — pi-sdd-030-routing-adapter
 
 **Change**: `pi-sdd-030-routing-adapter` — durable mission routing adapter for the pinned runtime
-**Repo**: `drenyra-pi` (Bun + TS ESM, bun test, Pi extension package, pinned `drenyra-ai@0.3.0` vendored)
+**Repo**: `drenyra-shell` (Bun + TS ESM, bun test, Pi extension package, pinned `drenyra-ai@0.3.0` vendored)
 **Archived at**: `openspec/changes/archive/2026-08-15-pi-sdd-030-routing-adapter/`
 **Archive date**: 2026-08-15
 **Artifact store**: openspec (file-based; engram best-effort)
@@ -11,7 +11,7 @@
 
 ## 1. Executive summary
 
-This change delivered Drenyra Pi's durable mission routing adapter: a Pi-owned
+This change delivered Drenyra Shell's durable mission routing adapter: a Pi-owned
 `preflight → route-select → execute` pipeline that runs the shared
 `WorkUnit`/`WorkResult` contract from the pinned `drenyra-ai@0.3.0` runtime with
 **no local transition authority**. A 7-stage preflight, an exhaustive 18-cell

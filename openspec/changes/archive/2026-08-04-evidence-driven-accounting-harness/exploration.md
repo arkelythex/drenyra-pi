@@ -1,14 +1,14 @@
 # Exploration — Evidence-Driven Accounting Harness
 
-> SDD change: `evidence-driven-accounting-harness` · Repo: `drenyra-pi` · Status: exploration complete
+> SDD change: `evidence-driven-accounting-harness` · Repo: `drenyra-shell` · Status: exploration complete
 > Vision source: `openspec/changes/evidence-driven-accounting-harness/vision.md` (user source, Spanish)
 > Store mode: HYBRID — this file is authoritative; Engram is best-effort.
 
 ## TL;DR
 
-The vision ("Turn Pi into an evidence-bound accounting operations harness") is a **full product**, not one change. The repo already owns the runtime-pinning core, a RUC/period scope store, a working monthly-close chain with an R2 approval gate and signed receipts, and 6 of 14 commands. Everything else — full EDA phase protocol wiring, the 4 authority modes, full scope binding, the evidence graph, 5 `lib/` modules, 4 contract families, 3 more extension modules, 7 subagents, prompts/skills/themes/assets — is missing or a stub.
+The vision ("Turn Shell into an evidence-bound accounting operations harness") is a **full product**, not one change. The repo already owns the runtime-pinning core, a RUC/period scope store, a working monthly-close chain with an R2 approval gate and signed receipts, and 6 of 14 commands. Everything else — full EDA phase protocol wiring, the 4 authority modes, full scope binding, the evidence graph, 5 `lib/` modules, 4 contract families, 3 more extension modules, 7 subagents, prompts/skills/themes/assets — is missing or a stub.
 
-The good news: the pinned `drenyra-ai@0.2.0` already exposes nearly every engine primitive the vision lists as "your advantage" (14 mission states + predicates, 5 intents, commands, events, idempotency, `MissionRuntime`, recovery, capabilities negotiation, receipts with Ed25519 + trusted-key verification, gates incl. materiality-proportional `ApprovalGate`, candidates, ledger, review lenses). The harness work is **wiring and discipline**, not engine building — exactly what the vision's "Drenyra existing = motor y autoridad; drenyra-pi = interfaz agentic y harness" doctrine says.
+The good news: the pinned `drenyra-ai@0.2.0` already exposes nearly every engine primitive the vision lists as "your advantage" (14 mission states + predicates, 5 intents, commands, events, idempotency, `MissionRuntime`, recovery, capabilities negotiation, receipts with Ed25519 + trusted-key verification, gates incl. materiality-proportional `ApprovalGate`, candidates, ledger, review lenses). The harness work is **wiring and discipline**, not engine building — exactly what the vision's "Drenyra existing = motor y autoridad; drenyra-shell = interfaz agentic y harness" doctrine says.
 
 **Recommended build order:** contracts + scope/canonicalization foundation → authority gates + accounting status → durable stores + monthly-close upgrade → evidence graph + receipt verification → extensions/commands → reconcile/verify chains → agents + skills/prompts/themes/assets. Each slice is one chained PR (see §5). The full vision exceeds 400 changed lines; chained PRs are expected.
 
@@ -47,7 +47,7 @@ The good news: the pinned `drenyra-ai@0.2.0` already exposes nearly every engine
 | Assets | `assets/README.md`, `agents/README.md`, `chains/README.md`, `prompts/README.md`, `skills/README.md`, `themes/README.md` | Placeholder stubs only. |
 | Tests | `__tests__/{pin,resolve,doctor,status,installer,context,extension}.test.ts`, `chains/__tests__/monthly-close.test.ts`, `__tests__/helpers/fixture-runtime.ts` | 8 files, 54 tests passing (`bun test`). Tests live in `__tests__/` + colocated `chains/__tests__/` (vitest include `**/__tests__/**/*.test.ts`) — vision's `tests/` dir does not exist and the existing convention should be kept. |
 | Build/verify | `scripts/build.mjs`, `scripts/verify-package-files.mjs`, `scripts/install-drenyra-ai.mjs` | tsc → dist (roots: runtime, extensions, index.ts; transitive imports e.g. chains compile in), postinstall wrapper copy, package-file conformance (dist entries + contracts + placeholder READMEs + pi manifest wiring). |
-| Manifest | `package.json` | name drenyra-pi 0.0.1-prealpha.1, ESM, node ≥22, `pi.{extensions,prompts,skills,themes}`, exports `.` `./runtime` `./extensions`, zero runtime deps, `drenyra-ai` pinned tgz devDependency (v0.2.0), peer `@earendil-works/pi-coding-agent` optional. |
+| Manifest | `package.json` | name drenyra-shell 0.0.1-prealpha.1, ESM, node ≥22, `pi.{extensions,prompts,skills,themes}`, exports `.` `./runtime` `./extensions`, zero runtime deps, `drenyra-ai` pinned tgz devDependency (v0.2.0), peer `@earendil-works/pi-coding-agent` optional. |
 | OpenSpec | `openspec/config.yaml`, `openspec/README.md` | HYBRID store, strict TDD active (`bun test`), stack bun/TS-ESM/vitest/strict. |
 
 ---
@@ -82,10 +82,10 @@ Exports map: `.` (all below), `./receipts`, `./ledger`, `./missions`, `./candida
 
 | Surface | Where | Consequence |
 | --- | --- | --- |
-| `MissionFileStore`, `writeFileAtomic`, `buildTempPath`, `MissionRuntimeStores` | `drenyra-ai/dist/cmd/adapters/file-mission-store.d.ts` — outside exports map | drenyra-pi must implement its own `MissionStore`/`MissionEventStore`/`IdempotencyStore` file adapters (or consume the CLI via child process, which conflicts with the library-consumption preference). |
+| `MissionFileStore`, `writeFileAtomic`, `buildTempPath`, `MissionRuntimeStores` | `drenyra-ai/dist/cmd/adapters/file-mission-store.d.ts` — outside exports map | drenyra-shell must implement its own `MissionStore`/`MissionEventStore`/`IdempotencyStore` file adapters (or consume the CLI via child process, which conflicts with the library-consumption preference). |
 | CLI-only helpers | `dist/cmd/output/*` (emitJson, readJsonFile) | Not exported; re-implement small helpers locally. |
-| Subagent/agent definitions, skills, policies | drenyra-ai README lists `agents/`, `skills/`, `policies/` but package `files` ships only `dist`, `contracts`, `fixtures`, README, LICENSE | The 7 vision subagents must be authored in drenyra-pi (`agents/`), not imported. |
-| CLI mission demo handler | `cmd/commands/mission-demo-handler.d.ts` | Pattern reference only (`mission start`/`apply --store --demo`); drenyra-pi should model its own intent handlers (see §4 EDA flow note). |
+| Subagent/agent definitions, skills, policies | drenyra-ai README lists `agents/`, `skills/`, `policies/` but package `files` ships only `dist`, `contracts`, `fixtures`, README, LICENSE | The 7 vision subagents must be authored in drenyra-shell (`agents/`), not imported. |
+| CLI mission demo handler | `cmd/commands/mission-demo-handler.d.ts` | Pattern reference only (`mission start`/`apply --store --demo`); drenyra-shell should model its own intent handlers (see §4 EDA flow note). |
 
 ---
 
@@ -230,7 +230,7 @@ SIRE compras/ventas (v0.2), advanced bank reconciliation (v0.3), AP/AR (v0.4), m
 | --- | --- | --- |
 | R1 | **Fiscal write-guard on words like igv/value/amount:** the @drenyra/pi write guard can block file writes containing these tokens (they are legitimate in this domain: `tax-controller-pe`/SUNAT/IGV, `value`/`amount` in materiality). | Use heredoc fallback for file creation when the write tool is blocked; write tokens in content without triggering the guard (e.g., write structure first, then patch); record this in the apply-phase notes. |
 | R2 | **Engram flakiness:** the Engram HTTP server is unreliable in this environment. | File-back (`openspec/`) is authoritative; Engram persistence is best-effort and must never block SDD progress (`store_mode: hybrid`). |
-| R3 | **drenyra-ai pinned tgz (v0.2.0) drift:** the runtime is a pinned GitHub-release tarball devDependency; its contracts in `node_modules/` are the source of truth. | Upgrade is a release of drenyra-pi with a migration note (runtime-dependency contract). `DEFAULT_PIN` is already `released` with a real checksum; doctor fails closed on mismatch. Verify against the pinned version only, never a checkout. |
+| R3 | **drenyra-ai pinned tgz (v0.2.0) drift:** the runtime is a pinned GitHub-release tarball devDependency; its contracts in `node_modules/` are the source of truth. | Upgrade is a release of drenyra-shell with a migration note (runtime-dependency contract). `DEFAULT_PIN` is already `released` with a real checksum; doctor fails closed on mismatch. Verify against the pinned version only, never a checkout. |
 | R4 | **Scope creep ("todo el documento"):** the vision is a full product (7 subagents, 14 commands, 13-phase protocol, post-v0.1 roadmap). | This change delivers **v0.1 Monthly Close Harness + EDA foundations** only; slices in §5 bound scope; roadmap items (S7) are explicit non-goals of the first PR chain. |
 | R5 | **Unexported drenyra-ai surfaces:** `MissionFileStore`/atomic-write helpers/CLI output helpers are not in the exports map; agents/skills/policies are not shipped in the package. | Build own file-store adapters (mirror the atomic-write pattern); author subagents locally; treat CLI as reference only (library consumption preferred over child-process, consistent with never-PATH doctrine). |
 | R6 | **ApprovalGate fail-open at R0/R1:** unset materiality is treated as R0 (allowed, no approval); embedded-key self-trust is weak in `ReceiptGate` without `trustedKeys`. | Harness must always derive materiality via `deriveMateriality` before the gate and maintain a trusted-key registry; missing scope/materiality fails closed (G4/G8). |
